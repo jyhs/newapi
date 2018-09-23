@@ -15,14 +15,11 @@ module.exports = class extends think.Logic {
       requestId: { string: true },
       is_error: { boolean: true }
     };
-    if (this.post('is_error')) {
-      const auth = this.post('auth');
-      const code = this.cache(this.post('requestId'));
-      if (think.isEmpty(code)) {
-        this.fail('验证码失效');
-      } else if (code !== auth) {
-        this.fail('验证码不正确');
-      }
-    }
+  }
+
+  getByIdAction() {
+    this.rules = {
+      id: { required: true, int: true }
+    };
   }
 };

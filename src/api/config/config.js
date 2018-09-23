@@ -8,6 +8,7 @@ module.exports = {
   // 可以公开访问的Action
   publicAction: [
     'user/loginByCode',
-    'user/loginByPassword'
+    'user/loginByPassword',
+    'user/getById'
   ]
 };

@@ -1,20 +1,9 @@
-import fs from 'fs';
-import https from 'https';
-const options = {
-  key: fs.readFileSync('/Users/tony/Work/2_huanjiaohu.com.key'),
-  cert: fs.readFileSync('/Users/tony/Work/1_huanjiaohu.com_bundle.crt')
-};
-const app = (callback, port, host, think) => {
-  const server = https.createServer(options, callback);
-  server.listen(port, host);
-  return server;
-};
+
 module.exports = {
   default_module: 'api',
   defaultErrno: 406,
-  port: 443,
   validateDefaultErrno: 406,
-  createServer: app,
+  workers: 0,
   weixin: {
     appid: 'wx6689f1d6479c5425', // 小程序 appid
     secret: '43f4cbef1445051cbbd4edb6c23b0fa2', // 小程序密钥
@@ -30,5 +19,4 @@ module.exports = {
     appkey: '', // 对应快递鸟用户后台 API key
     request_url: 'http://api.kdniao.cc/Ebusiness/EbusinessOrderHandle.aspx'
   }
-
 };

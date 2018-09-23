@@ -3,8 +3,8 @@
   "description": "nideshop - open source mini program shop",
   "version": "1.0.0",
   "scripts": {
-    "start": "node development.js",
-    "compile": "babel --no-babelrc src/ --presets think-node --out-dir app/",
+    "dev": "node development.js",
+    "build": "babel --no-babelrc src/ --presets think-node --out-dir app/",
     "lint": "eslint src/",
     "lint-fix": "eslint --fix src/"
   },
@@ -25,6 +25,7 @@
     "think-model-mysql": "^1.0.0",
     "thinkjs": "^3.0.0",
     "weixinpay": "^1.0.12",
+    "xlsx": "^0.14.0",
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
