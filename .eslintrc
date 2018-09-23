@@ -1,0 +1,6 @@
+{
+  "extends": "think",
+  "plugins": [
+    "vue"
+  ]
+}

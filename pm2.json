@@ -1,0 +1,15 @@
+{
+  "apps": [{
+    "name": "jyhs",
+    "script": "production.js",
+    "cwd": "/root/newapi",
+    "exec_mode": "fork",
+    "max_memory_restart": "1G",
+    "autorestart": true,
+    "node_args": [],
+    "args": [],
+    "env": {
+      
+    }
+  }]
+}
