@@ -9,4 +9,16 @@ module.exports = class extends think.Logic {
       bill: {method: 'file', required: true}
     };
   }
+  async listAction() {
+    this.rules = {
+      name: {string: true, trim: true},
+      page: {int: true, trim: true},
+      size: {int: true, trim: true}
+    };
+  }
+  async getByIdAction() {
+    this.rules = {
+      id: {int: true, required: true, trim: true}
+    };
+  }
 };

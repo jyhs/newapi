@@ -1,12 +1,12 @@
-const Base = require('./base.js');
+const Base = require('../../common/controller/base.js');
 const rp = require('request-promise');
-const md5 = require('md5');
+const moment = require('moment');
 
 module.exports = class extends Base {
   async getByIdAction() {
-    const userInfo = await this.model('user').where({id: this.get('id')}).find();
-    delete userInfo.password;
-    return this.json(userInfo);
+    const user = await this.model('user').where({id: this.get('id')}).find();
+    delete user.password;
+    return this.json(user);
   }
   async loginByPasswordAction() {
     if (this.post('is_error')) {
@@ -17,38 +17,14 @@ module.exports = class extends Base {
       } else if (code !== auth) {
         this.fail('验证码不正确');
       } else {
-        await this.login();
+        await this.model('user').login(this);
       }
     } else {
-      await this.login();
-    }
-  }
-  async login() {
-    const name = this.post('name');
-    const password = md5(this.post('password'));
-    const user = await this.model('user').where({ name: name, password: password }).find();
-    if (think.isEmpty(user)) {
-      return this.fail('用户名密码不正确');
-    } else if (user.status === 0) {
-      return this.fail('该用户已经失效请联系管理员');
-    } else {
-      const TokenSerivce = this.service('token', 'api');
-      const sessionKey = await TokenSerivce.create(user);
-      if (think.isEmpty(sessionKey)) {
-        return this.fail('登录失败');
-      }
-      return this.json({
-        'token': sessionKey,
-        'province': user.province,
-        'id': user.id,
-        'username': user.name,
-        'type': user.type
-      });
+      await this.model('user').login(this);
     }
   }
   async loginByCodeAction() {
     const code = this.get('code');
-    const register = this.get('register');
     // 获取unionid
     const options = {
       method: 'GET',
@@ -67,9 +43,8 @@ module.exports = class extends Base {
       return this.fail('登录失败');
     }
     // 根据unionid查找用户是否已经注册
-    const user = await this.model('user').where({ unionid: sessionData.unionid }).find();
-    let userId = null;
-    if (think.isEmpty(user) && register) {
+    let user = await this.model('user').where({ unionid: sessionData.unionid }).find();
+    if (think.isEmpty(user)) {
       let city = await this.model('citys').where({ name: sessionData.city }).find('mark', true);
       let province = await this.model('provinces').where({ name: sessionData.province }).find('code', true);
       if (think.isEmpty(province)) {
@@ -81,7 +56,7 @@ module.exports = class extends Base {
         city = 'bjc';
       }
       // 注册
-      userId = await this.model('user').add({
+      user = {
         name: sessionData.nickName,
         nickname: sessionData.nickName,
         password: '0ff8ecf84a686258caeb350dbc8040d6',
@@ -96,14 +71,15 @@ module.exports = class extends Base {
         province_name: sessionData.province,
         city_name: sessionData.city,
         unionid: sessionData.unionid
-      });
+      };
+      user.id = await this.model('user').add(user);
     }
 
     // 更新登录信息
-    // console.log(user);
-    // userId = await this.model('user').where({ id: user.id }).update({
-    //   insert_date: new Date()
-    // });
+    await this.model('user').where({ id: user.id }).update({
+      insert_date: moment().format('YYYYMMDD'),
+      headimgurl: sessionData.headimgurl
+    });
     // 获得token
     const TokenSerivce = this.service('token', 'api');
     const sessionKey = await TokenSerivce.create(user);

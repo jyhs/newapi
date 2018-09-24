@@ -1,6 +1,5 @@
 const Base = require('../../common/controller/base.js');
 const moment = require('moment');
-
 module.exports = class extends Base {
   async addAction() {
     const user = this.getLoginUser();
@@ -29,17 +28,11 @@ module.exports = class extends Base {
           top_freight: this.post('top_freight')
         });
         const qrService = this.service('qr', 'api');
-        this.redirect(qrService.buildGroupUrl(groupId));
+        this.type = 'image/svg+xml';
+        this.body = qrService.getGroupQrById(groupId);
       }
     } else {
       this.fail('权限不足');
     }
-  }
-  async listAction() {
-    const page = this.get('page') || 1;
-    const size = this.get('size') || 10;
-    const name = this.get('name') || '';
-    const list = await this.model('group').getGroupList({name, page, size});
-    return this.json(list);
   }
 };

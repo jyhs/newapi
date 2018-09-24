@@ -1,8 +1,7 @@
 module.exports = class extends think.Logic {
   loginByCodeAction() {
     this.rules = {
-      code: { required: true, string: true },
-      register: { boolean: true }
+      code: { required: true, string: true }
     };
   }
 

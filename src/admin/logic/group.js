@@ -13,11 +13,4 @@ module.exports = class extends think.Logic {
       private: {int: true, trim: true, default: 0}
     };
   }
-  async listAction() {
-    this.rules = {
-      name: {string: true, trim: true},
-      page: {int: true, trim: true},
-      size: {int: true, trim: true}
-    };
-  }
 };

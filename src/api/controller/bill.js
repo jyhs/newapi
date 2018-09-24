@@ -1,4 +1,4 @@
-const Base = require('./base.js');
+const Base = require('../../common/controller/base.js');
 const XLSX = require('xlsx');
 const _ = require('lodash');
 const moment = require('moment');
@@ -216,5 +216,27 @@ module.exports = class extends Base {
         recommend: billDetail['recommend']
       });
     }
+  }
+  async listAction() {
+    const page = this.get('page') || 1;
+    const size = this.get('size') || 10;
+    const name = this.get('name') || '';
+
+    const model = this.model('bill');
+    const list = await model.where({name: ['like', `%${name}%`], is_one_step: 0}).order(['effort_date DESC']).page(page, size).countSelect();
+    _.each(list.data, (item) => {
+      if (moment(item['effort_date']).isAfter(moment())) {
+        item['status'] = 1;
+      } else {
+        item['status'] = 0;
+      }
+    });
+    return this.json(list);
+  }
+  async getByIdAction() {
+    const id = this.get('id');
+    const model = this.model('bill');
+    const list = await model.where({id: id}).select();
+    return this.json(list);
   }
 };
