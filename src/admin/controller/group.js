@@ -29,6 +29,7 @@ module.exports = class extends Base {
         });
         const qrService = this.service('qr', 'api');
         this.type = 'image/svg+xml';
+        console.log(qrService.getGroupQrById(groupId));
         this.body = qrService.getGroupQrById(groupId);
       }
     } else {

@@ -6,7 +6,7 @@ module.exports = class extends think.Model {
    * @returns {Promise.<*>}
    */
   async getUser(userId) {
-    const user = await this.model('user').where({id: userId}).select();
+    const user = await this.where({id: userId}).select();
     return user;
   }
 
@@ -15,7 +15,7 @@ module.exports = class extends think.Model {
    * @returns {Promise.<*>}
    */
   async getUserList(userId) {
-    const goodsList = await this.model('user').where({id: userId}).select();
+    const goodsList = await this.where({id: userId}).select();
     return goodsList;
   }
 
@@ -26,7 +26,7 @@ module.exports = class extends think.Model {
   async login(self) {
     const name = self.post('name');
     const password = md5(self.post('password'));
-    const user = await self.model('user').where({ name: name, password: password }).find();
+    const user = await this.where({ name: name, password: password }).find();
     if (think.isEmpty(user)) {
       return self.fail('用户名密码不正确');
     } else if (user.status === 0) {

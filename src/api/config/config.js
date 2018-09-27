@@ -9,6 +9,8 @@ module.exports = {
   publicAction: [
     'user/loginByCode',
     'user/loginByPassword',
-    'user/getById'
+    'user/getById',
+    'user/forgetPassword',
+    'user/getAvatar'
   ]
 };

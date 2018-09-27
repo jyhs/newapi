@@ -15,10 +15,10 @@ module.exports = class extends Base {
           reject(this.fail('发送失败'));
         } else {
           this.cache(resData.sid, code, {
-            timeout: 1 * 60 * 1000
+            timeout: 5 * 60 * 1000
           });
+          resolve(this.success({'requestId': resData.sid}));
         }
-        resolve(this.success({'requestId': resData.sid}));
       });
     });
   }

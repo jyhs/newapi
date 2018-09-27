@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "gm": "^1.23.0",
+    "http": "^0.0.0",
     "jsonwebtoken": "^8.0.0",
     "kcors": "^2.2.1",
     "lodash": "^4.17.11",
@@ -25,6 +26,7 @@
     "think-model": "^1.0.0",
     "think-model-mysql": "^1.0.0",
     "thinkjs": "^3.0.0",
+    "url": "^0.11.0",
     "weixinpay": "^1.0.12",
     "xlsx": "^0.14.0",
     "xml2js": "^0.4.19"
