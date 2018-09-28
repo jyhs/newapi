@@ -1,4 +1,4 @@
-const md5 = require('md5');
+const moment = require('moment');
 
 module.exports = class extends think.Model {
   /**
@@ -6,44 +6,29 @@ module.exports = class extends think.Model {
    * @returns {Promise.<*>}
    */
   async getUser(userId) {
-    const user = await this.where({id: userId}).select();
+    const user = await this.where({id: userId}).find();
     return user;
   }
 
-  /**
-   * 获取购物车的商品
-   * @returns {Promise.<*>}
-   */
-  async getUserList(userId) {
-    const goodsList = await this.where({id: userId}).select();
-    return goodsList;
-  }
-
-  /**
-   * 清空已购买的商品
-   * @returns {Promise.<*>}
-   */
-  async login(self) {
-    const name = self.post('name');
-    const password = md5(self.post('password'));
-    const user = await this.where({ name: name, password: password }).find();
-    if (think.isEmpty(user)) {
-      return self.fail('用户名密码不正确');
-    } else if (user.status === 0) {
-      return self.fail('该用户已经失效请联系管理员');
-    } else {
-      const TokenSerivce = self.service('token', 'api');
-      const sessionKey = await TokenSerivce.create(user);
-      if (think.isEmpty(sessionKey)) {
-        return self.fail('登录失败');
-      }
-      return self.json({
-        'token': sessionKey,
-        'province': user.province,
-        'id': user.id,
-        'username': user.name,
-        'type': user.type
-      });
+  async getUserList({name, page, size, city, province, type}) {
+    const model = this.model('user').alias('u');
+    const list = await model.field(['u.*', 'c.name city', 'p.name province'])
+      .join({
+        table: 'citys',
+        join: 'inner',
+        as: 'c',
+        on: ['u.city', 'c.mark']
+      })
+      .join({
+        table: 'provinces',
+        join: 'inner',
+        as: 'p',
+        on: ['u.province', 'p.code']
+      })
+      .where({'u.name': ['like', `%${name}%`], 'u.city': ['like', `%${city}%`], 'u.province': ['like', `%${province}%`], 'u.type': ['like', `%${type}%`]}).order(['u.id DESC']).page(page, size).countSelect();
+    for (const item of list.data) {
+      delete item.password;
     }
+    return list;
   }
 };

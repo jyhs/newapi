@@ -1,5 +1,5 @@
 module.exports = class extends think.Logic {
-  async uploadAction() {
+  uploadAction() {
     this.allowMethods = 'post';
     this.rules = {
       bill_name: {string: true, trim: true, default: '礁岩海水团长单'},
@@ -9,14 +9,14 @@ module.exports = class extends think.Logic {
       bill: {method: 'file', required: true}
     };
   }
-  async listAction() {
+  listAction() {
     this.rules = {
       name: {string: true, trim: true},
       page: {int: true, trim: true},
       size: {int: true, trim: true}
     };
   }
-  async getByIdAction() {
+  getByIdAction() {
     this.rules = {
       id: {int: true, required: true, trim: true}
     };

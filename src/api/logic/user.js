@@ -32,7 +32,61 @@ module.exports = class extends think.Logic {
     };
   }
 
+  listAction() {
+    this.rules = {
+      name: {string: true, trim: true},
+      page: {int: true, trim: true},
+      size: {int: true, trim: true},
+      city: {string: true, trim: true},
+      province: {string: true, trim: true},
+      type: {string: true, trim: true}
+    };
+  }
+
+  registerAction() {
+    this.rules = {
+      name: {string: true, required: true, trim: true},
+      city: {string: true, trim: true},
+      province: {string: true, trim: true},
+      password1: {string: true, required: true, trim: true, length: {min: 6, max: 20}},
+      password2: {string: true, required: true, trim: true, length: {min: 6, max: 20}},
+      phone: {mobile: 'zh-CN', required: true, trim: true},
+      requestId: {string: true, required: true, trim: true},
+      auth: {string: true, required: true, trim: true}
+    };
+  }
+
+  updateAction() {
+    this.rules = {
+      id: { required: true, int: true, trim: true },
+      city: {string: true, trim: true},
+      province: {string: true, trim: true},
+      phone: {mobile: 'zh-CN', trim: true},
+      type: {string: true, trim: true},
+      code: {string: true, trim: true},
+      address: {string: true, trim: true},
+      description: {string: true, trim: true},
+      contacts: {string: true, trim: true},
+      status: {int: true, trim: true},
+      point: {int: true, trim: true}
+    };
+  }
+
   getAvatarAction() {
+    this.rules = {
+      id: { required: true, int: true }
+    };
+  }
+
+  uploadAvatarAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      id: {int: true, required: true, trim: true},
+      avatar: {method: 'file', required: true}
+    };
+  }
+
+  logoutAction() {
     this.rules = {
       id: { required: true, int: true }
     };

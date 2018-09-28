@@ -1,10 +1,10 @@
 module.exports = class extends think.Logic {
-  async getByIdAction() {
+  getByIdAction() {
     this.rules = {
       id: {int: true, required: true, trim: true}
     };
   }
-  async getByBillIdAction() {
+  getByBillIdAction() {
     this.rules = {
       id: {int: true, required: true, trim: true}
     };

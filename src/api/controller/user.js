@@ -6,6 +6,8 @@ const _ = require('lodash');
 const http = require('http');
 const url = require('url');
 const fs = require('fs');
+const images = require('images');
+
 module.exports = class extends Base {
   async bindPhoneAction() {
     await this.model('user').where({ id: this.post('id') }).update({
@@ -18,6 +20,29 @@ module.exports = class extends Base {
     delete user.password;
     return this.json(user);
   }
+  async login() {
+    const name = this.post('name');
+    const password = md5(this.post('password'));
+    const user = await this.model('user').where({ name: name, password: password }).find();
+    if (think.isEmpty(user)) {
+      return this.fail('用户名密码不正确');
+    } else if (user.status === 0) {
+      return this.fail('该用户已经失效请联系管理员');
+    } else {
+      const TokenSerivce = this.service('token', 'api');
+      const sessionKey = await TokenSerivce.create(user);
+      if (think.isEmpty(sessionKey)) {
+        return this.fail('登录失败');
+      }
+      return this.json({
+        'token': sessionKey,
+        'province': user.province,
+        'id': user.id,
+        'username': user.name,
+        'type': user.type
+      });
+    }
+  }
   async loginByPasswordAction() {
     if (this.post('is_error')) {
       const auth = this.post('auth');
@@ -27,10 +52,10 @@ module.exports = class extends Base {
       } else if (code !== auth) {
         this.fail('验证码不正确');
       } else {
-        await this.model('user').login(this);
+        await this.controller('user').login();
       }
     } else {
-      await this.model('user').login(this);
+      await this.controller('user').login();
     }
   }
   async loginByCodeAction() {
@@ -220,5 +245,133 @@ module.exports = class extends Base {
         });
       }
     }
+  }
+  async listAction() {
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 10;
+    const name = this.post('name') || '';
+    const city = this.post('city') || '';
+    const province = this.post('province') || '';
+    const type = this.post('type') || '';
+    const list = await this.model('user').getUserList({name, page, size, city, province, type});
+    return this.json(list);
+  }
+
+  async registerAction() {
+    const password1 = this.post('password1');
+    const password2 = this.post('password2');
+    const name = this.post('name');
+    const city = this.post('city') || 'shc';
+    const province = this.post('province') || 'sh';
+    const phone = this.post('phone');
+    const auth = this.post('auth');
+    const requestId = this.post('requestId');
+    const code = await this.cache(requestId);
+    if (think.isEmpty(code)) {
+      this.fail('验证码失效');
+    } else if (code !== auth) {
+      this.fail('验证码不正确');
+    } else if (password1 !== password2) {
+      this.fail('两次输入的密码不匹配');
+    } else {
+      const user = await this.model('user').where({name: name}).find();
+      if (!think.isEmpty(user)) {
+        this.fail('用户名已经存在');
+      } else {
+        // 注册
+        const user = {
+          name: name,
+          nickname: name,
+          password: md5(password1),
+          city: city,
+          phone: phone,
+          type: 'yy',
+          province: province
+        };
+        user.id = await this.model('user').add(user);
+        if (user.id > 0) {
+          this.success('注册成功');
+        } else {
+          this.fail('注册失败');
+        }
+      }
+    }
+  }
+  async typeListAction() {
+    const list = [
+      {'code': 'yy', 'name': '鱼友', 'desc': '可以参加团购'},
+      {'code': 'cjyy', 'name': '超级鱼友', 'desc': '可以参加团购'},
+      {'code': 'cjtz', 'name': '超级团长', 'desc': '可以参加团购，一键开团'},
+      {'code': 'lss', 'name': '零售商(本地)', 'desc': '可以参加团购、组织团购、上传普通出货单、一键开团'},
+      {'code': 'bdfws', 'name': '服务商(本地)', 'desc': '可以参加团购、组织团购、上传普通出货单、一键开团'},
+      {'code': 'cjlss', 'name': '超级零售商(全国)', 'desc': '可以参加团购、组织团购、上传普通出货单、一键开团'},
+      {'code': 'pfs', 'name': '批发商', 'desc': '可以参加团购、组织团购、上传普通出货单、上传私有出货单、一键开团'},
+      {'code': 'qcs', 'name': '器材商', 'desc': '可以在商城发布商品'},
+      {'code': 'yhgly', 'name': '用户管理员', 'desc': '可以管理用户列表'},
+      {'code': 'jygly', 'name': '交易管理员', 'desc': '可以管理交易列表'},
+      {'code': 'hdgly', 'name': '活动管理员', 'desc': '可以管理活动列表'},
+      {'code': 'bkgly', 'name': '百科管理员', 'desc': '可以管理百科列表'},
+      {'code': 'tggly', 'name': '团购管理员', 'desc': '可以管理团购列表'},
+      {'code': 'admin', 'name': '超级管理员', 'desc': '可以管理团购列表'}
+    ];
+    return this.json(list);
+  }
+
+  async updateAction() {
+    const user = {
+      city: this.post('city'),
+      province: this.post('province'),
+      phone: this.post('phone'),
+      type: this.post('type'),
+      code: this.post('code'),
+      address: this.post('address'),
+      description: this.post('description'),
+      contacts: this.post('contacts'),
+      status: this.post('status'),
+      point: this.post('point') || 0
+    };
+    await this.model('user').where({id: this.post('id')}).update(user);
+    this.success('更新成功');
+  }
+
+  async uploadAvatarAction() {
+    const avatar = think.extend({}, this.file('avatar'));
+    const id = this.post('id');
+    fs.readdir(think.config('image.user'), function(err, files) {
+      if (err) {
+        console.error(err);
+      }
+      if (files) {
+        files.forEach((itm, index) => {
+          const filedId = itm.split('.')[0];
+          if (filedId === id) {
+            fs.unlinkSync(think.config['image.user'] + itm);
+          }
+        });
+      }
+      const _name = avatar.filename;
+      const tempName = _name.split('.');
+      const name = id + '.' + tempName[1];
+      const path = think.config['image.user'] + name;
+      const tempPath = think.config['image.user'] + 'temp/' + name;
+
+      const file = fs.createWriteStream(tempPath);
+      file.on('error', (err) => {
+        if (err) {
+          this.fail('创建文件失败');
+        }
+      });
+
+      file.on('end', (err) => {
+        if (err) {
+          this.fail('压缩文件失败');
+        }
+        this.cache.put('getAvatarAction' + id, null);
+        images(tempPath).size(150).save(path, {
+          quality: 75
+        });
+        this.success('上传头像成功');
+      });
+    });
   }
 };

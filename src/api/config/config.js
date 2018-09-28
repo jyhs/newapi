@@ -11,6 +11,6 @@ module.exports = {
     'user/loginByPassword',
     'user/getById',
     'user/forgetPassword',
-    'user/getAvatar'
+    'user/register'
   ]
 };

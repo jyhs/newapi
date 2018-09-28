@@ -1,5 +1,5 @@
 module.exports = class extends think.Logic {
-  async addAction() {
+  addAction() {
     this.allowMethods = 'post';
     this.rules = {
       name: {string: true, trim: true, required: true},
@@ -13,7 +13,7 @@ module.exports = class extends think.Logic {
       private: {int: true, trim: true, default: 0}
     };
   }
-  async listAction() {
+  listAction() {
     this.rules = {
       name: {string: true, trim: true},
       page: {int: true, trim: true},
