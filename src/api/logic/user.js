@@ -114,7 +114,6 @@ module.exports = class extends think.Logic {
 
   changPasswordAction() {
     this.rules = {
-      id: { required: true, int: true },
       password: {string: true, required: true, trim: true, length: {min: 6, max: 20}}
     };
   }

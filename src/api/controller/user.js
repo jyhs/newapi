@@ -131,7 +131,7 @@ module.exports = class extends Base {
     });
   }
   async changPasswordAction() {
-    await this.model('user').where({ id: this.post('id') }).update({
+    await this.model('user').where({ id: this.getLoginUserId() }).update({
       password: md5(this.post('password'))
     });
     return this.success('操作成功');
