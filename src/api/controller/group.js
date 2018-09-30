@@ -1,4 +1,4 @@
-const Base = require('../../common/controller/base.js');
+const Base = require('./base.js');
 const moment = require('moment');
 
 module.exports = class extends Base {

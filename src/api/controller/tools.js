@@ -1,4 +1,4 @@
-const Base = require('../../common/controller/base.js');
+const Base = require('./base.js');
 const QcloudSms = require('qcloudsms_js');
 
 module.exports = class extends Base {

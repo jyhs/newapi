@@ -1,4 +1,4 @@
-const Base = require('../../common/controller/base.js');
+const Base = require('./base.js');
 
 module.exports = class extends Base {
   async getByIdAction() {

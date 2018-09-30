@@ -58,7 +58,6 @@ module.exports = class extends think.Logic {
 
   updateAction() {
     this.rules = {
-      id: { required: true, int: true, trim: true },
       city: {string: true, trim: true},
       province: {string: true, trim: true},
       phone: {mobile: 'zh-CN', trim: true},
@@ -72,16 +71,9 @@ module.exports = class extends think.Logic {
     };
   }
 
-  getAvatarAction() {
-    this.rules = {
-      id: { required: true, int: true }
-    };
-  }
-
   uploadAvatarAction() {
     this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, required: true, trim: true},
       avatar: {method: 'file', required: true}
     };
   }
@@ -101,14 +93,7 @@ module.exports = class extends think.Logic {
 
   bindPhoneAction() {
     this.rules = {
-      id: { required: true, int: true },
       phone: {mobile: 'zh-CN', required: true, trim: true}
-    };
-  }
-
-  checkPhoneAction() {
-    this.rules = {
-      id: { required: true, int: true }
     };
   }
 

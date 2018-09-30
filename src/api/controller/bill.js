@@ -1,4 +1,4 @@
-const Base = require('../../common/controller/base.js');
+const Base = require('./base.js');
 const XLSX = require('xlsx');
 const _ = require('lodash');
 const moment = require('moment');

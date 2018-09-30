@@ -1,4 +1,4 @@
-const Base = require('../../common/controller/base.js');
+const Base = require('./base.js');
 const moment = require('moment');
 module.exports = class extends Base {
   async addAction() {
@@ -29,7 +29,6 @@ module.exports = class extends Base {
         });
         const qrService = this.service('qr', 'api');
         this.type = 'image/svg+xml';
-        console.log(qrService.getGroupQrById(groupId));
         this.body = qrService.getGroupQrById(groupId);
       }
     } else {

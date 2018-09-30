@@ -1,4 +1,4 @@
-const Base = require('../../common/controller/base.js');
+const Base = require('./base.js');
 const rp = require('request-promise');
 const moment = require('moment');
 const md5 = require('md5');
@@ -10,7 +10,7 @@ const images = require('images');
 
 module.exports = class extends Base {
   async bindPhoneAction() {
-    await this.model('user').where({ id: this.post('id') }).update({
+    await this.model('user').where({ id: this.getLoginUserId() }).update({
       phone: this.post('phone')
     });
     return this.success('操作成功');
@@ -145,7 +145,7 @@ module.exports = class extends Base {
     }
   }
   async checkPhoneAction() {
-    const user = await this.model('user').field(['phone']).where({ id: this.get('id') }).find();
+    const user = await this.model('user').field(['phone']).where({ id: this.getLoginUserId() }).find();
     if (!user.phone || user.phone === '18888888888') {
       this.json({'isBindPhone': false});
     } else {
@@ -180,14 +180,14 @@ module.exports = class extends Base {
     }
   }
   async getAvatarAction() {
-    const key = 'getAvatarAction' + this.get('id');
+    const key = 'getAvatarAction' + this.getLoginUserId();
     const time = {timeout: 24 * 60 * 60 * 1000 * 7};
     const avatar = await this.cache(key);
     if (avatar) {
       this.type = 'image/jpeg';
       this.body = avatar;
     } else {
-      const user = await this.model('user').field(['headimgurl']).where({ id: this.get('id') }).find();
+      const user = await this.model('user').field(['headimgurl']).where({ id: this.getLoginUserId() }).find();
       if (!_.isEmpty(user.headimgurl)) {
         return new Promise((resolve, reject) => {
           const urlObject = url.parse(user.headimgurl);
@@ -317,7 +317,8 @@ module.exports = class extends Base {
     return this.json(list);
   }
 
-  async updateAction() {
+  async updateAction(userId) {
+    const id = userId || this.getLoginUserId();
     const user = {
       city: this.post('city'),
       province: this.post('province'),
@@ -330,13 +331,13 @@ module.exports = class extends Base {
       status: this.post('status'),
       point: this.post('point') || 0
     };
-    await this.model('user').where({id: this.post('id')}).update(user);
+    await this.model('user').where({id: id}).update(user);
     this.success('更新成功');
   }
 
   async uploadAvatarAction() {
     const avatar = think.extend({}, this.file('avatar'));
-    const id = this.post('id');
+    const id = this.getLoginUserId();
     fs.readdir(think.config('image.user'), function(err, files) {
       if (err) {
         console.error(err);
