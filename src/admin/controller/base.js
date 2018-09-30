@@ -15,6 +15,12 @@ module.exports = class extends think.Controller {
       if (this.ctx.state.user.type === 'yy') {
         return this.fail(401, '无权访问');
       }
+      if (this.ctx.controller === 'user' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'yhgly')) {
+        return this.fail(401, '无权访问');
+      }
+      if (this.ctx.controller === 'group' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'tggly')) {
+        return this.fail(401, '无权访问');
+      }
     }
   }
 
