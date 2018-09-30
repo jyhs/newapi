@@ -6,7 +6,7 @@ const _ = require('lodash');
 const http = require('http');
 const url = require('url');
 const fs = require('fs');
-const images = require('images');
+// const images = require('images');
 
 module.exports = class extends Base {
   async bindPhoneAction() {
@@ -213,13 +213,13 @@ module.exports = class extends Base {
         });
       } else {
         return new Promise((resolve, reject) => {
-          fs.readdir(think.config['image.user'], (err, files) => {
+          fs.readdir(think.config('image.user'), (err, files) => {
             let path = null;
             let _type = 'png';
             files.forEach((itm, index) => {
               const filedId = itm.split('.')[0];
               if (filedId === this.get('id')) {
-                path = think.config['image.user'] + itm;
+                path = think.config('image.user') + itm;
                 _type = itm.split('.')[1];
               } else {
                 reject(err);
@@ -347,15 +347,14 @@ module.exports = class extends Base {
         files.forEach((itm, index) => {
           const filedId = itm.split('.')[0];
           if (filedId === id) {
-            fs.unlinkSync(think.config['image.user'] + itm);
+            fs.unlinkSync(think.config('image.user') + itm);
           }
         });
       }
       const _name = avatar.filename;
       const tempName = _name.split('.');
       const name = id + '.' + tempName[1];
-      const path = think.config['image.user'] + name;
-      const tempPath = think.config['image.user'] + 'temp/' + name;
+      const tempPath = think.config('image.user') + 'temp/' + name;
 
       const file = fs.createWriteStream(tempPath);
       file.on('error', (err) => {
@@ -369,9 +368,9 @@ module.exports = class extends Base {
           this.fail('压缩文件失败');
         }
         this.cache.put('getAvatarAction' + id, null);
-        images(tempPath).size(150).save(path, {
-          quality: 75
-        });
+        // images(tempPath).size(150).save(path, {
+        //   quality: 75
+        // });
         this.success('上传头像成功');
       });
     });
