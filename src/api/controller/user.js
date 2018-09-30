@@ -179,15 +179,16 @@ module.exports = class extends Base {
       this.json(_.filter(users, (user) => { return user.city === city }));
     }
   }
-  async getAvatarAction() {
-    const key = 'getAvatarAction' + this.getLoginUserId();
+  async getAvatarAction(userId) {
+    const id = userId || this.getLoginUserId();
+    const key = 'getAvatarAction' + id;
     const time = {timeout: 24 * 60 * 60 * 1000 * 7};
     const avatar = await this.cache(key);
     if (avatar) {
       this.type = 'image/jpeg';
       this.body = avatar;
     } else {
-      const user = await this.model('user').field(['headimgurl']).where({ id: this.getLoginUserId() }).find();
+      const user = await this.model('user').field(['headimgurl']).where({ id: id }).find();
       if (!_.isEmpty(user.headimgurl)) {
         return new Promise((resolve, reject) => {
           const urlObject = url.parse(user.headimgurl);
