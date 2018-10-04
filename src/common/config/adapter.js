@@ -2,6 +2,7 @@ const fileCache = require('think-cache-file');
 const {Console, File, DateFile} = require('think-logger3');
 const path = require('path');
 const database = require('./database.js');
+const databaseP = require('./database.production.js');
 
 const isDev = think.env === 'development';
 
@@ -33,7 +34,7 @@ exports.model = {
     logSql: isDev,
     logger: msg => think.logger.info(msg)
   },
-  mysql: database
+  mysql: isDev ? database : databaseP
 };
 
 /**
