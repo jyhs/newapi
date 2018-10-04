@@ -17,6 +17,7 @@
     "lodash": "^4.17.11",
     "md5": "^2.2.1",
     "moment": "^2.22.2",
+    "node-xlsx": "^0.12.1",
     "qcloudsms_js": "^0.1.1",
     "qr-image": "^3.2.0",
     "request": "^2.81.0",

@@ -1,5 +1,5 @@
 module.exports = class extends think.Logic {
-  async addAction() {
+  addAction() {
     this.allowMethods = 'post';
     this.rules = {
       name: {string: true, trim: true, required: true},
@@ -13,14 +13,57 @@ module.exports = class extends think.Logic {
       private: {int: true, trim: true, default: 0}
     };
   }
-  async backAction() {
+  backAction() {
     this.rules = {
       id: {int: true, required: true, trim: true}
     };
   }
-  async deleteAction() {
+  nextAction() {
     this.rules = {
       id: {int: true, required: true, trim: true}
+    };
+  }
+  deleteAction() {
+    this.rules = {
+      id: {int: true, required: true, trim: true}
+    };
+  }
+  downloadAction() {
+    this.rules = {
+      id: {int: true, trim: true}
+    };
+  }
+  finishAction() {
+    this.rules = {
+      id: {int: true, trim: true}
+    };
+  }
+  privateQrAction() {
+    this.rules = {
+      id: {int: true, trim: true}
+    };
+  }
+  reopenAction() {
+    this.rules = {
+      id: {int: true, trim: true},
+      end_date: {date: true, required: true}
+    };
+  }
+  updateAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      name: {string: true, trim: true},
+      end_date: {date: true},
+      bill_id: {int: true, trim: true},
+      freight: {float: true, trim: true},
+      city: {string: true, trim: true},
+      province: {string: true, trim: true},
+      activity_code: {string: true, trim: true},
+      description: {string: true, trim: true},
+      top_freight: {int: true, trim: true},
+      status: {int: true, trim: true},
+      id: {int: true, required: true, trim: true},
+      private: {int: true, trim: true}
     };
   }
 };

@@ -1,6 +1,6 @@
 const Base = require('./base.js');
 const fs = require('fs');
-const images = require('images');
+// const images = require('images');
 
 module.exports = class extends Base {
   async deleteImageAction() {
@@ -77,9 +77,9 @@ module.exports = class extends Base {
         this.fail('操作失败');
       }
       const returnPath = `/${category}/${name}`;
-      images(path).size(150).save(smallPath, {
-        quality: 75
-      });
+      // images(path).size(150).save(smallPath, {
+      //   quality: 75
+      // });
       this.json({'imgPath': returnPath});
     });
   }
