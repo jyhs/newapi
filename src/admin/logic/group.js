@@ -13,4 +13,14 @@ module.exports = class extends think.Logic {
       private: {int: true, trim: true, default: 0}
     };
   }
+  async backAction() {
+    this.rules = {
+      id: {int: true, required: true, trim: true}
+    };
+  }
+  async deleteAction() {
+    this.rules = {
+      id: {int: true, required: true, trim: true}
+    };
+  }
 };

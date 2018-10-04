@@ -15,24 +15,25 @@ module.exports = class extends think.Controller {
       const userId = this.get('user_id') || this.post('user_id');
       if (userId && userId !== this.ctx.state.user.id) {
         return this.fail(401, '无权访问');
-      }
-      if (this.ctx.state.user.type === 'yy') {
-        return this.fail(401, '无权访问');
-      }
-      if (this.ctx.controller === 'user' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'yhgly')) {
-        return this.fail(401, '无权访问');
-      }
-      if (this.ctx.controller === 'group' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'tggly')) {
-        return this.fail(401, '无权访问');
-      }
-      if (this.ctx.controller === 'detail' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'tggly')) {
-        // return this.fail(401, '无权访问');
-      }
-      if (this.ctx.controller === 'bill' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'tggly')) {
-        // return this.fail(401, '无权访问');
-      }
-      if (this.ctx.controller === 'material' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'bkgly')) {
-        // return this.fail(401, '无权访问');
+      } else {
+        if (this.ctx.state.user.type === 'yy') {
+          return this.fail(401, '无权访问');
+        }
+        if (this.ctx.controller === 'user' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'yhgly')) {
+          return this.fail(401, '无权访问');
+        }
+        if (this.ctx.controller === 'group' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'tggly')) {
+          // return this.fail(401, '无权访问');
+        }
+        if (this.ctx.controller === 'detail' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'tggly')) {
+          // return this.fail(401, '无权访问');
+        }
+        if (this.ctx.controller === 'bill' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'tggly')) {
+          // return this.fail(401, '无权访问');
+        }
+        if (this.ctx.controller === 'material' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'bkgly')) {
+          // return this.fail(401, '无权访问');
+        }
       }
     }
   }

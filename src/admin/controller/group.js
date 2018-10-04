@@ -1,6 +1,11 @@
 const Base = require('./base.js');
 const moment = require('moment');
 module.exports = class extends Base {
+  async backAction() {
+    const group = await this.model('group_bill').where({id: this.post('id')}).find();
+    group.current_step = group.current_step - 1;
+    await this.model('group_bill').where({id: this.post('id')}).update({current_step: group.current_step});
+  }
   async addAction() {
     const user = this.getLoginUser();
     if (!moment(this.post('end_date') + '', 'YYYYMMDDhmmss').isAfter(moment())) {

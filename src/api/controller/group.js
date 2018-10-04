@@ -7,4 +7,11 @@ module.exports = class extends Base {
     const list = await this.model('group').getGroupList({name, page, size});
     return this.json(list);
   }
+  async activityAction() {
+    this.json([
+      {'code': 'default', 'name': '热团中', 'desc': ''},
+      {'code': 'cx', 'name': '9月狂欢', 'desc': ''},
+      {'code': 'jp', 'name': '精品推荐', 'desc': ''}
+    ]);
+  }
 };
