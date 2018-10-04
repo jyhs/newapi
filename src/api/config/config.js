@@ -11,6 +11,7 @@ module.exports = {
     'user/loginByPassword',
     'user/getById',
     'user/forgetPassword',
-    'user/register'
+    'user/register',
+    'game/list'
   ]
 };
