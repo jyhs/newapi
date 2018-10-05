@@ -10,14 +10,14 @@ module.exports = class extends Base {
     const ssender = qcloudsms.SmsSingleSender();
     const params = [code];
     return new Promise((resolve, reject) => {
-      ssender.sendWithParam(86, this.get('phone'), 140767, params, '', '', '', (err, res, resData) => {
+      ssender.sendWithParam(86, this.post('phone'), 140767, params, '', '', '', (err, res, resData) => {
         if (err) {
           reject(this.fail('发送失败'));
         } else {
           this.cache(resData.sid, code, {
             timeout: 5 * 60 * 1000
           });
-          resolve(this.success({'requestId': resData.sid}));
+          resolve(this.json({'requestId': resData.sid}));
         }
       });
     });

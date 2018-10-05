@@ -5,10 +5,57 @@ module.exports = class extends think.Logic {
       group_bill_id: {int: true, required: true, trim: true}
     };
   }
+  getByGroupIdAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      group_bill_id: {int: true, required: true, trim: true}
+    };
+  }
+  deleteDetailAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cart_id: {int: true, required: true, trim: true},
+      bill_detail_id: {int: true, required: true, trim: true}
+    };
+  }
+  deleteAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cart_id: {int: true, required: true, trim: true}
+    };
+  }
+  damageAddAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cart_id: {int: true, required: true, trim: true},
+      bill_detail_id: {int: true, required: true, trim: true}
+    };
+  }
+  lostAddAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cart_id: {int: true, required: true, trim: true},
+      bill_detail_id: {int: true, required: true, trim: true}
+    };
+  }
+  lostSubAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cart_id: {int: true, required: true, trim: true},
+      bill_detail_id: {int: true, required: true, trim: true}
+    };
+  }
+  damageSubAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cart_id: {int: true, required: true, trim: true},
+      bill_detail_id: {int: true, required: true, trim: true}
+    };
+  }
   updateAction() {
     this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, required: true, trim: true},
+      cart_id: {int: true, required: true, trim: true},
       status: {int: true, trim: true},
       sum: {int: true, trim: true},
       is_confirm: {int: true, trim: true},
@@ -19,6 +66,48 @@ module.exports = class extends think.Logic {
       city: {string: true, trim: true},
       contacts: {string: true, trim: true},
       description: {string: true, trim: true}
+    };
+  }
+  updateDetailAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cart_id: {int: true, required: true, trim: true},
+      bill_detail_id: {int: true, required: true, trim: true},
+      bill_detail_num: {int: true, required: true, trim: true},
+      sum: {float: true, required: true, trim: true},
+      freight: {float: true, required: true, trim: true}
+    };
+  }
+  addDetailAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cart_id: {int: true, required: true, trim: true},
+      bill_detail_id: {int: true, required: true, trim: true},
+      bill_detail_num: {int: true, required: true, trim: true},
+      sum: {float: true, required: true, trim: true},
+      freight: {float: true, required: true, trim: true}
+    };
+  }
+  listAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      group_bill_id: {int: true, required: true, trim: true},
+      page: {int: true, required: true, trim: true},
+      size: {int: true, required: true, trim: true}
+    };
+  }
+  getAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cart_id: {int: true, required: true, trim: true}
+    };
+  }
+  listDetailAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cart_id: {int: true, required: true, trim: true},
+      page: {int: true, required: true, trim: true},
+      size: {int: true, required: true, trim: true}
     };
   }
 };

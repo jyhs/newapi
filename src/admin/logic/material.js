@@ -19,7 +19,7 @@ module.exports = class extends think.Logic {
   updateAction() {
     this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, required: true, trim: true},
+      material_id: {int: true, required: true, trim: true},
       name: {string: true, required: true, trim: true},
       ename: {string: true, trim: true},
       sname: {string: true, trim: true},
@@ -43,11 +43,13 @@ module.exports = class extends think.Logic {
     };
   }
   deleteAction() {
+    this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, required: true, trim: true}
+      material_id: {int: true, required: true, trim: true}
     };
   }
   deleteImageAction() {
+    this.allowMethods = 'post';
     this.rules = {
       id: {int: true, required: true, trim: true},
       imgName: {string: true, required: true, trim: true}

@@ -4,12 +4,12 @@ const fs = require('fs');
 
 module.exports = class extends Base {
   async deleteImageAction() {
-    const material = await this.model('material').where({id: this.get('id')}).find();
-    const filePath = think.config('image.material') + '/' + material.category + '/' + this.get('imgName');
+    const material = await this.model('material').where({id: this.post('material_id')}).find();
+    const filePath = think.config('image.material') + '/' + material.category + '/' + this.post('imgName');
     fs.unlinkSync(filePath);
   }
   async deleteAction() {
-    const material = await this.model('material').where({id: this.get('id')}).find();
+    const material = await this.model('material').where({id: this.post('material_id')}).find();
     const filePath = think.config('image.material') + '/' + material.category + '/';
     fs.readdir(filePath, function(err, files) {
       if (err) {
@@ -26,7 +26,7 @@ module.exports = class extends Base {
         fs.unlinkSync(filePath + '/' + file);
       });
     });
-    await this.model('material').where({id: this.get('id')}).delete();
+    await this.model('material').where({id: this.post('material_id')}).delete();
   }
   async addAction() {
     const tag = this.post('tag') ? this.post('tag').replace(/，/ig, ',') : '';
@@ -53,7 +53,7 @@ module.exports = class extends Base {
         this.fail('名字已经存在');
       } else {
         const id = await this.model('material').add(materialObj);
-        this.json(({'id': id}));
+        this.json(({'material_id': id}));
       }
     }
   }
@@ -66,21 +66,15 @@ module.exports = class extends Base {
     let timestamp = Date.parse(new Date());
     timestamp = timestamp / 1000;
     const name = timestamp + '-' + code + '.' + tempName[1];
-    const path = think.config('image.material') + '/' + category + '/' + name;
-    const smallPath = think.config('image.material') + '/small/' + category + '/' + name;
-    const file = fs.createWriteStream(path);
-
-    img.pipe(file);
-
-    img.on('end', (err) => {
-      if (err) {
-        this.fail('操作失败');
-      }
+    const path = this.config('image.material') + '/' + category + '/' + name;
+    // const smallPath = this.config('image.material') + '/small/' + category + '/' + name;
+    return new Promise((resolve, reject) => {
+      fs.createWriteStream(path);
       const returnPath = `/${category}/${name}`;
       // images(path).size(150).save(smallPath, {
       //   quality: 75
       // });
-      this.json({'imgPath': returnPath});
+      resolve(this.json({'imgPath': returnPath}));
     });
   }
   async updateAction() {
@@ -99,6 +93,6 @@ module.exports = class extends Base {
       description: this.post('description'),
       classification: this.post('description')
     };
-    await this.model('material').where({id: this.post('id')}).update(materialObj);
+    await this.model('material').where({id: this.post('material_id')}).update(materialObj);
   }
 };

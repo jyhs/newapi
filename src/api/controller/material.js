@@ -126,7 +126,7 @@ module.exports = class extends Base {
     this.json(returnList);
   }
   async checkNameAction() {
-    const material = await this.model('material').where({name: this.get('name')}).find();
+    const material = await this.model('material').where({name: this.post('name')}).find();
     if (!think.isEmpty(material)) {
       this.fail('名字已经存在');
     }
@@ -139,11 +139,11 @@ module.exports = class extends Base {
     this.json(category);
   }
   async focusAction() {
-    const focus = this.model('focus').where({user_id: this.get('user_id'), material_id: this.get('material_id')}).find();
+    const focus = this.model('focus').where({user_id: this.post('user_id'), material_id: this.post('material_id')}).find();
     if (think.isEmpty(focus)) {
-      await this.model('focus').add({user_id: this.get('user_id'), material_id: this.get('material_id')});
+      await this.model('focus').add({user_id: this.post('user_id'), material_id: this.post('material_id')});
     } else {
-      await this.model('focus').where({user_id: this.get('user_id'), material_id: this.get('material_id')}).delete();
+      await this.model('focus').where({user_id: this.post('user_id'), material_id: this.post('material_id')}).delete();
     }
   }
   async focusListAction() {
@@ -154,51 +154,49 @@ module.exports = class extends Base {
       as: 'f',
       on: ['f.material_id', 'm.id']
     });
-    const list = await model.where({'f.user_id': this.get('user_id')}).select();
+    const list = await model.where({'f.user_id': this.post('user_id')}).select();
     this.json(list);
   }
   async getAction() {
-    const material = await this.model('material').where({id: this.get('id')}).find();
+    const material = await this.model('material').where({id: this.post('material_id')}).find();
     this.json(material);
   }
-  async imageAction() {
-    const code = await this.cache('material_image' + this.get('id'));
+  async getImageAction() {
+    const code = await this.cache('material_image' + this.post('material_id'));
     if (!think.isEmpty(code)) {
       this.json({'image': code});
     } else {
-      const material = await this.model('material').where({id: this.get('id')}).find();
-      const filePath = think.config('image.material') + '/' + material.category + '/';
+      const material = await this.model('material').where({id: this.post('material_id')}).find();
+      const filePath = this.config('image.material') + '/' + material.category + '/';
       const results = [];
-      fs.readdir(filePath, (err, files) => {
-        if (err) {
-          console.error(err);
-          this.fail('操作失败');
-        }
-        files.forEach((filename) => {
-          const temp = filename.substring(0, filename.indexOf('.')).split('-');
-          if (material.code === temp[1]) {
-            results.push(`/${material.category}/${filename}`);
+      return new Promise((resolve, reject) => {
+        fs.readdir(filePath, (err, files) => {
+          if (err) {
+            console.error(err);
+            reject(this.fail('操作失败'));
           }
+          _.each(files, (filename) => {
+            const temp = filename.substring(0, filename.indexOf('.')).split('-');
+            if (material.code === temp[1]) {
+              results.push(`/${material.category}/${filename}`);
+            }
+          });
+          this.cache('material_image' + this.post('material_id'), results);
+          resolve(this.json({'image': results}));
         });
-        think.cache.put('material_image' + this.get('id'), results[0]);
-        this.json({'image': results[0]});
       });
     }
   }
   async listAction() {
-    const page = this.get('page') || 1;
-    const size = this.get('size') || 10;
-    const name = this.get('name');
-    const type = this.get('type');
-    const category = this.get('category');
-    const classification = this.get('classification');
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 10;
+    const name = this.post('name');
+    const type = this.post('type');
+    const category = this.post('category');
+    const classification = this.post('classification');
     const whereMap = {};
     if (!think.isEmpty(type)) {
-      let types = `'',`;
-      _.each(type.split(','), (item) => {
-        types += `'${item}',`;
-      });
-      whereMap.type = types;
+      whereMap.type = type;
     }
     if (!think.isEmpty(classification)) {
       whereMap.classification = classification;
@@ -304,12 +302,12 @@ module.exports = class extends Base {
       {'code': 'csj', 'name': '测试剂', 'desc': '', 'pc': 'hc'}
     ];
 
-    if (this.get('category') === 'all') {
+    if (this.post('category') === 'all') {
       this.json(types);
     } else {
       const tp = [];
       _.each(types, (item) => {
-        if (item['pc'] === this.get('category')) {
+        if (item['pc'] === this.post('category')) {
           tp.push(item);
         }
       });
@@ -317,17 +315,16 @@ module.exports = class extends Base {
     }
   }
   async randomListAction() {
-    const page = this.get('page') || 1;
-    const size = this.get('size') || 10;
-    const number = this.get('number') || 10;
-    const classification = this.get('classification');
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 10;
+    const classification = this.post('classification');
     const whereMap = {};
 
     if (!think.isEmpty(classification)) {
       whereMap.classification = classification;
     }
 
-    const list = await this.model('material').where(whereMap).order(['rand()']).limit(number).page(page, size).countSelect();
+    const list = await this.model('material').where(whereMap).order(['rand()']).page(page, size).countSelect();
     this.json(list);
   }
   async levelAction() {
@@ -338,50 +335,26 @@ module.exports = class extends Base {
     ];
     this.json(category);
   }
-  async imageListAction() {
-    const imageList = await this.cache('material_imageList' + this.get('id'));
-    if (!think.isEmpty(imageList)) {
-      this.json({imageList: imageList});
-    } else {
-      const material = await this.model('material').where({id: this.get('id')}).find();
-      const filePath = think.config('image.material') + '/' + material.category + '/';
-      const results = [];
-      fs.readdir(filePath, (err, files) => {
-        if (err) {
-          console.error(err);
-          this.fail('操作失败');
-        }
-        files.forEach((filename) => {
-          const temp = filename.substring(0, filename.indexOf('.')).split('-');
-          if (material.code === temp[1]) {
-            results.push(`/${material.category}/${filename}`);
-          }
-        });
-        think.cache.put('material_imageList' + this.get('id'), results);
-        this.json({'imageList': results});
-      });
-    }
-  }
-  async imageSmallAction() {
-    const code = await this.cache('material_image_small' + this.get('id'));
+  async getImageSmallAction() {
+    const code = await this.cache('material_image_small' + this.post('material_id'));
     if (!think.isEmpty(code)) {
       this.type = 'image/png';
       this.body = code;
     } else {
-      const material = await this.model('material').where({id: this.get('id')}).find();
+      const material = await this.model('material').where({id: this.post('material_id')}).find();
 
       return new Promise((resolve, reject) => {
-        const filePath = think.config('image.material') + '/' + material.category + '/';
+        const filePath = this.config('image.material') + '/' + material.category + '/';
         fs.readdir(filePath, (err, files) => {
           if (err) {
             console.error(err);
             this.fail('操作失败');
           }
           let smallPath = null;
-          files.forEach((filename) => {
+          _.each(files, (filename) => {
             const temp = filename.substring(0, filename.indexOf('.')).split('-');
             if (material.code === temp[1]) {
-              smallPath = think.config('image.material') + '/small' + `/${material.category}/${filename}`;
+              smallPath = this.config('image.material') + '/small' + `/${material.category}/${filename}`;
             }
           });
           if (smallPath) {
@@ -389,20 +362,20 @@ module.exports = class extends Base {
             try {
               fs.readFile(smallPath, (err, data) => {
                 if (err) {
-                  resolve(this.body = think.config('image.materialDefault'));
+                  resolve(this.body = this.config('image.materialDefault'));
                 } else if (data) {
                   const decodeImg = Buffer.from(data.toString('base64'), 'base64');
                   this.type = 'image/png';
                   this.cache.put('material_image_small', resolve(this.body = decodeImg));
                 } else {
-                  resolve(this.body = think.config('image.materialDefault'));
+                  resolve(this.body = this.config('image.materialDefault'));
                 }
               });
             } catch (error) {
-              resolve(this.body = think.config('image.materialDefault'));
+              resolve(this.body = this.config('image.materialDefault'));
             }
           } else {
-            resolve(this.body = think.config('image.materialDefault'));
+            resolve(this.body = this.config('image.materialDefault'));
           }
         });
       });

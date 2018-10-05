@@ -1,14 +1,56 @@
 module.exports = class extends think.Logic {
   listAction() {
+    this.allowMethods = 'post';
     this.rules = {
       name: {string: true, trim: true},
       page: {int: true, trim: true},
       size: {int: true, trim: true}
     };
   }
-  getByIdAction() {
+  getAction() {
+    this.allowMethods = 'post';
     this.rules = {
       id: {int: true, required: true, trim: true}
+    };
+  }
+
+  getDetailByIdAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      detail_id: {int: true, required: true, trim: true}
+    };
+  }
+  getDetailByBillIdAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      bill_id: {int: true, required: true, trim: true}
+    };
+  }
+  getDetailByBillIdAndCategoryAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      bill_id: {int: true, required: true, trim: true},
+      category: {string: true, required: true, trim: true}
+    };
+  }
+  getDetailByBillIdAndRecommendAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      bill_id: {int: true, required: true, trim: true},
+      recommend: {string: true, required: true, trim: true}
+    };
+  }
+  getDetailByBillIdAndTypeAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      bill_id: {int: true, required: true, trim: true},
+      type: {string: true, required: true, trim: true}
+    };
+  }
+  getDetailByBillIdAndUndefineAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      bill_id: {int: true, required: true, trim: true}
     };
   }
 };

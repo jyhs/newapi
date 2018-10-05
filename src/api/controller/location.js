@@ -1,7 +1,7 @@
 const Base = require('./base.js');
 const _ = require('lodash');
 module.exports = class extends Base {
-  async chinaAction() {
+  async getChinaAction() {
     const provinces = await this.model('provinces').select();
     const citys = await this.model('citys').select();
     _.each(provinces, (province) => {
@@ -15,11 +15,11 @@ module.exports = class extends Base {
     this.json(provinces);
   }
   async getCityByCodeAction() {
-    const city = await this.model('citys').where({'mark': this.get('code')}).find();
+    const city = await this.model('citys').where({'mark': this.post('code')}).find();
     this.json(city);
   }
   async getCityByProvinceAction() {
-    const citys = await this.model('citys').where({'area': this.get('province')}).select();
+    const citys = await this.model('citys').where({'area': this.post('province')}).select();
     this.json(citys);
   }
   async getProvincesAction() {

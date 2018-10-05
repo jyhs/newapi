@@ -26,10 +26,54 @@ module.exports = class extends Base {
     });
     return this.json(list);
   }
-  async getByIdAction() {
-    const id = this.get('id');
+  async getAction() {
+    const id = this.post('id');
     const model = this.model('bill');
-    const list = await model.where({id: id}).select();
+    const bill = await model.where({id: id}).find();
+    return this.json(bill);
+  }
+
+  async getDetailByIdAction() {
+    const id = this.post('detail_id');
+    const detail = await this.model('bill_detail').where({id: id}).find();
+    return this.json(detail);
+  }
+  async getDetailByBillIdAction() {
+    const id = this.post('bill_id');
+    const model = this.model('bill_detail');
+    const list = await model.where({bill_id: id}).select();
     return this.json(list);
+  }
+  async getDetailByBillIdAndCategoryAction() {
+    const model = this.model('bill_detail').alias('d');
+    model.field(['d.*']).join({
+      table: 'material',
+      join: 'inner',
+      as: 'm',
+      on: ['d.material_id', 'm.id']
+    });
+    const list = await model.where({'m.category': this.post('category'), 'd.bill_id': this.post('bill_id')}).select();
+    this.json(list);
+  }
+  async getDetailByBillIdAndTypeAction() {
+    const model = this.model('bill_detail').alias('d');
+    model.field(['d.*']).join({
+      table: 'material',
+      join: 'inner',
+      as: 'm',
+      on: ['d.material_id', 'm.id']
+    });
+    const list = await model.where({'m.type': this.post('type'), 'd.bill_id': this.post('bill_id')}).select();
+    this.json(list);
+  }
+  async getDetailByBillIdAndRecommendAction() {
+    const model = this.model('bill_detail');
+    const list = await model.where({'recommend': this.post('recommend'), 'bill_id': this.post('bill_id')}).select();
+    this.json(list);
+  }
+  async getDetailByBillIdAndUndefineAction() {
+    const model = this.model('bill_detail');
+    const list = await model.where({'material_id': ['=', null], 'bill_id': this.post('bill_id')}).select();
+    this.json(list);
   }
 };

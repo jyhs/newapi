@@ -5,41 +5,41 @@ const xlsx = require('node-xlsx');
 const fs = require('fs');
 module.exports = class extends Base {
   async reopenAction() {
-    await this.model('group_bill').where({id: this.post('id')}).update({status: 1, end_date: this.post('end_date')});
+    await this.model('group_bill').where({id: this.post('group_id')}).update({status: 1, end_date: this.post('end_date')});
   }
   async privateQrAction() {
-    const groupId = this.post('id');
+    const groupId = this.post('group_id');
     const qrService = this.service('qr', 'api');
     this.type = 'image/svg+xml';
     this.body = qrService.getGroupQrById(groupId, true);
   }
   async finishAction() {
-    await this.model('group_bill').where({id: this.post('id')}).update({status: 0});
+    await this.model('group_bill').where({id: this.post('group_id')}).update({status: 0});
   }
   async backAction() {
-    const group = await this.model('group_bill').where({id: this.post('id')}).find();
+    const group = await this.model('group_bill').where({id: this.post('group_id')}).find();
     group.current_step = group.current_step - 1;
-    await this.model('group_bill').where({id: this.post('id')}).update({current_step: group.current_step});
+    await this.model('group_bill').where({id: this.post('group_id')}).update({current_step: group.current_step});
   }
   async nextAction() {
-    const group = await this.model('group_bill').where({id: this.post('id')}).find();
+    const group = await this.model('group_bill').where({id: this.post('group_id')}).find();
     if (group.status === 0) {
       this.fail('请先结束团购');
     } else {
-      const cart = await this.model('cart').field('count(is_pay) count').where({status: 1, is_pay: 0, sum: ['!=', 0], group_bill_id: this.post('id')}).find();
+      const cart = await this.model('cart').field('count(is_pay) count').where({status: 1, is_pay: 0, sum: ['!=', 0], group_bill_id: this.post('group_id')}).find();
 
       if (cart.count === 0) {
         this.fail('鱼友尚未全部支付');
       } else {
         group.current_step = group.current_step + 1;
-        await this.model('group_bill').where({id: this.post('id')}).update({current_step: group.current_step});
+        await this.model('group_bill').where({id: this.post('group_id')}).update({current_step: group.current_step});
       }
     }
   }
   async deleteAction() {
-    await this.model('group').delete(this.post('id'));
-    await this.model('cart').where({'group_bill_id': this.post('id')}).delete();
-    await this.model('group_bill').where({'id': this.post('id')}).delete();
+    await this.model('group').delete(this.post('group_id'));
+    await this.model('cart').where({'group_bill_id': this.post('group_id')}).delete();
+    await this.model('group_bill').where({'id': this.post('group_id')}).delete();
   }
   async addAction() {
     const user = this.getLoginUser();
@@ -70,13 +70,13 @@ module.exports = class extends Base {
     }
   }
   async updateAction() {
-    const group = this.model('group_bill').where({'id': this.post('id')}).find();
+    const group = this.model('group_bill').where({'id': this.post('group_id')}).find();
     if (!moment(this.post('end_date') + '', 'YYYYMMDDhmmss').isAfter(moment())) {
       this.fail('结束日期必须大于今天');
     } else if (group.status === 0) {
       this.fail('已经结束的团购单不能更新');
     } else {
-      await this.model('group_bill').where({id: this.post('id')}).update({
+      await this.model('group_bill').where({id: this.post('group_id')}).update({
         name: this.post('name'),
         end_date: this.post('end_date'),
         freight: this.post('freight'),
@@ -91,13 +91,13 @@ module.exports = class extends Base {
     }
   }
   async downloadAction() {
-    const group = this.model('group_bill').where({'id': this.post('id')}).find();
+    const group = await this.model('group_bill').where({'id': this.post('group_id')}).find();
     const returnData = [['序号', '昵称', '联系电话', '联系人', '联系地址', '合计', '备注', '品名', '规格', '单价', '数量', '共计（不含运费)']];
     const totleReturnData = [['品名', '规格', '单价', '数量', '共计（不含运费)']];
     const totleReturnDataWithfreight = [['品名', '规格', '单价', '数量', '生物总价', '生物运费', '缺货退费', '报损退费', '共计（含运费)']];
     const returnDataWithfreight = [['序号', '昵称', '联系电话', '联系人', '联系地址', '备注', '品名', '规格', '单价', '实际数量', '缺货数量', '报损数量', '缺货退款（含运费)', '报损退款', '应退款（含运费)', '应收款（含运费)']];
-    const detailGroups = this.model('group').detailGroup(this.post('id'));
-    const summaryGroups = this.model('group').summaryGroup(this.post('id'));
+    const detailGroups = this.model('group').detailGroup(this.post('group_id'));
+    const summaryGroups = this.model('group').summaryGroup(this.post('group_id'));
     let totleSum = 0;
     let totleSumWithfreight = 0;
     _.each(summaryGroups, (summaryGroup) => {
@@ -216,7 +216,7 @@ module.exports = class extends Base {
       returnDataWithfreight.push([]);
     });
     const name = 'coral123-' + group.id + '.xlsx';
-    const path = think.config('bill') + '/' + name;
+    const path = this.config('image.bill') + '/' + name;
 
     // var buffer = xlsx.build([{name: "总单(不含运费)", data: totleReturnData},{name: "明细(不含运费)", data: returnData},{name: "总单(含运费)", data: totleReturnDataWithfreight},{name: "明细(含运费)", data: returnDataWithfreight}]);
     const buffer = xlsx.build([{name: '总单', data: totleReturnData}, {name: '明细', data: returnData}], {'!merges': rangeList});

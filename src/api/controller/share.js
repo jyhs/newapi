@@ -8,6 +8,5 @@ module.exports = class extends Base {
       iv: this.post('iv')
     };
     await this.model('share').add(share);
-    this.success('操作成功');
   }
 };

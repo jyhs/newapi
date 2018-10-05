@@ -3,9 +3,9 @@ module.exports = class extends Base {
   async overAction() {
     const userObj = {
       user_id: this.getLoginUserId(),
-      level: this.get('level'),
-      title: this.get('title'),
-      time: this.get('time')
+      level: this.post('level'),
+      title: this.post('title'),
+      time: this.post('time')
     };
     const game = await this.model('game').where({ 'user_id': this.getLoginUserId() }).find();
     if (think.isEmpty(game)) {
@@ -27,7 +27,7 @@ module.exports = class extends Base {
       as: 'u',
       on: ['g.user_id', 'u.id']
     });
-    const list = await model.order(['g.level desc', 'g.time asc']).limit(50).select();
+    const list = await model.order(['g.level desc', 'g.time asc']).limit(this.post('size')).select();
     this.json(list);
   }
 };

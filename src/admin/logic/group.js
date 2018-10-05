@@ -14,38 +14,45 @@ module.exports = class extends think.Logic {
     };
   }
   backAction() {
+    this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, required: true, trim: true}
+      group_id: {int: true, required: true, trim: true}
     };
   }
   nextAction() {
+    this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, required: true, trim: true}
+      group_id: {int: true, required: true, trim: true}
     };
   }
   deleteAction() {
+    this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, required: true, trim: true}
+      group_id: {int: true, required: true, trim: true}
     };
   }
   downloadAction() {
+    this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, trim: true}
+      group_id: {int: true, trim: true}
     };
   }
   finishAction() {
+    this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, trim: true}
+      group_id: {int: true, trim: true}
     };
   }
   privateQrAction() {
+    this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, trim: true}
+      group_id: {int: true, trim: true}
     };
   }
   reopenAction() {
+    this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, trim: true},
+      group_id: {int: true, trim: true},
       end_date: {date: true, required: true}
     };
   }
@@ -62,7 +69,7 @@ module.exports = class extends think.Logic {
       description: {string: true, trim: true},
       top_freight: {int: true, trim: true},
       status: {int: true, trim: true},
-      id: {int: true, required: true, trim: true},
+      group_id: {int: true, required: true, trim: true},
       private: {int: true, trim: true}
     };
   }
