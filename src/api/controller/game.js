@@ -20,14 +20,9 @@ module.exports = class extends Base {
     }
   }
   async listAction() {
-    const model = this.model('game').alias('g');
-    model.field(['g.*', 'u.name', 'u.headimgurl']).join({
-      table: 'user',
-      join: 'inner',
-      as: 'u',
-      on: ['g.user_id', 'u.id']
-    });
-    const list = await model.order(['g.level desc', 'g.time asc']).limit(this.post('size')).select();
-    this.json(list);
+    const totle = await this.model('game').totleRanking();
+    const week = await this.model('game').weekRanking();
+    const month = await this.model('game').monthRanking();
+    this.json({ totle: totle, week: week, month: month });
   }
 };

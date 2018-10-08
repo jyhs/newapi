@@ -314,6 +314,25 @@ module.exports = class extends Base {
       this.json(tp);
     }
   }
+  async randomImageListAction() {
+    const path = await this.cache('material-hy-path');
+    if (think.isEmpty(path)) {
+      const pathList = [];
+      const path = this.config('image.material') + `/small/hy/`;
+      const files = fs.readdirSync(path);
+      files.forEach((filename) => {
+        const obj = {};
+        obj.pic = '/small/hy/' + filename;
+        obj.code = filename.substring(0, filename.indexOf('.')).split('-')[1];
+        pathList.push(obj);
+      });
+      await this.cache('material-hy-path', pathList);
+      const page = this.post('page');
+      const size = this.post('size');
+      const list = await this.model('material').where({'category': 'hy', 'price': ['>', 0], 'type': ['IN', ['dd', 'dxsx', 'dy', 'hyqt', 'xxsx', 'zhy', 'lty']]}).order('rand()').page(page, size).countSelect();
+      this.json(list);
+    }
+  }
   async randomListAction() {
     const page = this.post('page') || 1;
     const size = this.post('size') || 10;

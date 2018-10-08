@@ -61,4 +61,12 @@ module.exports = class extends think.Logic {
       classification: {int: true, default: 0}
     };
   }
+  randomImageListAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      page: {int: true, required: true, trim: true, default: 1},
+      size: {int: true, required: true, trim: true, default: 30},
+      classification: {int: true, default: 0}
+    };
+  }
 };
