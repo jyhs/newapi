@@ -18,12 +18,20 @@ module.exports = class extends Base {
     const city = await this.model('citys').where({'mark': this.post('code')}).find();
     this.json(city);
   }
+  async getCodeByCityAction() {
+    const city = await this.model('citys').where({'name': this.post('city'), 'type': 2}).find();
+    this.json(city);
+  }
   async getCityByProvinceAction() {
     const citys = await this.model('citys').where({'area': this.post('province')}).select();
     this.json(citys);
   }
   async getProvincesAction() {
     const provinces = await this.model('provinces').select();
+    this.json(provinces);
+  }
+  async getProvincesByCodeAction(code) {
+    const provinces = await this.model('provinces').where({'code': this.post('code')}).find();
     this.json(provinces);
   }
 };

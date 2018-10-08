@@ -1,5 +1,6 @@
 const Base = require('./base.js');
 const QcloudSms = require('qcloudsms_js');
+const rp = require('request-promise');
 
 module.exports = class extends Base {
   async sendVerificationAction() {
@@ -21,5 +22,31 @@ module.exports = class extends Base {
         }
       });
     });
+  }
+  async getCityByPhoneAction() {
+    const options = {
+      method: 'GET',
+      url: 'http://apis.juhe.cn/mobile/get',
+      qs: {
+        phone: this.post('phone'),
+        key: this.config('jhsj.phone_key')
+      }
+    };
+    const phoneDate = await rp(options);
+    let tempCity = null;
+    if (phoneDate && JSON.parse(phoneDate).resultcode === '200') {
+      tempCity = JSON.parse(phoneDate).result;
+    } else {
+      tempCity = {
+        'province': '西藏',
+        'city': '拉萨'
+      };
+    }
+    const returnCity = await this.model('citys').where({'name': tempCity.city, 'type': 2}).find();
+    if (!think.isEmpty(returnCity)) {
+      tempCity.mark = returnCity.mark;
+      tempCity.area = returnCity.area;
+    }
+    this.json(tempCity);
   }
 };
