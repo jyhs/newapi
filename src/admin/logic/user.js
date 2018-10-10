@@ -42,13 +42,6 @@ module.exports = class extends think.Logic {
     };
   }
 
-  getAvatarAction() {
-    this.allowMethods = 'post';
-    this.rules = {
-      user_id: {int: true, required: true, trim: true}
-    };
-  }
-
   uploadAvatarAction() {
     this.allowMethods = 'post';
     this.rules = {

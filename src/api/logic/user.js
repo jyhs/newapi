@@ -47,4 +47,10 @@ module.exports = class extends think.Logic {
       name: {string: true, required: true, trim: true}
     };
   }
+
+  getAvatarAction() {
+    this.rules = {
+      user_id: {int: true, required: true, trim: true}
+    };
+  }
 };

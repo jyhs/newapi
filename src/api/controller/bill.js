@@ -69,6 +69,27 @@ module.exports = class extends Base {
   async getDetailByBillIdAndRecommendAction() {
     const model = this.model('bill_detail');
     const list = await model.where({'recommend': this.post('recommend'), 'bill_id': this.post('bill_id')}).select();
+    _.each(list, (item) => {
+      if (item.recommend === 'tj') {
+        item.recommend = '推荐';
+      }
+      if (item.recommend === 'tej') {
+        item.recommend = '特价';
+      }
+    });
+    this.json(list);
+  }
+  async getDetailRecommendByBillIdAction() {
+    const model = this.model('bill_detail');
+    const list = await model.where({'recommend': ['!=', ''], 'bill_id': this.post('bill_id')}).select();
+    _.each(list, (item) => {
+      if (item.recommend === 'tj') {
+        item.recommend = '推荐';
+      }
+      if (item.recommend === 'tej') {
+        item.recommend = '特价';
+      }
+    });
     this.json(list);
   }
   async getDetailByBillIdAndUndefineAction() {

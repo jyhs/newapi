@@ -40,6 +40,12 @@ module.exports = class extends think.Logic {
       recommend: {string: true, required: true, trim: true}
     };
   }
+  getDetailRecommendByBillIdAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      bill_id: {int: true, required: true, trim: true}
+    };
+  }
   getDetailByBillIdAndTypeAction() {
     this.allowMethods = 'post';
     this.rules = {

@@ -1,7 +1,5 @@
 const Base = require('./base.js');
 const _ = require('lodash');
-const http = require('http');
-const url = require('url');
 const fs = require('fs');
 const md5 = require('md5');
 // const images = require('images');
@@ -22,74 +20,7 @@ module.exports = class extends Base {
     };
     await this.model('user').where({id: userId}).update(user);
   }
-  async getAvatarAction() {
-    const userId = this.post('user_id');
-    const key = 'getAvatarAction' + userId;
-    const time = {timeout: 24 * 60 * 60 * 1000 * 7};
-    const avatar = await this.cache(key);
-    if (avatar) {
-      this.type = 'image/jpeg';
-      this.body = avatar;
-    } else {
-      const user = await this.model('user').field(['headimgurl']).where({ id: userId }).find();
-      if (!_.isEmpty(user.headimgurl)) {
-        return new Promise((resolve, reject) => {
-          const urlObject = url.parse(user.headimgurl);
-          const options = {
-            hostname: urlObject.host,
-            port: urlObject.port,
-            path: urlObject.path,
-            method: 'GET'
-          };
-          const req = http.request(options, (resUrl) => {
-            resUrl.on('data', (chunk) => {
-              const decodeImg = Buffer.from(chunk.toString('base64'), 'base64');
-              this.cache(key, resolve(this.body = decodeImg), time);
-              this.type = 'image/jpeg';
-              resolve(this.body = decodeImg);
-            });
-          });
-          req.on('error', (e) => {
-            reject(e);
-          });
-          req.end();
-        });
-      } else {
-        return new Promise((resolve, reject) => {
-          fs.readdir(this.config('image.user'), (err, files) => {
-            let path = null;
-            let _type = 'png';
-            files.forEach((itm, index) => {
-              const filedId = itm.split('.')[0];
-              if (filedId === this.post('user_id')) {
-                path = this.config('image.user') + itm;
-                _type = itm.split('.')[1];
-              } else {
-                reject(err);
-              }
-            });
-            if (path) {
-              fs.readFile(path, (err, data) => {
-                if (err) {
-                  reject(err);
-                } else {
-                  const decodeImg = Buffer.from(data.toString('base64'), 'base64');
-                  this.type = 'image/' + _type;
-                  this.cache.put(key, resolve(this.body = decodeImg), time);
-                  resolve(resolve(this.body = decodeImg));
-                }
-              });
-            } else {
-              const decodeImg = Buffer.from(this.config['image.defaultUserAvatar'], 'base64');
-              this.type = 'image/png';
-              this.cache.put(key, resolve(this.body = decodeImg), time);
-              resolve(resolve(this.body = decodeImg));
-            }
-          });
-        });
-      }
-    }
-  }
+
   async typeAction() {
     const list = [
       {'code': 'yy', 'name': '鱼友', 'desc': '可以参加团购'},
