@@ -188,6 +188,7 @@ module.exports = class extends Base {
     const userId = this.get('user_id');
     const key = 'getAvatarAction' + userId;
     const time = {timeout: 24 * 60 * 60 * 1000 * 7};
+    await this.cache(key, null);
     const avatar = await this.cache(key);
     if (avatar) {
       this.type = 'image/jpeg';
@@ -217,39 +218,28 @@ module.exports = class extends Base {
           req.end();
         });
       } else {
-        return new Promise((resolve, reject) => {
-          fs.readdir(this.config('image.user'), (err, files) => {
-            let path = null;
-            let _type = 'png';
-            files.forEach((itm, index) => {
-              const filedId = itm.split('.')[0];
-              if (filedId === userId) {
-                path = this.config('image.user') + itm;
-                _type = itm.split('.')[1];
-              } else {
-                reject(err);
-              }
-            });
-            if (path) {
-              fs.readFile(path, (err, data) => {
-                if (err) {
-                  reject(err);
-                } else {
-                  const decodeImg = Buffer.from(data.toString('base64'), 'base64');
-                  this.type = 'image/' + _type;
-                  this.cache.put(key, resolve(this.body = decodeImg), time);
-                  resolve(this.body = decodeImg);
-                }
-              });
-            } else {
-              console.log('===', this.config('image.defaultUserAvatar'));
-              const decodeImg = Buffer.from(this.config('image.defaultUserAvatar'), 'base64');
-              this.type = 'image/png';
-              this.cache(key, resolve(this.body = decodeImg), time);
-              resolve(this.body = decodeImg);
-            }
-          });
+        const readDir = fs.readdirSync(this.config('image.user'));
+        let path = null;
+        let _type = 'png';
+        _.each(readDir, (itm, index) => {
+          const filedId = itm.split('.')[0];
+          if (filedId === userId) {
+            path = this.config('image.user') + itm;
+            _type = itm.split('.')[1];
+          }
         });
+        if (path) {
+          const image = fs.readFileSync(path);
+          const decodeImg = Buffer.from(image.toString('base64'), 'base64');
+          this.type = 'image/' + _type;
+          this.cache.put(key, decodeImg, time);
+          this.body = decodeImg;
+        } else {
+          const decodeImg = Buffer.from(this.config('image.defaultUserAvatar'), 'base64');
+          this.type = 'image/png';
+          this.cache(key, decodeImg, time);
+          this.body = decodeImg;
+        };
       }
     }
   }

@@ -18,7 +18,7 @@ module.exports = class extends think.Logic {
   getByIdAction() {
     this.allowMethods = 'post';
     this.rules = {
-      user_id: { required: true, int: true }
+      userId: { required: true, int: true }
     };
   }
 

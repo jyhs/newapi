@@ -7,7 +7,8 @@ module.exports = class extends Base {
       {'code': 'hy', 'name': '海鱼', 'desc': ''},
       {'code': 'rt', 'name': '软体', 'desc': ''},
       {'code': 'yg', 'name': '硬骨', 'desc': ''},
-      {'code': 'qt', 'name': '其他生物', 'desc': ''},
+      {'code': 'qt', 'name': '其他', 'desc': ''},
+      {'code': 'other', 'name': '未分类', 'desc': ''},
       {'code': 'hc', 'name': '耗材', 'desc': ''},
       {'code': 'sb', 'name': '设备', 'desc': ''}
 
@@ -115,7 +116,8 @@ module.exports = class extends Base {
       {'code': 'csj', 'name': '测试剂', 'desc': '', 'pc': 'hc'}
     ];
 
-    const returnList = [{'code': 'rm', 'name': '热门', 'desc': '', 'types': [{'code': 'tj', 'name': '推荐', 'desc': '', 'pc': 'rm'}, {'code': 'tej', 'name': '特价', 'desc': '', 'pc': 'rm'}]}];
+    const returnList = [];
+    // const returnList = [{'code': 'rm', 'name': '热门', 'desc': '', 'types': [{'code': 'tj', 'name': '推荐', 'desc': '', 'pc': 'rm'}, {'code': 'tej', 'name': '特价', 'desc': '', 'pc': 'rm'}]}];
     _.each(categorys, (category) => {
       const type = _.filter(types, (type) => {
         return type.pc === category.code;
@@ -158,15 +160,17 @@ module.exports = class extends Base {
     this.json(list);
   }
   async getAction() {
-    const material = await this.model('material').where({id: this.post('material_id')}).find();
+    const material = await this.model('material').where({id: this.post('materialId')}).find();
+    const focus = await this.model('focus').where({'material_id': this.post('materialId')}).find();
+    material['focus_id'] = focus.id;
     this.json(material);
   }
   async getImageAction() {
-    const code = await this.cache('material_image' + this.post('material_id'));
+    const code = await this.cache('material_image' + this.post('materialId'));
     if (!think.isEmpty(code)) {
       this.json({'image': code});
     } else {
-      const material = await this.model('material').where({id: this.post('material_id')}).find();
+      const material = await this.model('material').where({id: this.post('materialId')}).find();
       const filePath = this.config('image.material') + '/' + material.category + '/';
       const results = [];
       return new Promise((resolve, reject) => {
@@ -181,7 +185,7 @@ module.exports = class extends Base {
               results.push(`/${material.category}/${filename}`);
             }
           });
-          this.cache('material_image' + this.post('material_id'), results);
+          this.cache('material_image' + this.post('materialId'), results);
           resolve(this.json({'image': results}));
         });
       });
@@ -207,8 +211,17 @@ module.exports = class extends Base {
     if (!think.isEmpty(name)) {
       whereMap.name = ['like', `%${name}%`];
     }
-    const list = await this.model('material').where(whereMap).order(['id DESC']).page(page, size).countSelect();
-    this.json(list);
+    const materialList = await this.model('material').where(whereMap).order(['id DESC']).page(page, size).countSelect();
+    const focusList = await this.model('focus').where({'user_id': this.getLoginUserId()}).select();
+    _.each(materialList.data, (material) => {
+      material.focus_id = null;
+      _.each(focusList.data, (focus) => {
+        if (material.id === focus.material_id) {
+          material.focus_id = focus.id;
+        }
+      });
+    });
+    this.json(materialList);
   }
   async typeAction() {
     const types = [
@@ -355,49 +368,38 @@ module.exports = class extends Base {
     this.json(category);
   }
   async getImageSmallAction() {
-    const code = await this.cache('material_image_small' + this.post('material_id'));
-    if (!think.isEmpty(code)) {
+    await this.cache('material_image_small' + this.get('materialId'), null);
+    const img = await this.cache('material_image_small' + this.get('materialId'));
+    if (!think.isEmpty(img)) {
       this.type = 'image/png';
-      this.body = code;
+      this.body = img;
     } else {
-      const material = await this.model('material').where({id: this.post('material_id')}).find();
-
-      return new Promise((resolve, reject) => {
-        const filePath = this.config('image.material') + '/' + material.category + '/';
-        fs.readdir(filePath, (err, files) => {
-          if (err) {
-            console.error(err);
-            this.fail('操作失败');
-          }
-          let smallPath = null;
-          _.each(files, (filename) => {
-            const temp = filename.substring(0, filename.indexOf('.')).split('-');
-            if (material.code === temp[1]) {
-              smallPath = this.config('image.material') + '/small' + `/${material.category}/${filename}`;
-            }
-          });
-          if (smallPath) {
-            this.type = 'image/png';
-            try {
-              fs.readFile(smallPath, (err, data) => {
-                if (err) {
-                  resolve(this.body = this.config('image.materialDefault'));
-                } else if (data) {
-                  const decodeImg = Buffer.from(data.toString('base64'), 'base64');
-                  this.type = 'image/png';
-                  this.cache.put('material_image_small', resolve(this.body = decodeImg));
-                } else {
-                  resolve(this.body = this.config('image.materialDefault'));
-                }
-              });
-            } catch (error) {
-              resolve(this.body = this.config('image.materialDefault'));
-            }
-          } else {
-            resolve(this.body = this.config('image.materialDefault'));
-          }
-        });
+      const material = await this.model('material').where({id: this.get('materialId')}).find();
+      const filePath = this.config('image.material') + '/' + material.category + '/';
+      const files = fs.readdirSync(filePath);
+      let smallPath = null;
+      _.each(files, (filename) => {
+        const temp = filename.substring(0, filename.indexOf('.')).split('-');
+        if (material.code === temp[1]) {
+          smallPath = this.config('image.material') + '/small' + `/${material.category}/${filename}`;
+        }
       });
+      this.type = 'image/png';
+      if (smallPath) {
+        const small = fs.readFileSync(smallPath);
+        if (small) {
+          const decodeImg = Buffer.from(small.toString('base64'), 'base64');
+          this.type = 'image/png';
+          this.cache('material_image_small' + this.get('materialId'), decodeImg);
+          this.body = decodeImg;
+        } else {
+          const decodeImg = Buffer.from(this.config('image.materialDefault'), 'base64');
+          this.body = decodeImg;
+        }
+      } else {
+        const decodeImg = Buffer.from(this.config('image.materialDefault'), 'base64');
+        this.body = decodeImg;
+      }
     }
   }
 };

@@ -84,7 +84,7 @@ module.exports = class extends Base {
   }
 
   async getByIdAction() {
-    const user = await this.model('user').where({id: this.post('user_id')}).find();
+    const user = await this.model('user').where({id: this.post('userId')}).find();
     delete user.password;
     this.json(user);
   }

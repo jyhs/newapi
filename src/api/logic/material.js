@@ -21,19 +21,19 @@ module.exports = class extends think.Logic {
   getAction() {
     this.allowMethods = 'post';
     this.rules = {
-      material_id: {int: true, required: true, trim: true}
+      materialId: {int: true, required: true, trim: true}
     };
   }
   getImageAction() {
     this.allowMethods = 'post';
     this.rules = {
-      material_id: {int: true, required: true, trim: true}
+      materialId: {int: true, required: true, trim: true}
     };
   }
   getImageSmallAction() {
-    this.allowMethods = 'post';
+    this.allowMethods = 'get';
     this.rules = {
-      material_id: {int: true, required: true, trim: true}
+      materialId: {int: true, required: true, trim: true}
     };
   }
   typeAction() {

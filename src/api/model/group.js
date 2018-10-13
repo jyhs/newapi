@@ -1,9 +1,15 @@
 const moment = require('moment');
 
 module.exports = class extends think.Model {
-  async getGroupList({name, page, size}) {
+  async getGroupList({name, page, size, province}) {
     const model = this.model('group_bill').alias('gb');
-    const where = name ? {'gb.name': ['like', `%${name}%`]} : {'1': 1};
+    const whereMap = {};
+    if (!think.isEmpty(province)) {
+      whereMap['gb.province'] = province;
+    }
+    if (!think.isEmpty(name)) {
+      whereMap['gb.name'] = ['like', `%${name}%`];
+    }
     const list = await model.field(['gb.*', 'c.name city', 'p.name province', 'u.name supplier_name'])
       .join({
         table: 'citys',
@@ -28,7 +34,7 @@ module.exports = class extends think.Model {
         join: 'inner',
         as: 'u',
         on: ['b.supplier_id', 'u.id']
-      }).where(where).order(['gb.id DESC', 'gb.end_date DESC']).page(page, size).countSelect();
+      }).where(whereMap).order(['gb.id DESC', 'gb.end_date DESC']).page(page, size).countSelect();
     for (const item of list.data) {
       if (moment(item['end_date']).isAfter(moment())) {
         item['status'] = 1;

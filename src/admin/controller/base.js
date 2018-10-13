@@ -9,15 +9,11 @@ module.exports = class extends think.Controller {
     // 如果为非公开，则验证用户是否登录
     const controllerAction = this.ctx.controller + '/' + this.ctx.action;
     if (!publicController.includes(this.ctx.controller) && !publicAction.includes(controllerAction)) {
+      const userId = this.post('user_id') || this.post('userId');
+
       if (!this.ctx.state.user || this.ctx.state.user.id <= 0) {
         return this.fail(401, '请先登录');
-      }
-      const userId = this.post('user_id') || this.post('user_id');
-      if (userId && userId !== this.ctx.state.user.id) {
-        if (this.ctx.state.user.type !== 'admin' && this.ctx.state.user.type !== 'yhgly') {
-          return this.fail(401, '无权访问');
-        }
-      } else {
+      } else if (userId && userId !== this.ctx.state.user.id) {
         if (this.ctx.state.user.type === 'yy') {
           return this.fail(401, '无权访问');
         }

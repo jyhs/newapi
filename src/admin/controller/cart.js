@@ -78,15 +78,8 @@ module.exports = class extends Base {
     if (think.isEmpty(cart)) {
       this.fail('请先创建购物车');
     } else {
-      const group = await this.model('group_bill').where({id: cartId}).find();
-      if (!moment(group.end_date + '', 'YYYYMMDDhmmss').isAfter(moment())) {
-        this.fail('团购已经结束不能操作购物车');
-      } else if (group.status === 0) {
-        this.fail('团购已经结束不能操作购物车');
-      } else {
-        await this.model('cart_detail').where({cart_id: cartId}).delete();
-        await this.model('cart').where({id: cartId}).delete();
-      }
+      await this.model('cart_detail').where({cart_id: cartId}).delete();
+      await this.model('cart').where({id: cartId}).delete();
     }
   }
   async deleteDetailAction() {
@@ -108,24 +101,26 @@ module.exports = class extends Base {
   }
   async getByGroupIdAction() {
     const userId = this.getLoginUserId();
-    const groupBillId = this.post('group_bill_id');
+    const groupBillId = this.post('groupId');
     const cart = await this.model('cart').where({'group_bill_id': groupBillId, 'user_id': userId}).find();
     this.json(cart);
   }
   async addAction() {
     const userId = this.getLoginUserId();
-    const groupBillId = this.post('group_bill_id');
+    const groupBillId = this.post('groupId');
     const cart = await this.model('cart').field('count(1) count').where({user_id: userId, group_bill_id: groupBillId}).find();
     if (cart.count !== 0) {
       this.fail('购物车已经存在');
     } else {
       const user = await this.model('user').where({id: userId}).find();
-      await this.model('cart').add({
+      const cartId = await this.model('cart').add({
         group_bill_id: groupBillId,
         user_id: userId,
         phone: user.phone,
         status: 1
       });
+      const cart = await this.model('cart').where({id: cartId}).find();
+      this.json(cart);
     }
   }
   async updateAction() {
@@ -134,59 +129,59 @@ module.exports = class extends Base {
       this.fail('请先创建购物车');
     } else {
       const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
-      if (!moment(group.end_date + '', 'YYYYMMDDhmmss').isAfter(moment())) {
-        this.fail('团购已经结束不能操作购物车');
-      } else if (group.status === 0) {
-        this.fail('团购已经结束不能操作购物车');
-      } else {
-        if (Number(cart.is_pay) === 1) {
-          cart.is_pay = 2;
-        }
-        await this.model('cart').where({id: this.post('cart_id')}).update({
-          is_pay: cart.is_pay,
-          sum: this.post('sum'),
-          description: this.post('description'),
-          status: this.post('status'),
-          freight: this.post('freight'),
-          contacts: this.post('contacts'),
-          address: this.post('address'),
-          province: this.post('province'),
-          city: this.post('city'),
-          is_confirm: this.post('is_confirm')
-        });
+      // console.log(group.end_date);
+      // console.log(group.status);
+      // if (!moment(group.end_date + '', 'YYYYMMDDhmmss').isAfter(moment())) {
+      //   this.fail('团购已经结束不能操作购物车');
+      // } else if (Number(group.status) === 0) {
+      //   this.fail('团购已经结束不能操作购物车');
+      // } else {
+      if (Number(cart.is_pay) === 1) {
+        cart.is_pay = 2;
       }
+      await this.model('cart').where({id: this.post('cart_id')}).update({
+        is_pay: cart.is_pay,
+        sum: this.post('sum'),
+        description: this.post('description'),
+        status: this.post('status'),
+        freight: this.post('freight'),
+        contacts: this.post('contacts'),
+        address: this.post('address'),
+        province: this.post('province'),
+        city: this.post('city'),
+        is_confirm: this.post('is_confirm')
+      });
+      // }
     }
   }
   async listAction() {
     const page = this.post('page') || 1;
     const size = this.post('size') || 10;
-    const groupBillId = this.post('group_bill_id');
+    const groupId = this.post('groupId');
     const userId = this.getLoginUserId();
-    const list = await this.model('cart').where({'group_bill_id': groupBillId, 'user_id': userId}).order(['id DESC']).page(page, size).countSelect();
+    const list = await this.model('cart').where({'group_bill_id': groupId, 'user_id': userId}).order(['id DESC']).page(page, size).countSelect();
     this.json(list);
   }
   async updateDetailAction() {
-    const cartId = this.post('cart_id');
-    const billDetailId = this.post('bill_detail_id');
-    const billDetailNum = this.post('bill_detail_num');
-    const cart = await this.model('cart').where({id: this.post('cart_id')}).find();
+    const cartId = this.post('cartId');
+    const billDetailId = this.post('billDetailId');
+    const billDetailNum = this.post('billDetailNum');
+    const cart = await this.model('cart').where({id: cartId}).find();
     if (think.isEmpty(cart)) {
       this.fail('请先创建购物车');
     } else {
       const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
-      if (!moment(group.end_date + '', 'YYYYMMDDhmmss').isAfter(moment())) {
-        this.fail('团购已经结束不能操作购物车');
-      } else if (group.status === 0) {
-        this.fail('团购已经结束不能操作购物车');
-      } else {
-        await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({
-          bill_detail_num: billDetailNum
-        });
-        await this.model('cart').where({id: cartId}).update({
-          sum: this.post('sum'),
-          freight: this.post('freight')
-        });
-      }
+      // console.log(group.end_date);
+      // console.log(group.status);
+      // if (!moment(group.end_date + '', 'YYYYMMDDhmmss').isAfter(moment())) {
+      //   this.fail('团购已经结束不能操作购物车');
+      // } else if (Number(group.status) === 0) {
+      //   this.fail('团购已经结束不能操作购物车');
+      // } else {
+      await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({
+        bill_detail_num: billDetailNum
+      });
+      // }
     }
   }
   async addDetailAction() {
@@ -198,21 +193,21 @@ module.exports = class extends Base {
       this.fail('请先创建购物车');
     } else {
       const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
-      if (!moment(group.end_date + '', 'YYYYMMDDhmmss').isAfter(moment())) {
-        this.fail('团购已经结束不能操作购物车');
-      } else if (group.status === 0) {
-        this.fail('团购已经结束不能操作购物车');
-      } else {
-        await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).add({
-          cart_id: cartId,
-          bill_detail_id: billDetailId,
-          bill_detail_num: billDetailNum
-        });
-        await this.model('cart').where({id: cartId}).update({
-          sum: this.post('sum'),
-          freight: this.post('freight')
-        });
-      }
+      // if (!moment(group.end_date + '', 'YYYYMMDDhmmss').isAfter(moment())) {
+      //   this.fail('团购已经结束不能操作购物车');
+      // } else if (group.status === 0) {
+      //   this.fail('团购已经结束不能操作购物车');
+      // } else {
+      await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).add({
+        cart_id: cartId,
+        bill_detail_id: billDetailId,
+        bill_detail_num: billDetailNum
+      });
+      await this.model('cart').where({id: cartId}).update({
+        sum: this.post('sum'),
+        freight: this.post('freight')
+      });
+      // }
     }
   }
   async getAction() {
@@ -223,7 +218,7 @@ module.exports = class extends Base {
   async listDetailAction() {
     const page = this.post('page') || 1;
     const size = this.post('size') || 10;
-    const cartId = this.post('cart_id');
+    const cartId = this.post('cartId');
 
     const model = this.model('cart_detail').alias('cd');
     model.field(['cd.*']).join({

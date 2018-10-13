@@ -39,7 +39,7 @@ module.exports = class extends Base {
     return this.json(detail);
   }
   async getDetailByBillIdAction() {
-    const id = this.post('bill_id');
+    const id = this.post('billId');
     const model = this.model('bill_detail');
     const list = await model.where({bill_id: id}).select();
     return this.json(list);
@@ -52,7 +52,7 @@ module.exports = class extends Base {
       as: 'm',
       on: ['d.material_id', 'm.id']
     });
-    const list = await model.where({'m.category': this.post('category'), 'd.bill_id': this.post('bill_id')}).select();
+    const list = await model.where({'m.category': this.post('category'), 'd.bill_id': this.post('billId')}).select();
     this.json(list);
   }
   async getDetailByBillIdAndTypeAction() {

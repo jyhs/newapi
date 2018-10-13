@@ -12,6 +12,23 @@ module.exports = {
     'user/checkName',
     'user/forgetPassword',
     'user/register',
-    'game/list'
+    'user/getAvatar',
+    'game/list',
+    'bill/getDetailByBillId',
+    'bill/getDetailByBillIdAndCategory',
+    'group/list',
+    'group/get',
+    'ad/getNumber',
+    'notice/get',
+    'notice/check',
+    'location/getChina',
+    'location/getProvinces',
+    'material/categoryAll',
+    'material/category',
+    'material/list',
+    'material/get',
+    'material/getImage',
+    'material/getImageSmall',
+    'material/randomList'
   ]
 };

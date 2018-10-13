@@ -4,6 +4,7 @@ module.exports = class extends think.Logic {
     this.rules = {
       name: {string: true, trim: true},
       page: {int: true, trim: true},
+      province: {string: true, trim: true},
       size: {int: true, trim: true}
     };
   }

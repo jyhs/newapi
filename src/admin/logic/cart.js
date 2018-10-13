@@ -2,13 +2,13 @@ module.exports = class extends think.Logic {
   addAction() {
     this.allowMethods = 'post';
     this.rules = {
-      group_bill_id: {int: true, required: true, trim: true}
+      groupId: {int: true, required: true, trim: true}
     };
   }
   getByGroupIdAction() {
     this.allowMethods = 'post';
     this.rules = {
-      group_bill_id: {int: true, required: true, trim: true}
+      groupId: {int: true, required: true, trim: true}
     };
   }
   deleteDetailAction() {
@@ -71,11 +71,9 @@ module.exports = class extends think.Logic {
   updateDetailAction() {
     this.allowMethods = 'post';
     this.rules = {
-      cart_id: {int: true, required: true, trim: true},
-      bill_detail_id: {int: true, required: true, trim: true},
-      bill_detail_num: {int: true, required: true, trim: true},
-      sum: {float: true, required: true, trim: true},
-      freight: {float: true, required: true, trim: true}
+      cartId: {int: true, required: true, trim: true},
+      billDetailId: {int: true, required: true, trim: true},
+      billDetailNum: {int: true, required: true, trim: true}
     };
   }
   addDetailAction() {
@@ -91,7 +89,7 @@ module.exports = class extends think.Logic {
   listAction() {
     this.allowMethods = 'post';
     this.rules = {
-      group_bill_id: {int: true, required: true, trim: true},
+      groupId: {int: true, required: true, trim: true},
       page: {int: true, required: true, trim: true},
       size: {int: true, required: true, trim: true}
     };
@@ -105,7 +103,7 @@ module.exports = class extends think.Logic {
   listDetailAction() {
     this.allowMethods = 'post';
     this.rules = {
-      cart_id: {int: true, required: true, trim: true},
+      cartId: {int: true, required: true, trim: true},
       page: {int: true, required: true, trim: true},
       size: {int: true, required: true, trim: true}
     };

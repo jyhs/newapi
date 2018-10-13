@@ -5,13 +5,13 @@ module.exports = class extends Base {
   async addAction() {
     const notice = {
       user_id: this.getLoginUserId(),
-      notice_id: this.post('notice_id')
+      notice_id: this.post('noticeId')
     };
     await this.model('focus').add(notice);
   }
 
   async checkAction() {
-    const notice = await this.model('focus').where({'user_id': this.getLoginUserId(), 'notice_id': this.post('notice_id')}).find();
+    const notice = await this.model('focus').where({'user_id': this.getLoginUserId(), 'notice_id': this.post('noticeId')}).find();
     if (think.isEmpty(notice)) {
       this.json({'checked': true});
     } else {

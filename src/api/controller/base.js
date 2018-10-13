@@ -28,7 +28,11 @@ module.exports = class extends think.Controller {
      * @returns {*}
      */
   getLoginUserId() {
-    return this.ctx.state.user.id;
+    if (this.ctx.state.user) {
+      return this.ctx.state.user.id;
+    } else {
+      return 0;
+    }
   }
 
   getLoginUser() {
