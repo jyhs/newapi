@@ -4,6 +4,7 @@ module.exports = {
   defaultErrno: 406,
   validateDefaultErrno: 406,
   workers: 0,
+  date_format: 'YYYY-MM-DD HH:mm:ss',
   jhsj: {
     phone_key: '29ae0de1fea82b9060cbc069b99b876a'
   },

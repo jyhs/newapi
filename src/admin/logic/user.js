@@ -2,7 +2,7 @@ module.exports = class extends think.Logic {
   updateAction() {
     this.allowMethods = 'post';
     this.rules = {
-      user_id: {int: true, required: true, trim: true},
+      userId: {int: true, required: true, trim: true},
       city: {string: true, trim: true},
       province: {string: true, trim: true},
       phone: {mobile: 'zh-CN', trim: true},

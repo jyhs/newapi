@@ -4,12 +4,12 @@ const fs = require('fs');
 
 module.exports = class extends Base {
   async deleteImageAction() {
-    const material = await this.model('material').where({id: this.post('material_id')}).find();
+    const material = await this.model('material').where({id: this.post('materialId')}).find();
     const filePath = think.config('image.material') + '/' + material.category + '/' + this.post('imgName');
     fs.unlinkSync(filePath);
   }
   async deleteAction() {
-    const material = await this.model('material').where({id: this.post('material_id')}).find();
+    const material = await this.model('material').where({id: this.post('materialId')}).find();
     const filePath = think.config('image.material') + '/' + material.category + '/';
     fs.readdir(filePath, function(err, files) {
       if (err) {
@@ -26,7 +26,7 @@ module.exports = class extends Base {
         fs.unlinkSync(filePath + '/' + file);
       });
     });
-    await this.model('material').where({id: this.post('material_id')}).delete();
+    await this.model('material').where({id: this.post('materialId')}).delete();
   }
   async addAction() {
     const tag = this.post('tag') ? this.post('tag').replace(/，/ig, ',') : '';
@@ -53,7 +53,8 @@ module.exports = class extends Base {
         this.fail('名字已经存在');
       } else {
         const id = await this.model('material').add(materialObj);
-        this.json(({'material_id': id}));
+        const material = await this.model('material').where({ id: id }).find();
+        this.json(material);
       }
     }
   }
@@ -93,6 +94,6 @@ module.exports = class extends Base {
       description: this.post('description'),
       classification: this.post('description')
     };
-    await this.model('material').where({id: this.post('material_id')}).update(materialObj);
+    await this.model('material').where({id: this.post('materialId')}).update(materialObj);
   }
 };

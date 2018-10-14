@@ -3,8 +3,8 @@ const moment = require('moment');
 
 module.exports = class extends Base {
   async lostAddAction() {
-    const cartId = this.post('cart_id');
-    const billDetailId = this.post('bill_detail_id');
+    const cartId = this.post('cartId');
+    const billDetailId = this.post('billDetailId');
     const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId});
     const lostNum = cartDetail.cartDetail + 1;
     await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum});
@@ -27,8 +27,8 @@ module.exports = class extends Base {
     await this.model('cart').where({id: cartId}).update({'lost_back': lostBack});
   }
   async lostSubAction() {
-    const cartId = this.post('cart_id');
-    const billDetailId = this.post('bill_detail_id');
+    const cartId = this.post('cartId');
+    const billDetailId = this.post('billDetailId');
     const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId});
     const lostNum = cartDetail.cartDetail - 1;
     await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum});
@@ -51,8 +51,8 @@ module.exports = class extends Base {
     await this.model('cart').where({id: cartId}).update({'lost_back': lostBack});
   }
   async damageAddAction() {
-    const cartId = this.post('cart_id');
-    const billDetailId = this.post('bill_detail_id');
+    const cartId = this.post('cartId');
+    const billDetailId = this.post('billDetailId');
     const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId});
     const damageNum = cartDetail.cartDetail + 1;
     await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum});
@@ -62,8 +62,8 @@ module.exports = class extends Base {
     await this.model('cart').where({id: cartId}).update({'damage_back': damageBack});
   }
   async damageSubAction() {
-    const cartId = this.post('cart_id');
-    const billDetailId = this.post('bill_detail_id');
+    const cartId = this.post('cartId');
+    const billDetailId = this.post('billDetailId');
     const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId});
     const damageNum = cartDetail.cartDetail - 1;
     await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum});
@@ -73,8 +73,8 @@ module.exports = class extends Base {
     await this.model('cart').where({id: cartId}).update({'damage_back': damageBack});
   }
   async deleteAction() {
-    const cartId = this.post('cart_id');
-    const cart = await this.model('cart').where({id: this.post('cart_id')}).find();
+    const cartId = this.post('cartId');
+    const cart = await this.model('cart').where({id: this.post('cartId')}).find();
     if (think.isEmpty(cart)) {
       this.fail('请先创建购物车');
     } else {
@@ -83,9 +83,9 @@ module.exports = class extends Base {
     }
   }
   async deleteDetailAction() {
-    const cartId = this.post('cart_id');
-    const billDetailId = this.post('bill_detail_id');
-    const cart = await this.model('cart').where({id: this.post('cart_id')}).find();
+    const cartId = this.post('cartId');
+    const billDetailId = this.post('billDetailId');
+    const cart = await this.model('cart').where({id: this.post('cartId')}).find();
     if (think.isEmpty(cart)) {
       this.fail('请先创建购物车');
     } else {
@@ -124,34 +124,32 @@ module.exports = class extends Base {
     }
   }
   async updateAction() {
-    const cart = await this.model('cart').where({id: this.post('cart_id')}).find();
+    const cart = await this.model('cart').where({id: this.post('cartId')}).find();
     if (think.isEmpty(cart)) {
       this.fail('请先创建购物车');
     } else {
       const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
-      // console.log(group.end_date);
-      // console.log(group.status);
-      // if (!moment(group.end_date + '', 'YYYYMMDDhmmss').isAfter(moment())) {
-      //   this.fail('团购已经结束不能操作购物车');
-      // } else if (Number(group.status) === 0) {
-      //   this.fail('团购已经结束不能操作购物车');
-      // } else {
-      if (Number(cart.is_pay) === 1) {
-        cart.is_pay = 2;
+      if (!moment(group.end_date, moment.ISO_8601).isAfter(moment())) {
+        this.fail('团购已经结束不能操作购物车');
+      } else if (Number(group.status) === 0) {
+        this.fail('团购已经结束不能操作购物车');
+      } else {
+        if (Number(cart.is_pay) === 1) {
+          cart.is_pay = 2;
+        }
+        await this.model('cart').where({id: this.post('cartId')}).update({
+          is_pay: cart.is_pay,
+          sum: this.post('sum'),
+          description: this.post('description'),
+          status: this.post('status'),
+          freight: this.post('freight'),
+          contacts: this.post('contacts'),
+          address: this.post('address'),
+          province: this.post('province'),
+          city: this.post('city'),
+          is_confirm: this.post('isConfirm')
+        });
       }
-      await this.model('cart').where({id: this.post('cart_id')}).update({
-        is_pay: cart.is_pay,
-        sum: this.post('sum'),
-        description: this.post('description'),
-        status: this.post('status'),
-        freight: this.post('freight'),
-        contacts: this.post('contacts'),
-        address: this.post('address'),
-        province: this.post('province'),
-        city: this.post('city'),
-        is_confirm: this.post('is_confirm')
-      });
-      // }
     }
   }
   async listAction() {
@@ -171,47 +169,45 @@ module.exports = class extends Base {
       this.fail('请先创建购物车');
     } else {
       const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
-      // console.log(group.end_date);
-      // console.log(group.status);
-      // if (!moment(group.end_date + '', 'YYYYMMDDhmmss').isAfter(moment())) {
-      //   this.fail('团购已经结束不能操作购物车');
-      // } else if (Number(group.status) === 0) {
-      //   this.fail('团购已经结束不能操作购物车');
-      // } else {
-      await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({
-        bill_detail_num: billDetailNum
-      });
-      // }
+      if (!moment(group.end_date, moment.ISO_8601).isAfter(moment())) {
+        this.fail('团购已经结束不能操作购物车');
+      } else if (Number(group.status) === 0) {
+        this.fail('团购已经结束不能操作购物车');
+      } else {
+        await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({
+          bill_detail_num: billDetailNum
+        });
+      }
     }
   }
   async addDetailAction() {
-    const cartId = this.post('cart_id');
-    const billDetailId = this.post('bill_detail_id');
-    const billDetailNum = this.post('bill_detail_num');
-    const cart = await this.model('cart').where({id: this.post('cart_id')}).find();
+    const cartId = this.post('cartId');
+    const billDetailId = this.post('billDetailId');
+    const billDetailNum = this.post('billDetailNum');
+    const cart = await this.model('cart').where({id: this.post('cartId')}).find();
     if (think.isEmpty(cart)) {
       this.fail('请先创建购物车');
     } else {
       const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
-      // if (!moment(group.end_date + '', 'YYYYMMDDhmmss').isAfter(moment())) {
-      //   this.fail('团购已经结束不能操作购物车');
-      // } else if (group.status === 0) {
-      //   this.fail('团购已经结束不能操作购物车');
-      // } else {
-      await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).add({
-        cart_id: cartId,
-        bill_detail_id: billDetailId,
-        bill_detail_num: billDetailNum
-      });
-      await this.model('cart').where({id: cartId}).update({
-        sum: this.post('sum'),
-        freight: this.post('freight')
-      });
-      // }
+      if (!moment(group.end_date, moment.ISO_8601).isAfter(moment())) {
+        this.fail('团购已经结束不能操作购物车');
+      } else if (group.status === 0) {
+        this.fail('团购已经结束不能操作购物车');
+      } else {
+        await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).add({
+          cart_id: cartId,
+          bill_detail_id: billDetailId,
+          bill_detail_num: billDetailNum
+        });
+        await this.model('cart').where({id: cartId}).update({
+          sum: this.post('sum'),
+          freight: this.post('freight')
+        });
+      }
     }
   }
   async getAction() {
-    const id = this.post('cart_id');
+    const id = this.post('cartId');
     const cart = await this.model('cart').where({id: id}).find();
     return this.json(cart);
   }

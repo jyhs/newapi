@@ -3,15 +3,15 @@ module.exports = class extends think.Logic {
     this.allowMethods = 'post';
     this.rules = {
       name: {string: true, trim: true, default: '礁岩海水团长单'},
-      supplier_id: {int: true, required: true, trim: true},
-      effort_date: {date: true, required: true},
+      supplierId: {int: true, required: true, trim: true},
+      effortDate: {date: true, required: true},
       bill: {method: 'file', required: true}
     };
   }
   deleteAction() {
     this.allowMethods = 'post';
     this.rules = {
-      bill_id: {int: true, required: true, trim: true}
+      billId: {int: true, required: true, trim: true}
     };
   }
   detailAddAction() {
@@ -24,19 +24,19 @@ module.exports = class extends think.Logic {
       point: {int: true, required: true, trim: true},
       numbers: {int: true, trim: true, default: 99},
       limits: {int: true, trim: true, default: 99},
-      bill_id: {int: true, required: true, trim: true}
+      billId: {int: true, required: true, trim: true}
     };
   }
   detailDeleteAction() {
     this.allowMethods = 'post';
     this.rules = {
-      bill_detail_id: {int: true, required: true, trim: true}
+      billDetailId: {int: true, required: true, trim: true}
     };
   }
   detailUpdateAction() {
     this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, required: true, trim: true},
+      detailId: {int: true, required: true, trim: true},
       size: {string: true, trim: true},
       recommend: {string: true, trim: true},
       price: {int: true, trim: true},

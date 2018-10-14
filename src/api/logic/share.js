@@ -10,7 +10,7 @@ module.exports = class extends think.Logic {
   selectAction() {
     this.allowMethods = 'post';
     this.rules = {
-      user_id: {int: true, required: true, trim: true},
+      userId: {int: true, required: true, trim: true},
       param: {string: true, required: true, trim: true},
       date: {date: true, required: true, trim: true}
     };

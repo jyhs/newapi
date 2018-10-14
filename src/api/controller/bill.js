@@ -18,11 +18,13 @@ module.exports = class extends Base {
     const where = name ? {'b.name': ['like', `%${name}%`], 'b.is_one_step': 0} : {'b.is_one_step': 0};
     const list = await model.where(where).order(['b.effort_date DESC']).page(page, size).countSelect();
     _.each(list.data, (item) => {
-      if (moment(item['effort_date']).isAfter(moment())) {
+      const efDate = moment(item['effort_date'], moment.ISO_8601);
+      if (efDate.isAfter(moment())) {
         item['status'] = 1;
       } else {
         item['status'] = 0;
       }
+      item['effort_date'] = efDate.format(this.config('date_format'));
     });
     return this.json(list);
   }
@@ -34,7 +36,7 @@ module.exports = class extends Base {
   }
 
   async getDetailByIdAction() {
-    const id = this.post('detail_id');
+    const id = this.post('detailId');
     const detail = await this.model('bill_detail').where({id: id}).find();
     return this.json(detail);
   }
@@ -63,12 +65,12 @@ module.exports = class extends Base {
       as: 'm',
       on: ['d.material_id', 'm.id']
     });
-    const list = await model.where({'m.type': this.post('type'), 'd.bill_id': this.post('bill_id')}).select();
+    const list = await model.where({'m.type': this.post('type'), 'd.bill_id': this.post('billId')}).select();
     this.json(list);
   }
   async getDetailByBillIdAndRecommendAction() {
     const model = this.model('bill_detail');
-    const list = await model.where({'recommend': this.post('recommend'), 'bill_id': this.post('bill_id')}).select();
+    const list = await model.where({'recommend': this.post('recommend'), 'bill_id': this.post('billId')}).select();
     _.each(list, (item) => {
       if (item.recommend === 'tj') {
         item.recommend = '推荐';
@@ -81,7 +83,7 @@ module.exports = class extends Base {
   }
   async getDetailRecommendByBillIdAction() {
     const model = this.model('bill_detail');
-    const list = await model.where({'recommend': ['!=', ''], 'bill_id': this.post('bill_id')}).select();
+    const list = await model.where({'recommend': ['!=', ''], 'bill_id': this.post('billId')}).select();
     _.each(list, (item) => {
       if (item.recommend === 'tj') {
         item.recommend = '推荐';
@@ -94,7 +96,7 @@ module.exports = class extends Base {
   }
   async getDetailByBillIdAndUndefineAction() {
     const model = this.model('bill_detail');
-    const list = await model.where({'material_id': ['=', null], 'bill_id': this.post('bill_id')}).select();
+    const list = await model.where({'material_id': ['=', null], 'bill_id': this.post('billId')}).select();
     this.json(list);
   }
 };

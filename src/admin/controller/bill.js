@@ -8,10 +8,10 @@ module.exports = class extends Base {
     const file = think.extend({}, this.file('bill'));
     const userId = this.getLoginUserId();
     const billName = this.post('name');
-    const effortDate = this.post('effort_date');
-    const supplierId = this.post('supplier_id');
+    const effortDate = this.post('effortDate');
+    const supplierId = this.post('supplierId');
     const user = this.getLoginUser();
-    if (!moment(this.post('effort_date') + '', 'YYYYMMDDhmmss').isAfter(moment())) {
+    if (!moment(this.post('effortDate') + '', 'YYYYMMDDhmmss').isAfter(moment())) {
       this.fail('生效日期必须大于今天');
     } else {
       const wb = XLSX.readFile(file.path);
@@ -159,12 +159,12 @@ module.exports = class extends Base {
     }
   }
   async deleteAction() {
-    await this.model('bill_detail').where({bill_id: this.post('bill_id')}).delete();
-    await this.model('bill').where({id: this.post('bill_id')}).delete();
+    await this.model('bill_detail').where({bill_id: this.post('billId')}).delete();
+    await this.model('bill').where({id: this.post('billId')}).delete();
   }
 
   async detailDeleteAction() {
-    await this.model('bill_detail').where({id: this.post('bill_detail_id')}).delete();
+    await this.model('bill_detail').where({id: this.post('billDetailId')}).delete();
   }
   async detailUpdateAction() {
     const detailObj = {
@@ -175,7 +175,7 @@ module.exports = class extends Base {
       limits: this.post('limits'),
       recommend: this.post('recommend')
     };
-    await this.model('bill_detail').where({id: this.post('id')}).update(detailObj);
+    await this.model('bill_detail').where({id: this.post('detailId')}).update(detailObj);
   }
   async detailAddAction(detailParam) {
     const detailObj = detailParam || {
@@ -185,7 +185,7 @@ module.exports = class extends Base {
       point: this.post('point'),
       numbers: this.post('numbers'),
       limits: this.post('limits'),
-      bill_id: this.post('bill_id'),
+      bill_id: this.post('billId'),
       recommend: this.post('recommend')
     };
     const detail = await this.model('bill_detail').where({name: detailObj.name, size: detailObj.size}).find();

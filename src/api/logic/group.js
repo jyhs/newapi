@@ -8,16 +8,10 @@ module.exports = class extends think.Logic {
       size: {int: true, trim: true}
     };
   }
-  deleteAction() {
-    this.allowMethods = 'post';
-    this.rules = {
-      id: {int: true, trim: true}
-    };
-  }
   getAction() {
     this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, trim: true}
+      groupId: {int: true, trim: true}
     };
   }
 };

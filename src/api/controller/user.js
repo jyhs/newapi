@@ -28,7 +28,7 @@ module.exports = class extends Base {
     }
   }
   async loginByPasswordAction() {
-    if (this.post('is_error')) {
+    if (this.post('isError')) {
       const auth = this.post('auth');
       const code = await this.cache(this.post('requestId'));
       if (think.isEmpty(code)) {
@@ -185,7 +185,7 @@ module.exports = class extends Base {
   }
 
   async getAvatarAction() {
-    const userId = this.get('user_id');
+    const userId = this.get('userId');
     const key = 'getAvatarAction' + userId;
     const time = {timeout: 24 * 60 * 60 * 1000 * 7};
     await this.cache(key, null);

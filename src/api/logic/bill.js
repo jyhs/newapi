@@ -17,7 +17,7 @@ module.exports = class extends think.Logic {
   getDetailByIdAction() {
     this.allowMethods = 'post';
     this.rules = {
-      detail_id: {int: true, required: true, trim: true}
+      detailId: {int: true, required: true, trim: true}
     };
   }
   getDetailByBillIdAction() {
@@ -36,27 +36,27 @@ module.exports = class extends think.Logic {
   getDetailByBillIdAndRecommendAction() {
     this.allowMethods = 'post';
     this.rules = {
-      bill_id: {int: true, required: true, trim: true},
+      billId: {int: true, required: true, trim: true},
       recommend: {string: true, required: true, trim: true}
     };
   }
   getDetailRecommendByBillIdAction() {
     this.allowMethods = 'post';
     this.rules = {
-      bill_id: {int: true, required: true, trim: true}
+      billId: {int: true, required: true, trim: true}
     };
   }
   getDetailByBillIdAndTypeAction() {
     this.allowMethods = 'post';
     this.rules = {
-      bill_id: {int: true, required: true, trim: true},
+      billId: {int: true, required: true, trim: true},
       type: {string: true, required: true, trim: true}
     };
   }
   getDetailByBillIdAndUndefineAction() {
     this.allowMethods = 'post';
     this.rules = {
-      bill_id: {int: true, required: true, trim: true}
+      billId: {int: true, required: true, trim: true}
     };
   }
 };

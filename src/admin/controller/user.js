@@ -5,7 +5,7 @@ const md5 = require('md5');
 // const images = require('images');
 module.exports = class extends Base {
   async updateAction() {
-    const userId = this.post('user_id');
+    const userId = this.post('userId');
     const user = {
       city: this.post('city'),
       province: this.post('province'),

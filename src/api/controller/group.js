@@ -9,7 +9,7 @@ module.exports = class extends Base {
     return this.json(list);
   }
   async getAction() {
-    const group = await this.model('group').getGroup(this.post('id'));
+    const group = await this.model('group').getGroup(this.post('groupId'));
     return this.json(group);
   }
   async activityAction() {

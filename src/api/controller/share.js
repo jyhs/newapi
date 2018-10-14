@@ -10,7 +10,7 @@ module.exports = class extends Base {
     await this.model('share').add(share);
   }
   async selectAction() {
-    const userId = this.post('user_id');
+    const userId = this.post('userId');
     const param = this.post('param');
     const date = this.post('date');
     const list = await this.model('share').where({'user_id': userId, 'param': param, 'insert_date': date}).select();

@@ -13,7 +13,7 @@ module.exports = class extends think.Logic {
       password: { required: true, string: true, trim: true },
       auth: { string: true, trim: true },
       requestId: { string: true },
-      is_error: { boolean: true }
+      isError: { boolean: true }
     };
   }
 
@@ -50,7 +50,7 @@ module.exports = class extends think.Logic {
 
   getAvatarAction() {
     this.rules = {
-      user_id: {int: true, required: true, trim: true}
+      userId: {int: true, required: true, trim: true}
     };
   }
 };
