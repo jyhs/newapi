@@ -90,7 +90,7 @@ module.exports = class extends Base {
       this.fail('请先创建购物车');
     } else {
       const group = await this.model('group_bill').where({id: cartId}).find();
-      if (!moment(group.end_date + '', 'YYYYMMDDhmmss').isAfter(moment())) {
+      if (!moment(group.end_date, moment.ISO_8601).isAfter(moment())) {
         this.fail('团购已经结束不能操作购物车');
       } else if (group.status === 0) {
         this.fail('团购已经结束不能操作购物车');

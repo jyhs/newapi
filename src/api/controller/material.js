@@ -371,6 +371,7 @@ module.exports = class extends Base {
     await this.cache('material_image_small' + this.get('materialId'), null);
     const img = await this.cache('material_image_small' + this.get('materialId'));
     if (!think.isEmpty(img)) {
+      console.log(111);
       this.type = 'image/png';
       this.body = img;
     } else {

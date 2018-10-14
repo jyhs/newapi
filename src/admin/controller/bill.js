@@ -11,7 +11,7 @@ module.exports = class extends Base {
     const effortDate = this.post('effortDate');
     const supplierId = this.post('supplierId');
     const user = this.getLoginUser();
-    if (!moment(this.post('effortDate') + '', 'YYYYMMDDhmmss').isAfter(moment())) {
+    if (!moment(this.post('effortDate'), moment.ISO_8601).isAfter(moment())) {
       this.fail('生效日期必须大于今天');
     } else {
       const wb = XLSX.readFile(file.path);
