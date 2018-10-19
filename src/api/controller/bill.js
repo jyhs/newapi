@@ -29,7 +29,7 @@ module.exports = class extends Base {
     return this.json(list);
   }
   async getAction() {
-    const id = this.post('id');
+    const id = this.post('billId');
     const model = this.model('bill');
     const bill = await model.where({id: id}).find();
     return this.json(bill);

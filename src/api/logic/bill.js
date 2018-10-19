@@ -10,7 +10,7 @@ module.exports = class extends think.Logic {
   getAction() {
     this.allowMethods = 'post';
     this.rules = {
-      id: {int: true, required: true, trim: true}
+      billId: {int: true, required: true, trim: true}
     };
   }
 
