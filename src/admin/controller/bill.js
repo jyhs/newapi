@@ -2,16 +2,27 @@ const Base = require('./base.js');
 const XLSX = require('xlsx');
 const moment = require('moment');
 const _ = require('lodash');
-
+const parse = require('url-parse');
 module.exports = class extends Base {
   async addAction() {
     const file = think.extend({}, this.file('bill'));
+    const urlObj = parse(decodeURI(this.ctx.url), true);
     const userId = this.getLoginUserId();
-    const billName = this.post('name');
-    const effortDate = this.post('effortDate');
-    const supplierId = this.post('supplierId');
+    const billName = urlObj.query.name;
+    const _effortDate = urlObj.query.effortDate;
+    const supplierId = urlObj.query.supplierId; 
+    const description = urlObj.query.description; 
+    const d = new Date(_effortDate);  
+    const effortDate = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + 'T' + '0'+d.getHours() + ':0' + d.getMinutes() + ':0' + d.getSeconds();
+    console.log(effortDate)
     const user = this.getLoginUser();
-    if (!moment(this.post('effortDate'), moment.ISO_8601).isAfter(moment())) {
+    if(_.isEmpty(billName)){
+      this.fail('单子名字不能为空');
+    } else if(_.isEmpty(effortDate)){
+      this.fail('生效日不能为空');
+    } else if(_.isEmpty(supplierId)){
+      this.fail('供应商不能为空');
+    } else if (!moment(effortDate, moment.ISO_8601).isAfter(moment())) {
       this.fail('生效日期必须大于今天');
     } else {
       const wb = XLSX.readFile(file.path);
@@ -141,13 +152,13 @@ module.exports = class extends Base {
             phone: user.phone,
             effort_date: effortDate,
             supplier_id: supplierId,
-            description: ''
+            description: description
           });
           for (let i = 1; i <= length; i++) {
             const detail = resaultlist[i - 1];
             detail['bill_id'] = billId;
             detail['user_id'] = userId;
-            await this.controller('detail', 'admin').addAction(detail);
+            await this.controller('bill', 'admin').detailAddAction(detail);
             if (i === length) {
               return this.json({ 'bill_id': billId });
             }
