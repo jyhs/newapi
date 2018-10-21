@@ -27,6 +27,20 @@ module.exports = class extends Base {
       return this.json(user);
     }
   }
+
+  async logoutAction() {
+    const user = this.getLoginUser();
+    if (think.isEmpty(user)) {
+      return this.fail('该用户不存在');
+    } else {
+      const TokenSerivce = this.service('token', 'api');
+      const sessionKey = await TokenSerivce.create(user);
+      if (think.isEmpty(sessionKey)) {
+        return this.fail('登出失败');
+      }
+    }
+  }
+
   async loginByPasswordAction() {
     if (this.post('isError')) {
       const auth = this.post('auth');
@@ -221,7 +235,7 @@ module.exports = class extends Base {
         const readDir = fs.readdirSync(this.config('image.user'));
         let path = null;
         let _type = 'png';
-        _.each(readDir, (itm, index) => {
+        _.each(readDir, (itm) => {
           const filedId = itm.split('.')[0];
           if (filedId === userId) {
             path = this.config('image.user') + itm;

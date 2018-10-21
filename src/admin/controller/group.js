@@ -13,7 +13,8 @@ module.exports = class extends Base {
     return this.json(list);
   }
   async reopenAction() {
-    await this.model('group_bill').where({id: this.post('groupId')}).update({status: 1, end_date: this.post('endDate')});
+    const endDate = moment(this.post('endDate'), moment.ISO_8601).add(1, 'days').format(this.config('date_format'));
+    await this.model('group_bill').where({id: this.post('groupId')}).update({status: 1, end_date: endDate});
   }
   async privateQrAction() {
     const groupId = this.post('groupId');
@@ -86,7 +87,7 @@ module.exports = class extends Base {
     } else {
       await this.model('group_bill').where({id: this.post('groupId')}).update({
         name: this.post('name'),
-        end_date: this.post('endDate'),
+        end_date: this.service('date', 'api').convertWebDateToSubmitDate(this.post('endDate')),
         freight: this.post('freight'),
         description: this.post('description'),
         city: this.post('city'),

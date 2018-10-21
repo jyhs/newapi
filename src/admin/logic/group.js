@@ -43,25 +43,25 @@ module.exports = class extends think.Logic {
   downloadAction() {
     this.allowMethods = 'post';
     this.rules = {
-      groupId: {int: true, trim: true}
+      groupId: {int: true, required: true, trim: true}
     };
   }
   finishAction() {
     this.allowMethods = 'post';
     this.rules = {
-      groupId: {int: true, trim: true}
+      groupId: {int: true, required: true, trim: true}
     };
   }
   privateQrAction() {
     this.allowMethods = 'post';
     this.rules = {
-      groupId: {int: true, trim: true}
+      groupId: {int: true, required: true, trim: true}
     };
   }
   reopenAction() {
     this.allowMethods = 'post';
     this.rules = {
-      groupId: {int: true, trim: true},
+      groupId: {int: true, required: true, trim: true},
       endDate: {date: true, required: true}
     };
   }

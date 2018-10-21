@@ -1,5 +1,6 @@
 const Base = require('./base.js');
 const fs = require('fs');
+const _ = require('lodash');
 // const images = require('images');
 
 module.exports = class extends Base {
@@ -11,20 +12,15 @@ module.exports = class extends Base {
   async deleteAction() {
     const material = await this.model('material').where({id: this.post('materialId')}).find();
     const filePath = think.config('image.material') + '/' + material.category + '/';
-    fs.readdir(filePath, function(err, files) {
-      if (err) {
-        console.error(err);
-        this.fail('操作失败');
+    const files = fs.readdirSync(filePath);
+    const results = [];
+    _.each(files, (filename) => {
+      if (filename.indexOf(material.code) >= 0) {
+        results.push(filename);
       }
-      const results = [];
-      files.forEach(function(filename) {
-        if (filename.indexOf(material.code) >= 0) {
-          results.push(filename);
-        }
-      });
-      results.forEach((file) => {
-        fs.unlinkSync(filePath + '/' + file);
-      });
+    });
+    _.each(results, (file) => {
+      fs.unlinkSync(filePath + '/' + file);
     });
     await this.model('material').where({id: this.post('materialId')}).delete();
   }

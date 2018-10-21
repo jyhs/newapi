@@ -13,7 +13,7 @@ module.exports = class extends think.Model {
     if (!think.isEmpty(userId)) {
       whereMap['gb.user_id'] = userId;
     }
-    const list = await model.field(['gb.*', 'c.name city', 'p.name province', 'u.name supplier_name'])
+    const list = await model.field(['gb.*', 'gb.bill_id billId', 'b.name bill_name', 'c.name city_name', 'p.name province_name', 'u.name supplier_name'])
       .join({
         table: 'citys',
         join: 'inner',
@@ -39,10 +39,12 @@ module.exports = class extends think.Model {
         on: ['b.supplier_id', 'u.id']
       }).where(whereMap).order(['gb.id DESC', 'gb.end_date DESC']).page(page, size).countSelect();
     for (const item of list.data) {
-      if (moment(item['end_date']).isAfter(moment())) {
-        item['status'] = 1;
-      } else {
-        item['status'] = 0;
+      if (item['status'] !== 0) {
+        if (moment(item['end_date'], moment.ISO_8601).isAfter(moment())) {
+          item['status'] = 1;
+        } else {
+          item['status'] = 0;
+        }
       }
       const sum = await this.model('cart').getGroupMoneyById(item['id']);
       item['sum'] = sum;
@@ -76,11 +78,15 @@ module.exports = class extends think.Model {
         as: 'u',
         on: ['b.supplier_id', 'u.id']
       }).where({'gb.id': id}).order(['gb.id DESC', 'gb.end_date DESC']).find();
-    if (moment(group['end_date']).isAfter(moment())) {
-      group['status'] = 1;
-    } else {
-      group['status'] = 0;
+
+    if (group['status'] !== 0) {
+      if (moment(group['end_date'], moment.ISO_8601).isAfter(moment())) {
+        group['status'] = 1;
+      } else {
+        group['status'] = 0;
+      }
     }
+
     const sum = await this.model('cart').getGroupMoneyById(group['id']);
     group['sum'] = sum;
     return group;

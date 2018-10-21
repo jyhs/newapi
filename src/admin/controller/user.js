@@ -26,9 +26,8 @@ module.exports = class extends Base {
       {'code': 'yy', 'name': '鱼友', 'desc': '可以参加团购'},
       {'code': 'cjyy', 'name': '超级鱼友', 'desc': '可以参加团购'},
       {'code': 'cjtz', 'name': '超级团长', 'desc': '可以参加团购，一键开团'},
-      {'code': 'lss', 'name': '零售商(本地)', 'desc': '可以参加团购、组织团购、上传普通出货单、一键开团'},
-      {'code': 'bdfws', 'name': '服务商(本地)', 'desc': '可以参加团购、组织团购、上传普通出货单、一键开团'},
-      {'code': 'cjlss', 'name': '超级零售商(全国)', 'desc': '可以参加团购、组织团购、上传普通出货单、一键开团'},
+      {'code': 'fws', 'name': '服务商(本地)', 'desc': '可以参加团购、组织团购、上传普通出货单、一键开团'},
+      {'code': 'lss', 'name': '零售商(全国)', 'desc': '可以参加团购、组织团购、上传普通出货单、一键开团'},
       {'code': 'pfs', 'name': '批发商', 'desc': '可以参加团购、组织团购、上传普通出货单、上传私有出货单、一键开团'},
       {'code': 'qcs', 'name': '器材商', 'desc': '可以在商城发布商品'},
       {'code': 'yhgly', 'name': '用户管理员', 'desc': '可以管理用户列表'},
@@ -44,33 +43,26 @@ module.exports = class extends Base {
   async uploadAvatarAction() {
     const avatar = this.file('avatar');
     const id = this.post('user_id');
-    return new Promise((resolve, reject) => {
-      fs.readdir(this.config('image.user'), (err, files) => {
-        if (err) {
-          reject(err);
+    const files = fs.readdirSync(this.config('image.user'));
+    if (!think.isEmpty(files)) {
+      files.forEach((itm, index) => {
+        const filedId = itm.split('.')[0];
+        if (Number(filedId) === id) {
+          fs.unlinkSync(this.config('image.user') + '/' + itm);
         }
-        if (!think.isEmpty(files)) {
-          files.forEach((itm, index) => {
-            const filedId = itm.split('.')[0];
-            if (Number(filedId) === id) {
-              fs.unlinkSync(this.config('image.user') + '/' + itm);
-            }
-          });
-        }
-        const _name = avatar.name;
-        const tempName = _name.split('.');
-        const name = id + '.' + tempName[1];
-        const tempPath = this.config('image.user') + '/temp/' + name;
-
-        fs.createWriteStream(tempPath);
-
-        this.cache('getAvatarAction' + id, null);
-        // images(tempPath).size(150).save(path, {
-        //   quality: 75
-        // });
-        resolve('OK');
       });
-    });
+    }
+    const _name = avatar.name;
+    const tempName = _name.split('.');
+    const name = id + '.' + tempName[1];
+    const tempPath = this.config('image.user') + '/temp/' + name;
+
+    fs.createWriteStream(tempPath);
+
+    await this.cache('getAvatarAction' + id, null);
+    // images(tempPath).size(150).save(this.config('image.user'), {
+    //   quality: 75
+    // });
   }
 
   async getByTypeAction() {

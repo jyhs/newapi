@@ -21,54 +21,39 @@ module.exports = class extends Base {
 
   async getAction() {
     const dir = think.config('image.notice') + '/';
-    return new Promise((resolve, reject) => {
-      fs.readdir(dir, (err, files) => {
-        if (err) {
-          console.error(err);
-          reject(this.fail('操作失败'));
-        }
-        let maxId = 1;
-        let defaultItem = '1.png';
-        _.each(files, (itm) => {
-          const filedId = itm.split('.')[0];
-          if (Number(filedId) >= maxId) {
-            maxId = Number(filedId);
-            defaultItem = itm;
-          }
-        });
-        resolve(this.json({'notice_file': 'https://static.huanjiaohu.com/image/notice/' + defaultItem, 'notice_id': maxId}));
-      });
+    const files = fs.readdirSync(dir);
+    let maxId = 1;
+    let defaultItem = '1.png';
+    _.each(files, (itm) => {
+      const filedId = itm.split('.')[0];
+      if (Number(filedId) >= maxId) {
+        maxId = Number(filedId);
+        defaultItem = itm;
+      }
     });
+    this.json({'notice_file': 'https://static.huanjiaohu.com/image/notice/' + defaultItem, 'notice_id': maxId});
   }
 
   async publishAction() {
     const img = this.file('img');
     const dir = think.config('image.notice') + '/';
-    return new Promise((resolve, reject) => {
-      fs.readdir(dir, (err, files) => {
-        if (err) {
-          console.error(err);
-          reject(this.fail('操作失败'));
-        }
-        let maxId = 1;
-        files.forEach((itm, index) => {
-          const filedId = itm.split('.')[0];
-          if (Number(filedId) >= maxId) {
-            maxId = Number(filedId);
-          }
-        });
-        const _name = img.name;
-        const tempName = _name.split('.');
-        const path = `${dir}${maxId + 1}.${tempName[1]}`;
-        const file = fs.createWriteStream(path);
-        file.on('error', (err) => {
-          if (err) {
-            reject(this.fail('创建文件失败'));
-          }
-        });
-        this.model('focus').where({'notice_id': ['!=', null]}).delete();
-        resolve('OK');
-      });
+    const files = fs.readdirSync(dir);
+    let maxId = 1;
+    files.forEach((itm, index) => {
+      const filedId = itm.split('.')[0];
+      if (Number(filedId) >= maxId) {
+        maxId = Number(filedId);
+      }
     });
+    const _name = img.name;
+    const tempName = _name.split('.');
+    const path = `${dir}${maxId + 1}.${tempName[1]}`;
+    const file = fs.createWriteStream(path);
+    file.on('error', (err) => {
+      if (err) {
+        this.fail('创建文件失败');
+      }
+    });
+    await this.model('focus').where({'notice_id': ['!=', null]}).delete();
   }
 };

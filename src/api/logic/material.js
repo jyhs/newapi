@@ -8,14 +8,14 @@ module.exports = class extends think.Logic {
   focusAction() {
     this.allowMethods = 'post';
     this.rules = {
-      user_id: {int: true, required: true, trim: true},
-      material_id: {int: true, required: true, trim: true}
+      userId: {int: true, required: true, trim: true},
+      materialId: {int: true, required: true, trim: true}
     };
   }
   focusListAction() {
     this.allowMethods = 'post';
     this.rules = {
-      user_id: {int: true, required: true, trim: true}
+      userId: {int: true, required: true, trim: true}
     };
   }
   getAction() {

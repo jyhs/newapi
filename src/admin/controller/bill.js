@@ -156,7 +156,9 @@ module.exports = class extends Base {
             const detail = resaultlist[i - 1];
             detail['bill_id'] = billId;
             detail['user_id'] = userId;
-            await this.controller('bill', 'admin').detailAddAction(detail);
+
+            await this.detailAddAction(detail);
+
             if (i === length) {
               return this.json({ 'bill_id': billId });
             }
@@ -197,7 +199,7 @@ module.exports = class extends Base {
       bill_id: this.post('billId'),
       recommend: this.post('recommend')
     };
-    const detail = await this.model('bill_detail').where({name: detailObj.name, size: detailObj.size}).find();
+    const detail = await this.model('bill_detail').where({name: detailObj.name, size: detailObj.size, bill_id: detailObj.bill_id}).find();
     if (!think.isEmpty(detail)) {
       this.fail('名字和大小一样的鱼已经存在');
     } else {
