@@ -10,17 +10,15 @@ module.exports = class extends Base {
     const userId = this.getLoginUserId();
     const billName = urlObj.query.name;
     const _effortDate = urlObj.query.effortDate;
-    const supplierId = urlObj.query.supplierId; 
-    const description = urlObj.query.description; 
-    const d = new Date(_effortDate);  
-    const effortDate = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + 'T' + '0'+d.getHours() + ':0' + d.getMinutes() + ':0' + d.getSeconds();
-    console.log(effortDate)
+    const supplierId = urlObj.query.supplierId;
+    const description = urlObj.query.description;
+    const effortDate = this.service('date', 'api').convertWebDateToSubmitDate(_effortDate);
     const user = this.getLoginUser();
-    if(_.isEmpty(billName)){
+    if (_.isEmpty(billName)) {
       this.fail('单子名字不能为空');
-    } else if(_.isEmpty(effortDate)){
+    } else if (_.isEmpty(effortDate)) {
       this.fail('生效日不能为空');
-    } else if(_.isEmpty(supplierId)){
+    } else if (_.isEmpty(supplierId)) {
       this.fail('供应商不能为空');
     } else if (!moment(effortDate, moment.ISO_8601).isAfter(moment())) {
       this.fail('生效日期必须大于今天');

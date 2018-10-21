@@ -14,6 +14,7 @@ module.exports = {
     'user/register',
     'user/getAvatar',
     'game/list',
+    'bill/list',
     'bill/getDetailByBillId',
     'bill/getDetailByBillIdAndCategory',
     'group/list',

@@ -4,6 +4,14 @@ const _ = require('lodash');
 const xlsx = require('node-xlsx');
 const fs = require('fs');
 module.exports = class extends Base {
+  async listAction() {
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 10;
+    const name = this.post('name') || '';
+    const userId = this.getLoginUserId();
+    const list = await this.model('group').getUserGroupList({name, page, size, userId});
+    return this.json(list);
+  }
   async reopenAction() {
     await this.model('group_bill').where({id: this.post('groupId')}).update({status: 1, end_date: this.post('endDate')});
   }
@@ -71,7 +79,7 @@ module.exports = class extends Base {
   }
   async updateAction() {
     const group = this.model('group_bill').where({'id': this.post('groupId')}).find();
-    if (!moment(this.post('endDate'), moment.ISO_8601).isAfter(moment())) {
+    if (this.post('endDate') && !moment(this.post('endDate'), moment.ISO_8601).isAfter(moment())) {
       this.fail('结束日期必须大于今天');
     } else if (group.status === 0) {
       this.fail('已经结束的团购单不能更新');

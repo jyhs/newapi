@@ -1,7 +1,7 @@
 const moment = require('moment');
 
 module.exports = class extends think.Model {
-  async getGroupList({name, page, size, province}) {
+  async getGroupList({name, page, size, province, userId}) {
     const model = this.model('group_bill').alias('gb');
     const whereMap = {};
     if (!think.isEmpty(province)) {
@@ -9,6 +9,9 @@ module.exports = class extends think.Model {
     }
     if (!think.isEmpty(name)) {
       whereMap['gb.name'] = ['like', `%${name}%`];
+    }
+    if (!think.isEmpty(userId)) {
+      whereMap['gb.user_id'] = userId;
     }
     const list = await model.field(['gb.*', 'c.name city', 'p.name province', 'u.name supplier_name'])
       .join({

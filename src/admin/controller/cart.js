@@ -155,9 +155,29 @@ module.exports = class extends Base {
   async listAction() {
     const page = this.post('page') || 1;
     const size = this.post('size') || 10;
-    const groupId = this.post('groupId');
     const userId = this.getLoginUserId();
-    const list = await this.model('cart').where({'group_bill_id': groupId, 'user_id': userId}).order(['id DESC']).page(page, size).countSelect();
+    const model = this.model('cart').alias('c');
+    model.field(['c.*', 'g.name group_name', 'g.status group_status']).join({
+      table: 'group_bill',
+      join: 'inner',
+      as: 'g',
+      on: ['c.group_bill_id', 'g.id']
+    });
+    const list = await model.where({'c.user_id': userId}).order(['c.id DESC']).page(page, size).countSelect();
+    this.json(list);
+  }
+  async listByGroupIdAction() {
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 10;
+    const groupId = this.post('groupId');
+    const model = this.model('cart').alias('c');
+    model.field(['c.*', 'g.name group_name', 'g.status group_status']).join({
+      table: 'group_bill',
+      join: 'inner',
+      as: 'g',
+      on: ['c.group_bill_id', 'g.id']
+    });
+    const list = await model.where({'c.group_bill_id': groupId}).order(['c.id DESC']).page(page, size).countSelect();
     this.json(list);
   }
   async updateDetailAction() {
