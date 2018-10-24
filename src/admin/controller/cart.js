@@ -90,7 +90,7 @@ module.exports = class extends Base {
       this.fail('请先创建购物车');
     } else {
       const group = await this.model('group_bill').where({id: cartId}).find();
-      if (!moment(group.end_date, moment.ISO_8601).isAfter(moment())) {
+      if (!moment(group.end_date).isAfter(moment())) {
         this.fail('团购已经结束不能操作购物车');
       } else if (group.status === 0) {
         this.fail('团购已经结束不能操作购物车');
@@ -102,7 +102,7 @@ module.exports = class extends Base {
   async getByGroupIdAction() {
     const userId = this.getLoginUserId();
     const groupBillId = this.post('groupId');
-    const cart = await this.model('cart').where({'group_bill_id': groupBillId, 'user_id': userId}).find();
+    const cart = await this.model('cart').where({'group_bill_id': groupBillId, 'user_id': userId}).select();
     this.json(cart);
   }
   async addAction() {
@@ -129,7 +129,7 @@ module.exports = class extends Base {
       this.fail('请先创建购物车');
     } else {
       const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
-      if (!moment(group.end_date, moment.ISO_8601).isAfter(moment())) {
+      if (!moment(group.end_date).isAfter(moment())) {
         this.fail('团购已经结束不能操作购物车');
       } else if (Number(group.status) === 0) {
         this.fail('团购已经结束不能操作购物车');
@@ -189,7 +189,7 @@ module.exports = class extends Base {
       this.fail('请先创建购物车');
     } else {
       const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
-      if (!moment(group.end_date, moment.ISO_8601).isAfter(moment())) {
+      if (!moment(group.end_date).isAfter(moment())) {
         this.fail('团购已经结束不能操作购物车');
       } else if (Number(group.status) === 0) {
         this.fail('团购已经结束不能操作购物车');
@@ -209,7 +209,7 @@ module.exports = class extends Base {
       this.fail('请先创建购物车');
     } else {
       const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
-      if (!moment(group.end_date, moment.ISO_8601).isAfter(moment())) {
+      if (!moment(group.end_date).isAfter(moment())) {
         this.fail('团购已经结束不能操作购物车');
       } else if (group.status === 0) {
         this.fail('团购已经结束不能操作购物车');

@@ -13,7 +13,8 @@ module.exports = class extends Base {
     return this.json(list);
   }
   async reopenAction() {
-    const endDate = moment(this.post('endDate'), moment.ISO_8601).add(1, 'days').format(this.config('date_format'));
+    const effortDate = this.service('date', 'api').convertWebDateToSubmitDate(this.post('endDate'));
+    const endDate = moment(effortDate).add(1, 'days').format(this.config('date_format'));
     await this.model('group_bill').where({id: this.post('groupId')}).update({status: 1, end_date: endDate});
   }
   async privateQrAction() {
@@ -52,14 +53,15 @@ module.exports = class extends Base {
   }
   async addAction() {
     const user = this.getLoginUser();
-    if (!moment(this.post('endDate'), moment.ISO_8601).isAfter(moment())) {
+    const effortDate = this.service('date', 'api').convertWebDateToSubmitDate(this.post('endDate'));
+    if (!moment(effortDate).isAfter(moment())) {
       this.fail('结束日期必须大于今天');
     } else {
       const groupId = await this.model('group_bill').add({
         name: this.post('name'),
         contacts: user.name,
         phone: user.phone,
-        end_date: moment(this.post('endDate'), moment.ISO_8601).format(this.config('date_format')),
+        end_date: moment(effortDate).format(this.config('date_format')),
         pickup_address: '',
         pickup_date: new Date(),
         pay_type: 0,
@@ -80,7 +82,8 @@ module.exports = class extends Base {
   }
   async updateAction() {
     const group = this.model('group_bill').where({'id': this.post('groupId')}).find();
-    if (this.post('endDate') && !moment(this.post('endDate'), moment.ISO_8601).isAfter(moment())) {
+    const effortDate = this.service('date', 'api').convertWebDateToSubmitDate(this.post('endDate'));
+    if (this.post('endDate') && !moment(effortDate).isAfter(moment())) {
       this.fail('结束日期必须大于今天');
     } else if (group.status === 0) {
       this.fail('已经结束的团购单不能更新');

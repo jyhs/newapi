@@ -11,4 +11,10 @@ module.exports = class extends think.Logic {
       phone: {mobile: 'zh-CN', required: true, trim: true}
     };
   }
+  getUserByTokenAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      token: {string: true, required: true, trim: true}
+    };
+  }
 };

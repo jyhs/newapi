@@ -20,7 +20,7 @@ module.exports = class extends Base {
       this.fail('生效日不能为空');
     } else if (_.isEmpty(supplierId)) {
       this.fail('供应商不能为空');
-    } else if (!moment(effortDate, moment.ISO_8601).isAfter(moment())) {
+    } else if (!moment(effortDate).isAfter(moment())) {
       this.fail('生效日期必须大于今天');
     } else {
       const wb = XLSX.readFile(file.path);

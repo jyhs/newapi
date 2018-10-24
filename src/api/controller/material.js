@@ -140,25 +140,7 @@ module.exports = class extends Base {
     ];
     this.json(category);
   }
-  async focusAction() {
-    const focus = this.model('focus').where({user_id: this.post('userId'), material_id: this.post('materialId')}).find();
-    if (think.isEmpty(focus)) {
-      await this.model('focus').add({user_id: this.post('userId'), material_id: this.post('materialId')});
-    } else {
-      await this.model('focus').where({user_id: this.post('userId'), material_id: this.post('materialId')}).delete();
-    }
-  }
-  async focusListAction() {
-    const model = this.model('material').alias('m');
-    model.field(['m.*']).join({
-      table: 'focus',
-      join: 'inner',
-      as: 'f',
-      on: ['f.material_id', 'm.id']
-    });
-    const list = await model.where({'f.user_id': this.post('userId')}).select();
-    this.json(list);
-  }
+
   async getAction() {
     const material = await this.model('material').where({id: this.post('materialId')}).find();
     const focus = await this.model('focus').where({'material_id': this.post('materialId')}).find();
@@ -208,7 +190,7 @@ module.exports = class extends Base {
     const focusList = await this.model('focus').where({'user_id': this.getLoginUserId()}).select();
     _.each(materialList.data, (material) => {
       material.focus_id = null;
-      _.each(focusList.data, (focus) => {
+      _.each(focusList, (focus) => {
         if (material.id === focus.material_id) {
           material.focus_id = focus.id;
         }
@@ -363,35 +345,39 @@ module.exports = class extends Base {
   async getImageSmallAction() {
     await this.cache('material_image_small' + this.get('materialId'), null);
     const img = await this.cache('material_image_small' + this.get('materialId'));
+    this.type = 'image/png';
     if (!think.isEmpty(img)) {
-      this.type = 'image/png';
       this.body = img;
     } else {
       const material = await this.model('material').where({id: this.get('materialId')}).find();
-      const filePath = this.config('image.material') + '/' + material.category + '/';
-      const files = fs.readdirSync(filePath);
-      let smallPath = null;
-      _.each(files, (filename) => {
-        const temp = filename.substring(0, filename.indexOf('.')).split('-');
-        if (material.code === temp[1]) {
-          smallPath = this.config('image.material') + '/small' + `/${material.category}/${filename}`;
-        }
-      });
-      this.type = 'image/png';
-      if (smallPath) {
-        const small = fs.readFileSync(smallPath);
-        if (small) {
-          const decodeImg = Buffer.from(small.toString('base64'), 'base64');
-          this.type = 'image/png';
-          this.cache('material_image_small' + this.get('materialId'), decodeImg);
-          this.body = decodeImg;
+      if (think.isEmpty(material)) {
+        const decodeImg = Buffer.from(this.config('image.materialDefault'), 'base64');
+        this.body = decodeImg;
+      } else {
+        const filePath = this.config('image.material') + '/' + material.category + '/';
+        const files = fs.readdirSync(filePath);
+        let smallPath = null;
+        _.each(files, (filename) => {
+          const temp = filename.substring(0, filename.indexOf('.')).split('-');
+          if (material.code === temp[1]) {
+            smallPath = this.config('image.material') + '/small' + `/${material.category}/${filename}`;
+          }
+        });
+        if (smallPath) {
+          const small = fs.readFileSync(smallPath);
+          if (small) {
+            const decodeImg = Buffer.from(small.toString('base64'), 'base64');
+            this.type = 'image/png';
+            this.cache('material_image_small' + this.get('materialId'), decodeImg);
+            this.body = decodeImg;
+          } else {
+            const decodeImg = Buffer.from(this.config('image.materialDefault'), 'base64');
+            this.body = decodeImg;
+          }
         } else {
           const decodeImg = Buffer.from(this.config('image.materialDefault'), 'base64');
           this.body = decodeImg;
         }
-      } else {
-        const decodeImg = Buffer.from(this.config('image.materialDefault'), 'base64');
-        this.body = decodeImg;
       }
     }
   }

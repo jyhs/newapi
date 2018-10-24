@@ -5,19 +5,7 @@ module.exports = class extends think.Logic {
       name: {string: true, required: true, trim: true}
     };
   }
-  focusAction() {
-    this.allowMethods = 'post';
-    this.rules = {
-      userId: {int: true, required: true, trim: true},
-      materialId: {int: true, required: true, trim: true}
-    };
-  }
-  focusListAction() {
-    this.allowMethods = 'post';
-    this.rules = {
-      userId: {int: true, required: true, trim: true}
-    };
-  }
+
   getAction() {
     this.allowMethods = 'post';
     this.rules = {

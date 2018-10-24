@@ -92,4 +92,26 @@ module.exports = class extends Base {
     };
     await this.model('material').where({id: this.post('materialId')}).update(materialObj);
   }
+
+  async focusAction() {
+    const userId = this.getLoginUserId();
+    const focus = await this.model('focus').where({user_id: userId, material_id: this.post('materialId')}).find();
+    if (think.isEmpty(focus)) {
+      await this.model('focus').add({user_id: userId, material_id: this.post('materialId')});
+    } else {
+      await this.model('focus').where({user_id: userId, material_id: this.post('materialId')}).delete();
+    }
+  }
+  async focusListAction() {
+    const userId = this.getLoginUserId();
+    const model = this.model('material').alias('m');
+    model.field(['m.*']).join({
+      table: 'focus',
+      join: 'inner',
+      as: 'f',
+      on: ['f.material_id', 'm.id']
+    });
+    const list = await model.where({'f.user_id': userId}).select();
+    this.json(list);
+  }
 };

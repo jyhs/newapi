@@ -18,7 +18,7 @@ module.exports = class extends Base {
     const where = name ? {'b.name': ['like', `%${name}%`], 'b.is_one_step': 0} : {'b.is_one_step': 0};
     const list = await model.where(where).order(['b.effort_date DESC']).page(page, size).countSelect();
     _.each(list.data, (item) => {
-      const efDate = moment(item['effort_date'], moment.ISO_8601);
+      const efDate = moment(item['effort_date']);
       if (efDate.isAfter(moment())) {
         item['status'] = 1;
       } else {

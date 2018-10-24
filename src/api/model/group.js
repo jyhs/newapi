@@ -40,7 +40,7 @@ module.exports = class extends think.Model {
       }).where(whereMap).order(['gb.id DESC', 'gb.end_date DESC']).page(page, size).countSelect();
     for (const item of list.data) {
       if (item['status'] !== 0) {
-        if (moment(item['end_date'], moment.ISO_8601).isAfter(moment())) {
+        if (moment(item['end_date']).isAfter(moment())) {
           item['status'] = 1;
         } else {
           item['status'] = 0;
@@ -80,7 +80,7 @@ module.exports = class extends think.Model {
       }).where({'gb.id': id}).order(['gb.id DESC', 'gb.end_date DESC']).find();
 
     if (group['status'] !== 0) {
-      if (moment(group['end_date'], moment.ISO_8601).isAfter(moment())) {
+      if (moment(group['end_date']).isAfter(moment())) {
         group['status'] = 1;
       } else {
         group['status'] = 0;
