@@ -178,7 +178,6 @@ module.exports = class extends Base {
       if (!think.isEmpty(user)) {
         this.fail('用户名已经存在');
       } else {
-        // 注册
         const user = {
           name: name,
           nickname: name,
@@ -190,6 +189,10 @@ module.exports = class extends Base {
         };
         user.id = await this.model('user').add(user);
         if (user.id > 0) {
+          const cityObj = await this.controller('tools').getCityByPhoneAction(phone);
+          if (cityObj) {
+            this.model('user').where({ 'id': user.id }).update({city: cityObj.mark, province: cityObj.area, city_name: cityObj.city, province_name: cityObj.province});
+          }
           this.success('注册成功');
         } else {
           this.fail('注册失败');

@@ -23,12 +23,13 @@ module.exports = class extends Base {
       });
     });
   }
-  async getCityByPhoneAction() {
+  async getCityByPhoneAction(phone) {
+    const _phone = phone || this.post('phone');
     const options = {
       method: 'GET',
       url: 'http://apis.juhe.cn/mobile/get',
       qs: {
-        phone: this.post('phone'),
+        phone: _phone,
         key: this.config('jhsj.phone_key')
       }
     };
@@ -48,6 +49,7 @@ module.exports = class extends Base {
       tempCity.area = returnCity.area;
     }
     this.json(tempCity);
+    return tempCity;
   }
   async getUserByTokenAction() {
     const token = this.post('token');

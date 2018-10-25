@@ -6,6 +6,7 @@ const md5 = require('md5');
 module.exports = class extends Base {
   async updateAction() {
     const userId = this.post('userId');
+
     const user = {
       city: this.post('city'),
       province: this.post('province'),
@@ -19,6 +20,13 @@ module.exports = class extends Base {
       point: this.post('point') || 0
     };
     await this.model('user').where({id: userId}).update(user);
+    if (think.isEmpty(this.post('city')) && !think.isEmpty(this.post('phone'))) {
+      const cityObj = await this.controller('tools', 'api').getCityByPhoneAction(this.post('phone'));
+      if (cityObj) {
+        this.model('user').where({ 'id': userId }).update({city: cityObj.mark, province: cityObj.area, city_name: cityObj.city, province_name: cityObj.province});
+      }
+    }
+    this.json('OK');
   }
 
   async typeAction() {
@@ -115,5 +123,18 @@ module.exports = class extends Base {
       delete item.password;
     }
     this.json(list);
+  }
+
+  async updateUserCityAction() {
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 2;
+    const list = await this.model('user').where({phone: ['!=', '18888888888']}).page(page, size).countSelect();
+    for (const user of list.data) {
+      const cityObj = await this.controller('tools', 'api').getCityByPhoneAction(user.phone);
+      if (cityObj) {
+        this.model('user').where({ 'id': user.id }).update({city: cityObj.mark, province: cityObj.area, city_name: cityObj.city, province_name: cityObj.province});
+      }
+    }
+    this.json('OK');
   }
 };
