@@ -39,8 +39,7 @@ module.exports = class extends Base {
       this.fail('请先结束团购');
     } else {
       const cart = await this.model('cart').field('count(is_pay) count').where({status: 1, is_pay: 0, sum: ['!=', 0], group_bill_id: this.post('groupId')}).find();
-
-      if (cart.count === 0) {
+      if (cart.count > 0) {
         this.fail('鱼友尚未全部支付');
       } else {
         group.current_step = group.current_step + 1;

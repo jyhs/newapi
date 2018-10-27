@@ -1,5 +1,4 @@
 const Base = require('./base.js');
-const _ = require('lodash');
 const fs = require('fs');
 const md5 = require('md5');
 // const images = require('images');
@@ -50,7 +49,7 @@ module.exports = class extends Base {
 
   async uploadAvatarAction() {
     const avatar = this.file('avatar');
-    const id = this.post('user_id');
+    const id = this.post('userId');
     const files = fs.readdirSync(this.config('image.user'));
     if (!think.isEmpty(files)) {
       files.forEach((itm, index) => {
@@ -64,23 +63,26 @@ module.exports = class extends Base {
     const tempName = _name.split('.');
     const name = id + '.' + tempName[1];
     const tempPath = this.config('image.user') + '/temp/' + name;
-
-    fs.createWriteStream(tempPath);
-
+    fs.renameSync(avatar.path, tempPath);
     await this.cache('getAvatarAction' + id, null);
+    // console.log(tempPath);
+    // console.log(this.config('image.user'));
     // images(tempPath).size(150).save(this.config('image.user'), {
     //   quality: 75
     // });
   }
 
   async getByTypeAction() {
-    const users = await this.model('user').where({ type: this.post('type') }).select();
-    const city = this.post('city');
-    if (_.isEmpty(city)) {
-      this.json(users);
-    } else {
-      this.json(_.filter(users, (user) => { return user.city === city }));
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 10;
+    const province = this.post('province');
+    const whereMap = {};
+    whereMap['type'] = this.post('type');
+    if (!think.isEmpty(province)) {
+      whereMap['province'] = province;
     }
+    const users = await this.model('user').where(whereMap).order(['id DESC']).page(page, size).countSelect();
+    this.json(users);
   }
 
   async getByIdAction() {
@@ -100,10 +102,23 @@ module.exports = class extends Base {
   async listAction() {
     const page = this.post('page') || 1;
     const size = this.post('size') || 10;
-    const name = this.post('name') || '';
-    const city = this.post('city') || '';
-    const province = this.post('province') || '';
-    const type = this.post('type') || '';
+    const name = this.post('name');
+    const city = this.post('city');
+    const province = this.post('province');
+    const type = this.post('type');
+    const whereMap = {};
+    if (!think.isEmpty(province)) {
+      whereMap['u.province'] = province;
+    }
+    if (!think.isEmpty(type)) {
+      whereMap['u.type'] = type;
+    }
+    if (!think.isEmpty(city)) {
+      whereMap['u.city'] = city;
+    }
+    if (!think.isEmpty(name)) {
+      whereMap['u.name'] = ['like', `%${name}%`];
+    }
     const model = this.model('user').alias('u');
     const list = await model.field(['u.*', 'c.name city', 'p.name province'])
       .join({
@@ -118,7 +133,7 @@ module.exports = class extends Base {
         as: 'p',
         on: ['u.province', 'p.code']
       })
-      .where({'u.name': ['like', `%${name}%`], 'u.city': ['like', `%${city}%`], 'u.province': ['like', `%${province}%`], 'u.type': ['like', `%${type}%`]}).order(['u.id DESC']).page(page, size).countSelect();
+      .where(whereMap).order(['u.id DESC']).page(page, size).countSelect();
     for (const item of list.data) {
       delete item.password;
     }

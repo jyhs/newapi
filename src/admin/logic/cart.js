@@ -11,6 +11,12 @@ module.exports = class extends think.Logic {
       groupId: {int: true, required: true, trim: true}
     };
   }
+  getCurrentCartByGroupIdAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      groupId: {int: true, required: true, trim: true}
+    };
+  }
   deleteDetailAction() {
     this.allowMethods = 'post';
     this.rules = {
@@ -77,6 +83,16 @@ module.exports = class extends think.Logic {
     };
   }
   addDetailAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cartId: {int: true, required: true, trim: true},
+      billDetailId: {int: true, required: true, trim: true},
+      billDetailNum: {int: true, required: true, trim: true},
+      sum: {float: true, required: true, trim: true},
+      freight: {float: true, required: true, trim: true}
+    };
+  }
+  addOrUpdateDetailAction() {
     this.allowMethods = 'post';
     this.rules = {
       cartId: {int: true, required: true, trim: true},

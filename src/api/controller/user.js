@@ -161,8 +161,6 @@ module.exports = class extends Base {
     const password1 = this.post('password1');
     const password2 = this.post('password2');
     const name = this.post('name');
-    const city = this.post('city') || 'shc';
-    const province = this.post('province') || 'sh';
     const phone = this.post('phone');
     const auth = this.post('auth');
     const requestId = this.post('requestId');
@@ -182,10 +180,8 @@ module.exports = class extends Base {
           name: name,
           nickname: name,
           password: md5(password1),
-          city: city,
           phone: phone,
-          type: 'yy',
-          province: province
+          type: 'yy'
         };
         user.id = await this.model('user').add(user);
         if (user.id > 0) {

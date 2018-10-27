@@ -31,8 +31,6 @@ module.exports = class extends think.Logic {
     this.allowMethods = 'post';
     this.rules = {
       name: {string: true, required: true, trim: true},
-      city: {string: true, trim: true},
-      province: {string: true, trim: true},
       password1: {string: true, required: true, trim: true, length: {min: 6, max: 20}},
       password2: {string: true, required: true, trim: true, length: {min: 6, max: 20}},
       phone: {mobile: 'zh-CN', required: true, trim: true},
