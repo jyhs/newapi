@@ -85,7 +85,7 @@ module.exports = class extends Base {
 
   async getByIdAction() {
     const user = await this.model('user').where({id: this.post('userId')}).find();
-    const focus = await this.model('focus').where({'user_id': user.id}).count();
+    const focus = await this.model('focus').where({'user_id': user.id, material_id: ['!=', null]}).count();
     user.focusNo = focus || 0;
     delete user.password;
     this.json(user);
@@ -128,13 +128,13 @@ module.exports = class extends Base {
   async updateUserCityAction() {
     const page = this.post('page') || 1;
     const size = this.post('size') || 2;
-    const list = await this.model('user').where({phone: ['!=', '18888888888']}).page(page, size).countSelect();
+    const list = await this.model('user').where({phone: ['!=', '18888888888']}).order(['id DESC']).page(page, size).countSelect();
     for (const user of list.data) {
       const cityObj = await this.controller('tools', 'api').getCityByPhoneAction(user.phone);
       if (cityObj) {
         this.model('user').where({ 'id': user.id }).update({city: cityObj.mark, province: cityObj.area, city_name: cityObj.city, province_name: cityObj.province});
       }
     }
-    this.json('OK');
+    this.json({'status': 'OK'});
   }
 };

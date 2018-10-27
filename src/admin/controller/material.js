@@ -101,9 +101,12 @@ module.exports = class extends Base {
     } else {
       await this.model('focus').where({user_id: userId, material_id: this.post('materialId')}).delete();
     }
+    this.success(true);
   }
   async focusListAction() {
     const userId = this.getLoginUserId();
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 10;
     const model = this.model('material').alias('m');
     model.field(['m.*']).join({
       table: 'focus',
@@ -111,7 +114,7 @@ module.exports = class extends Base {
       as: 'f',
       on: ['f.material_id', 'm.id']
     });
-    const list = await model.where({'f.user_id': userId}).select();
+    const list = await model.where({'f.user_id': userId}).page(page, size).countSelect();
     this.json(list);
   }
 };

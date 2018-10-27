@@ -41,12 +41,16 @@ module.exports = class extends Base {
     return this.json(detail);
   }
   async getDetailByBillIdAction() {
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 10;
     const id = this.post('billId');
     const model = this.model('bill_detail');
-    const list = await model.where({bill_id: id}).select();
+    const list = await model.where({bill_id: id}).page(page, size).countSelect();
     return this.json(list);
   }
   async getDetailByBillIdAndCategoryAction() {
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 10;
     const model = this.model('bill_detail').alias('d');
     model.field(['d.*']).join({
       table: 'material',
@@ -54,10 +58,12 @@ module.exports = class extends Base {
       as: 'm',
       on: ['d.material_id', 'm.id']
     });
-    const list = await model.where({'m.category': this.post('category'), 'd.bill_id': this.post('billId')}).select();
+    const list = await model.where({'m.category': this.post('category'), 'd.bill_id': this.post('billId')}).page(page, size).countSelect();
     this.json(list);
   }
   async getDetailByBillIdAndTypeAction() {
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 10;
     const model = this.model('bill_detail').alias('d');
     model.field(['d.*']).join({
       table: 'material',
@@ -65,12 +71,14 @@ module.exports = class extends Base {
       as: 'm',
       on: ['d.material_id', 'm.id']
     });
-    const list = await model.where({'m.type': this.post('type'), 'd.bill_id': this.post('billId')}).select();
+    const list = await model.where({'m.type': this.post('type'), 'd.bill_id': this.post('billId')}).page(page, size).countSelect();
     this.json(list);
   }
   async getDetailByBillIdAndRecommendAction() {
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 10;
     const model = this.model('bill_detail');
-    const list = await model.where({'recommend': this.post('recommend'), 'bill_id': this.post('billId')}).select();
+    const list = await model.where({'recommend': this.post('recommend'), 'bill_id': this.post('billId')}).page(page, size).countSelect();
     _.each(list, (item) => {
       if (item.recommend === 'tj') {
         item.recommend = '推荐';
@@ -82,8 +90,10 @@ module.exports = class extends Base {
     this.json(list);
   }
   async getDetailRecommendByBillIdAction() {
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 10;
     const model = this.model('bill_detail');
-    const list = await model.where({'recommend': ['!=', ''], 'bill_id': this.post('billId')}).select();
+    const list = await model.where({'recommend': ['!=', ''], 'bill_id': this.post('billId')}).page(page, size).countSelect();
     _.each(list, (item) => {
       if (item.recommend === 'tj') {
         item.recommend = '推荐';
@@ -95,8 +105,10 @@ module.exports = class extends Base {
     this.json(list);
   }
   async getDetailByBillIdAndUndefineAction() {
+    const page = this.post('page') || 1;
+    const size = this.post('size') || 10;
     const model = this.model('bill_detail');
-    const list = await model.where({'material_id': ['=', null], 'bill_id': this.post('billId')}).select();
+    const list = await model.where({'material_id': ['=', null], 'bill_id': this.post('billId')}).page(page, size).countSelect();
     this.json(list);
   }
 };

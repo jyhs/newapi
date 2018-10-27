@@ -58,6 +58,8 @@ module.exports = class extends think.Logic {
   focusAction() {
     this.allowMethods = 'post';
     this.rules = {
+      page: {int: true, trim: true},
+      size: {int: true, trim: true},
       materialId: {int: true, required: true, trim: true}
     };
   }

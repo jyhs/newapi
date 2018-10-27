@@ -16,6 +16,7 @@ module.exports = class extends Base {
     const effortDate = this.service('date', 'api').convertWebDateToSubmitDate(this.post('endDate'));
     const endDate = moment(effortDate).add(1, 'days').format(this.config('date_format'));
     await this.model('group_bill').where({id: this.post('groupId')}).update({status: 1, end_date: endDate});
+    this.success(true);
   }
   async privateQrAction() {
     const groupId = this.post('groupId');
@@ -25,6 +26,7 @@ module.exports = class extends Base {
   }
   async finishAction() {
     await this.model('group_bill').where({id: this.post('groupId')}).update({status: 0});
+    this.success(true);
   }
   async backAction() {
     const group = await this.model('group_bill').where({id: this.post('groupId')}).find();
@@ -100,6 +102,7 @@ module.exports = class extends Base {
         activity_code: this.post('activityCode'),
         status: this.post('status')
       });
+      this.success(true);
     }
   }
   async downloadAction() {

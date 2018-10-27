@@ -23,12 +23,16 @@ module.exports = class extends think.Logic {
   getDetailByBillIdAction() {
     this.allowMethods = 'post';
     this.rules = {
+      page: {int: true, trim: true},
+      size: {int: true, trim: true},
       billId: {int: true, required: true, trim: true}
     };
   }
   getDetailByBillIdAndCategoryAction() {
     this.allowMethods = 'post';
     this.rules = {
+      page: {int: true, trim: true},
+      size: {int: true, trim: true},
       billId: {int: true, required: true, trim: true},
       category: {string: true, required: true, trim: true}
     };
@@ -36,6 +40,8 @@ module.exports = class extends think.Logic {
   getDetailByBillIdAndRecommendAction() {
     this.allowMethods = 'post';
     this.rules = {
+      page: {int: true, trim: true},
+      size: {int: true, trim: true},
       billId: {int: true, required: true, trim: true},
       recommend: {string: true, required: true, trim: true}
     };
@@ -43,12 +49,16 @@ module.exports = class extends think.Logic {
   getDetailRecommendByBillIdAction() {
     this.allowMethods = 'post';
     this.rules = {
+      page: {int: true, trim: true},
+      size: {int: true, trim: true},
       billId: {int: true, required: true, trim: true}
     };
   }
   getDetailByBillIdAndTypeAction() {
     this.allowMethods = 'post';
     this.rules = {
+      page: {int: true, trim: true},
+      size: {int: true, trim: true},
       billId: {int: true, required: true, trim: true},
       type: {string: true, required: true, trim: true}
     };
@@ -56,6 +66,8 @@ module.exports = class extends think.Logic {
   getDetailByBillIdAndUndefineAction() {
     this.allowMethods = 'post';
     this.rules = {
+      page: {int: true, trim: true},
+      size: {int: true, trim: true},
       billId: {int: true, required: true, trim: true}
     };
   }
