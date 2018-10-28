@@ -80,8 +80,8 @@ module.exports = class extends Base {
     } else {
       await this.model('cart_detail').where({cart_id: cartId}).delete();
       await this.model('cart').where({id: cartId}).delete();
+      this.success(true);
     }
-    this.success(true);
   }
   async deleteDetailAction() {
     const cartId = this.post('cartId');
@@ -90,16 +90,16 @@ module.exports = class extends Base {
     if (think.isEmpty(cart)) {
       this.fail('请先创建购物车');
     } else {
-      const group = await this.model('group_bill').where({id: cartId}).find();
+      const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
       if (!moment(group.end_date).isAfter(moment())) {
         this.fail('团购已经结束不能操作购物车');
       } else if (group.status === 0) {
         this.fail('团购已经结束不能操作购物车');
       } else {
         await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).delete();
+        this.success(true);
       }
     }
-    this.success(true);
   }
   async getCurrentCartByGroupIdAction() {
     const userId = this.getLoginUserId();
@@ -223,16 +223,13 @@ module.exports = class extends Base {
         this.fail('团购已经结束不能操作购物车');
       } else {
         const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).find();
-        console.log(cartDetail);
         if (think.isEmpty(cartDetail)) {
-          console.log(1111);
           await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).add({
             cart_id: cartId,
             bill_detail_id: billDetailId,
             bill_detail_num: billDetailNum
           });
         } else {
-          console.log(22);
           await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({
             bill_detail_num: billDetailNum
           });
