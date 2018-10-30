@@ -1,7 +1,7 @@
 const Base = require('./base.js');
 const fs = require('fs');
 const md5 = require('md5');
-// const images = require('images');
+const images = require('images');
 module.exports = class extends Base {
   async updateAction() {
     const userId = this.post('userId');
@@ -65,11 +65,9 @@ module.exports = class extends Base {
     const tempPath = this.config('image.user') + '/temp/' + name;
     fs.renameSync(avatar.path, tempPath);
     await this.cache('getAvatarAction' + id, null);
-    // console.log(tempPath);
-    // console.log(this.config('image.user'));
-    // images(tempPath).size(150).save(this.config('image.user'), {
-    //   quality: 75
-    // });
+    images(tempPath + '').size(150).save(this.config('image.user') + '/' + name, {
+      quality: 75
+    });
   }
 
   async getByTypeAction() {

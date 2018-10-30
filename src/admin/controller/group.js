@@ -13,7 +13,7 @@ module.exports = class extends Base {
     return this.json(list);
   }
   async reopenAction() {
-    const effortDate = this.service('date', 'api').convertWebDateToSubmitDate(this.post('endDate'));
+    const effortDate = this.service('date', 'api').convertWebDateToSubmitDateTime(this.post('endDate'));
     const endDate = moment(effortDate).add(1, 'days').format(this.config('date_format'));
     await this.model('group_bill').where({id: this.post('groupId')}).update({status: 1, end_date: endDate});
     this.success(true);
@@ -54,7 +54,7 @@ module.exports = class extends Base {
   }
   async addAction() {
     const user = this.getLoginUser();
-    const effortDate = this.service('date', 'api').convertWebDateToSubmitDate(this.post('endDate'));
+    const effortDate = this.service('date', 'api').convertWebDateToSubmitDateTime(this.post('endDate'));
     if (!moment(effortDate).isAfter(moment())) {
       this.fail('结束日期必须大于今天');
     } else {
@@ -83,7 +83,7 @@ module.exports = class extends Base {
   }
   async updateAction() {
     const group = this.model('group_bill').where({'id': this.post('groupId')}).find();
-    const effortDate = this.service('date', 'api').convertWebDateToSubmitDate(this.post('endDate'));
+    const effortDate = this.service('date', 'api').convertWebDateToSubmitDateTime(this.post('endDate'));
     if (this.post('endDate') && !moment(effortDate).isAfter(moment())) {
       this.fail('结束日期必须大于今天');
     } else if (group.status === 0) {
@@ -91,7 +91,7 @@ module.exports = class extends Base {
     } else {
       await this.model('group_bill').where({id: this.post('groupId')}).update({
         name: this.post('name'),
-        end_date: this.service('date', 'api').convertWebDateToSubmitDate(this.post('endDate')),
+        end_date: this.service('date', 'api').convertWebDateToSubmitDateTime(this.post('endDate')),
         freight: this.post('freight'),
         description: this.post('description'),
         city: this.post('city'),
@@ -110,8 +110,8 @@ module.exports = class extends Base {
     const totleReturnData = [['品名', '规格', '单价', '数量', '共计（不含运费)']];
     const totleReturnDataWithfreight = [['品名', '规格', '单价', '数量', '生物总价', '生物运费', '缺货退费', '报损退费', '共计（含运费)']];
     const returnDataWithfreight = [['序号', '昵称', '联系电话', '联系人', '联系地址', '备注', '品名', '规格', '单价', '实际数量', '缺货数量', '报损数量', '缺货退款（含运费)', '报损退款', '应退款（含运费)', '应收款（含运费)']];
-    const detailGroups = this.model('group').detailGroup(this.post('groupId'));
-    const summaryGroups = this.model('group').summaryGroup(this.post('groupId'));
+    const detailGroups = await this.model('group').detailGroup(this.post('groupId'));
+    const summaryGroups = await this.model('group').summaryGroup(this.post('groupId'));
     let totleSum = 0;
     let totleSumWithfreight = 0;
     _.each(summaryGroups, (summaryGroup) => {

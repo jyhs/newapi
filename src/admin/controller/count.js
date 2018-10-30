@@ -1,5 +1,5 @@
 const Base = require('./base.js');
-const _ = require('lodash');
+// const _ = require('lodash');
 module.exports = class extends Base {
   async grossSalesAction() {
     const userId = this.post('userId');
@@ -18,5 +18,11 @@ module.exports = class extends Base {
     const groupId = await this.model('group_bill').where(whereMap).max('id');
     const sum = await this.model('cart').where({group_bill_id: groupId}).sum('sum');
     this.json(sum);
+  }
+  async groupByYearAction() {
+    const from = this.post('from') || this.service('date', 'api').convertWebDateToSubmitDateTime(this.post('from'));
+    const to = this.post('to') || this.service('date', 'api').convertWebDateToSubmitDateTime(this.post('to'));
+    const a = await this.model('group').countGroup(from, to);
+    this.json(a);
   }
 };

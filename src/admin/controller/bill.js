@@ -12,7 +12,7 @@ module.exports = class extends Base {
     const _effortDate = urlObj.query.effortDate;
     const supplierId = urlObj.query.supplierId;
     const description = urlObj.query.description;
-    const effortDate = this.service('date', 'api').convertWebDateToSubmitDate(_effortDate);
+    const effortDate = this.service('date', 'api').convertWebDateToSubmitDateTime(_effortDate);
     const user = this.getLoginUser();
     if (_.isEmpty(billName)) {
       this.fail('单子名字不能为空');

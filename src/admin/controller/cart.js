@@ -5,9 +5,12 @@ module.exports = class extends Base {
   async lostAddAction() {
     const cartId = this.post('cartId');
     const billDetailId = this.post('billDetailId');
+    const billDetailNum = this.post('billDetailNum');
+    const sum = this.post('sum');
+    const freight = this.post('freight');
     const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId});
-    const lostNum = cartDetail.cartDetail + 1;
-    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum});
+    const lostNum = cartDetail.lost_num + 1;
+    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum, 'bill_detail_number': billDetailNum});
     const billDetail = await this.model('bill_detail').where({id: billDetailId});
     const groupDetail = await this.model('cart').alias('c').field(['g.*']).join({
       table: 'group_bill',
@@ -24,14 +27,18 @@ module.exports = class extends Base {
     }
     let lostBack = billDetail.price + cartDetail.lost_back + backFreight;
     lostBack = lostBack > cartDetail.sum ? cartDetail.sum : lostBack;
-    await this.model('cart').where({id: cartId}).update({'lost_back': lostBack});
+    await this.model('cart').where({id: cartId}).update({'lost_back': lostBack, 'sum': sum, 'freight': freight});
+    this.success(true);
   }
   async lostSubAction() {
     const cartId = this.post('cartId');
     const billDetailId = this.post('billDetailId');
+    const billDetailNum = this.post('billDetailNum');
+    const sum = this.post('sum');
+    const freight = this.post('freight');
     const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId});
-    const lostNum = cartDetail.cartDetail - 1;
-    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum});
+    const lostNum = cartDetail.lost_num - 1;
+    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum, 'bill_detail_number': billDetailNum});
     const billDetail = await this.model('bill_detail').where({id: billDetailId});
     const groupDetail = await this.model('cart').alias('c').field(['g.*']).join({
       table: 'group_bill',
@@ -48,29 +55,38 @@ module.exports = class extends Base {
     }
     let lostBack = billDetail.price - cartDetail.lost_back - backFreight;
     lostBack = lostBack < 0 ? 0 : lostBack;
-    await this.model('cart').where({id: cartId}).update({'lost_back': lostBack});
+    await this.model('cart').where({id: cartId}).update({'lost_back': lostBack, 'sum': sum, 'freight': freight});
+    this.success(true);
   }
   async damageAddAction() {
     const cartId = this.post('cartId');
     const billDetailId = this.post('billDetailId');
+    const billDetailNum = this.post('billDetailNum');
+    const sum = this.post('sum');
+    const freight = this.post('freight');
     const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId});
-    const damageNum = cartDetail.cartDetail + 1;
-    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum});
+    const damageNum = cartDetail.damage_num + 1;
+    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum, 'bill_detail_number': billDetailNum});
     const billDetail = await this.model('bill_detail').where({id: billDetailId});
     let damageBack = billDetail.price + cartDetail.damage_back;
     damageBack = damageBack > cartDetail.sum ? cartDetail.sum : damageBack;
-    await this.model('cart').where({id: cartId}).update({'damage_back': damageBack});
+    await this.model('cart').where({id: cartId}).update({'damage_back': damageBack, 'sum': sum, 'freight': freight});
+    this.success(true);
   }
   async damageSubAction() {
     const cartId = this.post('cartId');
     const billDetailId = this.post('billDetailId');
+    const billDetailNum = this.post('billDetailNum');
+    const sum = this.post('sum');
+    const freight = this.post('freight');
     const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId});
-    const damageNum = cartDetail.cartDetail - 1;
-    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum});
+    const damageNum = cartDetail.damage_num - 1;
+    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum, 'bill_detail_number': billDetailNum});
     const billDetail = await this.model('bill_detail').where({id: billDetailId});
     let damageBack = billDetail.price - cartDetail.damage_back;
     damageBack = damageBack < 0 ? 0 : damageBack;
-    await this.model('cart').where({id: cartId}).update({'damage_back': damageBack});
+    await this.model('cart').where({id: cartId}).update({'damage_back': damageBack, 'sum': sum, 'freight': freight});
+    this.success(true);
   }
   async deleteAction() {
     const cartId = this.post('cartId');

@@ -34,28 +34,40 @@ module.exports = class extends think.Logic {
     this.allowMethods = 'post';
     this.rules = {
       cartId: {int: true, required: true, trim: true},
-      billDetailId: {int: true, required: true, trim: true}
+      billDetailId: {int: true, required: true, trim: true},
+      billDetailNum: {int: true, required: true, trim: true},
+      sum: {int: true, required: true, trim: true},
+      freight: {int: true, required: true, trim: true}
     };
   }
   lostAddAction() {
     this.allowMethods = 'post';
     this.rules = {
       cartId: {int: true, required: true, trim: true},
-      billDetailId: {int: true, required: true, trim: true}
+      billDetailId: {int: true, required: true, trim: true},
+      billDetailNum: {int: true, required: true, trim: true},
+      sum: {int: true, required: true, trim: true},
+      freight: {int: true, required: true, trim: true}
     };
   }
   lostSubAction() {
     this.allowMethods = 'post';
     this.rules = {
       cartId: {int: true, required: true, trim: true},
-      billDetailId: {int: true, required: true, trim: true}
+      billDetailId: {int: true, required: true, trim: true},
+      billDetailNum: {int: true, required: true, trim: true},
+      sum: {int: true, required: true, trim: true},
+      freight: {int: true, required: true, trim: true}
     };
   }
   damageSubAction() {
     this.allowMethods = 'post';
     this.rules = {
       cartId: {int: true, required: true, trim: true},
-      billDetailId: {int: true, required: true, trim: true}
+      billDetailId: {int: true, required: true, trim: true},
+      billDetailNum: {int: true, required: true, trim: true},
+      sum: {int: true, required: true, trim: true},
+      freight: {int: true, required: true, trim: true}
     };
   }
   updateAction() {
