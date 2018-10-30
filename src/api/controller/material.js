@@ -343,11 +343,10 @@ module.exports = class extends Base {
     this.json(category);
   }
   async getImageSmallAction() {
-    await this.cache('material_image_small' + this.get('materialId'), null);
     const img = await this.cache('material_image_small' + this.get('materialId'));
     this.type = 'image/png';
-    if (!think.isEmpty(img)) {
-      this.body = img;
+    if (img) {
+      this.body = Buffer.from(img, 'base64');
     } else {
       const material = await this.model('material').where({id: this.get('materialId')}).find();
       if (think.isEmpty(material)) {
