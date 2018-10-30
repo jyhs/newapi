@@ -201,11 +201,10 @@ module.exports = class extends Base {
     const userId = this.get('userId');
     const key = 'getAvatarAction' + userId;
     const time = {timeout: 24 * 60 * 60 * 1000 * 7};
-    await this.cache(key, null);
     const avatar = await this.cache(key);
     if (avatar) {
       this.type = 'image/jpeg';
-      this.body = avatar;
+      this.body = Buffer.from(avatar, 'base64');
     } else {
       const user = await this.model('user').field(['headimgurl']).where({ id: userId }).find();
       if (!_.isEmpty(user.headimgurl)) {
@@ -236,16 +235,17 @@ module.exports = class extends Base {
         let _type = 'png';
         _.each(readDir, (itm) => {
           const filedId = itm.split('.')[0];
-          if (filedId === userId) {
-            path = this.config('image.user') + itm;
+          if (Number(filedId) === Number(userId)) {
+            path = this.config('image.user') + '/' + itm;
             _type = itm.split('.')[1];
           }
         });
+
         if (path) {
           const image = fs.readFileSync(path);
           const decodeImg = Buffer.from(image.toString('base64'), 'base64');
           this.type = 'image/' + _type;
-          this.cache.put(key, decodeImg, time);
+          this.cache(key, decodeImg, time);
           this.body = decodeImg;
         } else {
           const decodeImg = Buffer.from(this.config('image.defaultUserAvatar'), 'base64');
