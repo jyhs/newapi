@@ -9,8 +9,8 @@ module.exports = class extends think.Model {
     const summaryGroup = `select bd.name,bd.size,bd.price,sum(bill_detail_num) bill_detail_num,sum((bd.price*cd.bill_detail_num)) sum,sum(c.freight) sum_freight,sum(c.lost_back) sum_lost_back,sum(c.damage_back) sum_damage_back from cart c,cart_detail cd,bill_detail bd where c.is_confirm=1 and c.id=cd.cart_id  and cd.bill_detail_id=bd.id and c.group_bill_id=${id} group by name,size,price`;
     return this.query(summaryGroup);
   }
-  countGroup(from, to) {
-    return this.query(`select date_format(g.end_date, '%Y-%m') date,sum(c.sum) sum from cart c,group_bill g where  g.id=c.group_bill_id and c.is_pay=1 and g.end_date BETWEEN '${from}' AND '${to}' group by date_format(g.end_date, '%Y-%m')`);
+  countGroup(from, to, userId) {
+    return this.query(`select date_format(g.end_date, '%Y-%m') date,sum(c.sum) sum from cart c,group_bill g where  g.id=c.group_bill_id and c.is_pay=1 and g.status=0 and  ${userId ? 'g.user_id=' + userId : '1=1'} and g.end_date  BETWEEN '${from}' AND '${to}' group by date_format(g.end_date, '%Y-%m')`);
   }
   detailGroup(id) {
     const detailGroup = `select IFNULL(u.nickname,u.name) userName,u.phone,u.contacts,(select name from citys where mark=u.province) province,(select name from citys where mark=u.city) city,if(u.address='null','',u.address) address,if(c.description='null','',c.description) description,bd.name,bd.size,bd.price,cd.bill_detail_num,(bd.price*cd.bill_detail_num) sum,c.freight,cd.lost_back_freight,cd.lost_num,cd.damage_num from cart c,cart_detail cd,bill_detail bd,user u where c.is_confirm=1 and c.id=cd.cart_id and c.user_id=u.id and cd.bill_detail_id=bd.id and c.group_bill_id=${id} order by c.id asc`;

@@ -1,11 +1,5 @@
 module.exports = class extends think.Logic {
-  grossSalesAction() {
-    this.allowMethods = 'post';
-    this.rules = {
-      userId: {int: true, trim: true}
-    };
-  }
-  lastGrossSalesAction() {
+  grossSalesSummaryAction() {
     this.allowMethods = 'post';
     this.rules = {
       userId: {int: true, required: true, trim: true}
@@ -14,8 +8,9 @@ module.exports = class extends think.Logic {
   groupByYearAction() {
     this.allowMethods = 'post';
     this.rules = {
-      from: {string: true, required: true, trim: true},
-      to: {string: true, required: true, trim: true}
+      from: {date: true, required: true, trim: true},
+      to: {date: true, required: true, trim: true},
+      userId: {int: true, required: true, trim: true}
     };
   }
 };
