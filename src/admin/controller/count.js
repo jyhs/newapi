@@ -27,10 +27,25 @@ module.exports = class extends Base {
       monthUp: sumLastMonthGroup[0].sum - sumThisMonthGroup[0].sum >= 0
     });
   }
+  async groupSumByYearAction() {
+    const from = this.service('date', 'api').convertWebDateToSubmitDate(this.post('from'));
+    const to = this.service('date', 'api').convertWebDateToSubmitDate(this.post('to'));
+    let userId = this.post('userId');
+    const user = this.getLoginUser();
+    if (user.type === 'admin' || user.type === 'tggly') {
+      userId = null;
+    }
+    const list = await this.model('group').sumGroup(from, to, userId);
+    const obj = {};
+    _.each(list, (item) => {
+      obj[item.date] = item.sum;
+    });
+    this.json(list);
+  }
 
-  async groupByYearAction() {
-    const from = this.post('from') || this.service('date', 'api').convertWebDateToSubmitDateTime(this.post('from'));
-    const to = this.post('to') || this.service('date', 'api').convertWebDateToSubmitDateTime(this.post('to'));
+  async groupCountByYearAction() {
+    const from = this.service('date', 'api').convertWebDateToSubmitDate(this.post('from'));
+    const to = this.service('date', 'api').convertWebDateToSubmitDate(this.post('to'));
     let userId = this.post('userId');
     const user = this.getLoginUser();
     if (user.type === 'admin' || user.type === 'tggly') {
@@ -39,8 +54,40 @@ module.exports = class extends Base {
     const list = await this.model('group').countGroup(from, to, userId);
     const obj = {};
     _.each(list, (item) => {
-      obj[item.date] = item.sum;
+      obj[item.date] = item.count;
     });
+    this.json(list);
+  }
+  async groupUserListAction() {
+    const from = this.service('date', 'api').convertWebDateToSubmitDate(this.post('from'));
+    const to = this.service('date', 'api').convertWebDateToSubmitDate(this.post('to'));
+    const limit = this.post('limit');
+    let userId = this.post('userId');
+    const user = this.getLoginUser();
+    if (user.type === 'admin' || user.type === 'tggly') {
+      userId = null;
+    }
+    const list = await this.model('group').countGroupUserList(from, to, userId, limit);
+    this.json(list);
+  }
+  async groupSupplierListAction() {
+    const from = this.service('date', 'api').convertWebDateToSubmitDate(this.post('from'));
+    const to = this.service('date', 'api').convertWebDateToSubmitDate(this.post('to'));
+    const limit = this.post('limit');
+    let userId = this.post('userId');
+    const user = this.getLoginUser();
+    if (user.type === 'admin' || user.type === 'tggly') {
+      userId = null;
+    }
+    const list = await this.model('group').countGroupSupplierList(from, to, userId, limit);
+    this.json(list);
+  }
+  async groupMaterialListAction() {
+    const from = this.service('date', 'api').convertWebDateToSubmitDate(this.post('from'));
+    const to = this.service('date', 'api').convertWebDateToSubmitDate(this.post('to'));
+    const limit = this.post('limit');
+    const category = this.post('category');
+    const list = await this.model('group').countGroupMaterialList(from, to, limit, category);
     this.json(list);
   }
 };

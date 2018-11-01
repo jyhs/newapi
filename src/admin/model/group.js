@@ -2,14 +2,24 @@ const moment = require('moment');
 
 module.exports = class extends think.Model {
   delete(id) {
-    const deleteDetail = `delete from cart_detail where cart_id in (select id from (select c.id from cart c where c.group_bill_id=${id}) cartid)`;
-    this.execute(deleteDetail);
+    this.execute(`delete from cart_detail where cart_id in (select id from (select c.id from cart c where c.group_bill_id=${id}) cartid)`);
   }
   summaryGroup(id) {
-    const summaryGroup = `select bd.name,bd.size,bd.price,sum(bill_detail_num) bill_detail_num,sum((bd.price*cd.bill_detail_num)) sum,sum(c.freight) sum_freight,sum(c.lost_back) sum_lost_back,sum(c.damage_back) sum_damage_back from cart c,cart_detail cd,bill_detail bd where c.is_confirm=1 and c.id=cd.cart_id  and cd.bill_detail_id=bd.id and c.group_bill_id=${id} group by name,size,price`;
-    return this.query(summaryGroup);
+    return this.query(`select bd.name,bd.size,bd.price,sum(bill_detail_num) bill_detail_num,sum((bd.price*cd.bill_detail_num)) sum,sum(c.freight) sum_freight,sum(c.lost_back) sum_lost_back,sum(c.damage_back) sum_damage_back from cart c,cart_detail cd,bill_detail bd where c.is_confirm=1 and c.id=cd.cart_id  and cd.bill_detail_id=bd.id and c.group_bill_id=${id} group by name,size,price`);
+  }
+  countGroupMaterialList(from, to, limit = 10, category = 'hy') {
+    return this.query(`select m.id,count(m.id) count,m.name from bill b,group_bill g,bill_detail bd,material m where g.bill_id=b.id and bd.bill_id=b.id and bd.material_id=m.id and m.category='${category}' and  g.status=0 and g.end_date BETWEEN '${from}' AND '${to}' group by m.id order by count desc limit ${limit}`);
+  }
+  countGroupSupplierList(from, to, userId, limit = 10) {
+    return this.query(`select b.supplier_id user_id,count(b.supplier_id) count, sum(c.sum) sum ,(select u.name from user u where u.id=b.supplier_id) name  from bill b,group_bill g,cart c where c.group_bill_id=g.id and g.bill_id=b.id and g.status=0 and c.is_pay=1 and b.supplier_id !=32 and ${userId ? 'g.user_id=' + userId : '1=1'} and g.end_date BETWEEN '${from}' AND '${to}' group by b.supplier_id order by count desc limit ${limit}`);
+  }
+  countGroupUserList(from, to, userId, limit = 10) {
+    return this.query(`select c.user_id,count(c.user_id) count,sum(c.sum) sum,(select u.name from user u where u.id=c.user_id) name  from cart c,group_bill g where  g.id=c.group_bill_id and c.is_pay=1 and g.status=0 and  ${userId ? 'g.user_id=' + userId : '1=1'} and g.end_date BETWEEN '${from}' AND '${to}' group by c.user_id order by count desc limit ${limit}`);
   }
   countGroup(from, to, userId) {
+    return this.query(`select date_format(g.end_date, '%Y-%m') date,IFNULL(count(g.id),0) count from group_bill g where  g.status=0 and  ${userId ? 'g.user_id=' + userId : '1=1'} and g.end_date  BETWEEN '${from}' AND '${to}' group by date_format(g.end_date, '%Y-%m')`);
+  }
+  sumGroup(from, to, userId) {
     return this.query(`select date_format(g.end_date, '%Y-%m') date,IFNULL(sum(c.sum),0) sum from cart c,group_bill g where  g.id=c.group_bill_id and c.is_pay=1 and g.status=0 and  ${userId ? 'g.user_id=' + userId : '1=1'} and g.end_date  BETWEEN '${from}' AND '${to}' group by date_format(g.end_date, '%Y-%m')`);
   }
   sumThisWeekGroup(userId) {
