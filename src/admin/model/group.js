@@ -17,10 +17,10 @@ module.exports = class extends think.Model {
     return this.query(`select c.user_id,count(c.user_id) count,sum(c.sum) sum,(select u.name from user u where u.id=c.user_id) name  from cart c,group_bill g where  g.id=c.group_bill_id and c.is_pay=1 and g.status=0 and  ${userId ? 'g.user_id=' + userId : '1=1'} and g.end_date BETWEEN '${from}' AND '${to}' group by c.user_id order by count desc limit ${limit}`);
   }
   countGroup(from, to, userId) {
-    return this.query(`select date_format(g.end_date, '%Y-%m') date,IFNULL(count(g.id),0) count from group_bill g where  g.status=0 and  ${userId ? 'g.user_id=' + userId : '1=1'} and g.end_date  BETWEEN '${from}' AND '${to}' group by date_format(g.end_date, '%Y-%m')`);
+    return this.query(`select date_format(g.end_date, '%Y-%m') date,IFNULL(count(g.id),0) count from group_bill g where   ${userId ? 'g.user_id=' + userId : '1=1'} and g.end_date  BETWEEN '${from}' AND '${to}' group by date_format(g.end_date, '%Y-%m')`);
   }
   sumGroup(from, to, userId) {
-    return this.query(`select date_format(g.end_date, '%Y-%m') date,IFNULL(sum(c.sum),0) sum from cart c,group_bill g where  g.id=c.group_bill_id and c.is_pay=1 and g.status=0 and  ${userId ? 'g.user_id=' + userId : '1=1'} and g.end_date  BETWEEN '${from}' AND '${to}' group by date_format(g.end_date, '%Y-%m')`);
+    return this.query(`select date_format(g.end_date, '%Y-%m') date,IFNULL(sum(c.sum),0) sum from cart c,group_bill g where  g.id=c.group_bill_id and c.is_pay=1  and  ${userId ? 'g.user_id=' + userId : '1=1'} and g.end_date  BETWEEN '${from}' AND '${to}' group by date_format(g.end_date, '%Y-%m')`);
   }
   sumThisWeekGroup(userId) {
     return this.query(`select IFNULL(sum(c.sum),0) sum from cart c,group_bill g where  g.id=c.group_bill_id and c.is_pay=1 and g.status=0 and  ${userId ? 'g.user_id=' + userId : '1=1'} and YEARWEEK(date_format(c.insert_date,'%Y-%m-%d')) = YEARWEEK(now())`);
