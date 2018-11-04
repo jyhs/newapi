@@ -21,9 +21,9 @@ module.exports = class extends Base {
     this.json({
       sum: sum,
       lastSum: lastSum,
-      week: (sumThisWeekGroup[0].sum - sumLastWeekGroup[0].sum) / (sumLastWeekGroup[0].sum + 1) * 100,
+      week: Math.round(Math.abs(sumThisWeekGroup[0].sum - sumLastWeekGroup[0].sum) / (sumLastWeekGroup[0].sum + 1)) * 100,
       weekUp: sumThisWeekGroup[0].sum - sumLastWeekGroup[0].sum >= 0,
-      month: (sumThisMonthGroup[0].sum - sumLastMonthGroup[0].sum) / (sumLastMonthGroup[0].sum + 1) * 100,
+      month: Math.round(Math.abs(sumThisMonthGroup[0].sum - sumLastMonthGroup[0].sum) / (sumLastMonthGroup[0].sum + 1)) * 100,
       monthUp: sumLastMonthGroup[0].sum - sumThisMonthGroup[0].sum >= 0
     });
   }
@@ -40,7 +40,7 @@ module.exports = class extends Base {
     _.each(list, (item) => {
       obj[item.date] = item.sum;
     });
-    this.json(list);
+    this.json(obj);
   }
 
   async groupCountByYearAction() {
@@ -52,11 +52,15 @@ module.exports = class extends Base {
       userId = null;
     }
     const list = await this.model('group').countGroup(from, to, userId);
-    const obj = {};
+    const returnListKey = [];
+    const returnListDate = [];
+    let countSum = 0;
     _.each(list, (item) => {
-      obj[item.date] = item.count;
+      returnListKey.push(item.date);
+      returnListDate.push(item.count);
+      countSum += item.count;
     });
-    this.json(list);
+    this.json({'sum': countSum, 'x': returnListKey, 'y': returnListDate});
   }
   async groupUserListAction() {
     const from = this.service('date', 'api').convertWebDateToSubmitDate(this.post('from'));
@@ -92,11 +96,16 @@ module.exports = class extends Base {
   }
   async userListByProvinceAction() {
     const user = this.getLoginUser();
+    const limit = this.post('limit');
     if (user.type === 'admin' || user.type === 'yhgly') {
-      const list = await this.model('user').userListByProvince();
-      this.json(list);
+      const list = await this.model('user').userListByProvince(limit);
+      const obj = {};
+      _.each(list, (item) => {
+        obj[item.province] = item.count;
+      });
+      this.json(obj);
     } else {
-      this.json([]);
+      this.json({});
     }
   }
   async userCityListByProvinceAction() {
@@ -105,7 +114,7 @@ module.exports = class extends Base {
       const list = await this.model('user').userCityListByProvince(this.post('province'));
       this.json(list);
     } else {
-      this.json([]);
+      this.json({});
     }
   }
 };

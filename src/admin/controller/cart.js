@@ -185,7 +185,7 @@ module.exports = class extends Base {
     const size = this.post('size') || 10;
     const userId = this.getLoginUserId();
     const model = this.model('cart').alias('c');
-    model.field(['c.*', 'date_format(c.insert_date, \'%Y-%m-%d %H:%i:%s\') insert_date_format', 'g.name group_name', 'g.status group_status']).join({
+    model.field(['c.*', 'date_format(c.insert_date, \'%Y-%m-%d %H:%i\') insert_date_format', 'g.name group_name', 'g.status group_status']).join({
       table: 'group_bill',
       join: 'inner',
       as: 'g',

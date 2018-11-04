@@ -80,6 +80,9 @@ module.exports = class extends Base {
       whereMap['province'] = province;
     }
     const users = await this.model('user').where(whereMap).order(['id DESC']).page(page, size).countSelect();
+    for (const item of users.data) {
+      delete item.password;
+    }
     this.json(users);
   }
 

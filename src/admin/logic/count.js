@@ -54,4 +54,10 @@ module.exports = class extends think.Logic {
       province: {string: true, required: true, trim: true}
     };
   }
+  async userListByProvinceAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      limit: {int: true, trim: true}
+    };
+  }
 };

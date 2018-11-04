@@ -8,7 +8,7 @@ module.exports = class extends think.Model {
     return this.query(`select bd.name,bd.size,bd.price,sum(bill_detail_num) bill_detail_num,sum((bd.price*cd.bill_detail_num)) sum,sum(c.freight) sum_freight,sum(c.lost_back) sum_lost_back,sum(c.damage_back) sum_damage_back from cart c,cart_detail cd,bill_detail bd where c.is_confirm=1 and c.id=cd.cart_id  and cd.bill_detail_id=bd.id and c.group_bill_id=${id} group by name,size,price`);
   }
   countGroupMaterialList(from, to, limit = 10, category = 'hy') {
-    return this.query(`select m.id,count(m.id) count,m.name from bill b,group_bill g,bill_detail bd,material m where g.bill_id=b.id and bd.bill_id=b.id and bd.material_id=m.id and m.category='${category}' and  g.status=0 and g.end_date BETWEEN '${from}' AND '${to}' group by m.id order by count desc limit ${limit}`);
+    return this.query(`select m.id,count(m.id) count,m.name,m.tag from bill b,group_bill g,bill_detail bd,material m where g.bill_id=b.id and bd.bill_id=b.id and bd.material_id=m.id and m.category='${category}' and  g.status=0 and g.end_date BETWEEN '${from}' AND '${to}' group by m.id order by count desc limit ${limit}`);
   }
   countGroupSupplierList(from, to, userId, limit = 10) {
     return this.query(`select b.supplier_id user_id,count(b.supplier_id) count, sum(c.sum) sum ,(select u.name from user u where u.id=b.supplier_id) name  from bill b,group_bill g,cart c where c.group_bill_id=g.id and g.bill_id=b.id and g.status=0 and c.is_pay=1 and b.supplier_id !=32 and ${userId ? 'g.user_id=' + userId : '1=1'} and g.end_date BETWEEN '${from}' AND '${to}' group by b.supplier_id order by count desc limit ${limit}`);
@@ -47,7 +47,7 @@ module.exports = class extends think.Model {
     if (!think.isEmpty(userId)) {
       whereMap['gb.user_id'] = userId;
     }
-    const list = await model.field(['gb.*', 'date_format(gb.end_date, \'%Y-%m-%d %H:%i:%s\') end_date_format', 'gb.bill_id billId', 'b.name bill_name', 'c.name city_name', 'p.name province_name', 'u.name supplier_name'])
+    const list = await model.field(['gb.*', 'date_format(gb.end_date, \'%Y-%m-%d %H:%i\') end_date_format', 'gb.bill_id billId', 'b.name bill_name', 'c.name city_name', 'p.name province_name', 'u.name supplier_name'])
       .join({
         table: 'citys',
         join: 'inner',
