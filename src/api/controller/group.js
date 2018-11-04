@@ -10,6 +10,9 @@ module.exports = class extends Base {
   }
   async getAction() {
     const group = await this.model('group').getGroup(this.post('groupId'));
+    if (group) {
+      group['end_date_format'] = this.service('date', 'api').convertWebDateToSubmitDateTime(group['end_date']);
+    }
     return this.json(group);
   }
   async activityAction() {

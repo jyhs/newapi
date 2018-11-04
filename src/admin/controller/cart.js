@@ -160,19 +160,23 @@ module.exports = class extends Base {
       } else if (Number(group.status) === 0) {
         this.fail('团购已经结束不能操作购物车');
       } else {
-        await this.model('cart').where({id: this.post('cartId')}).update({
-          is_pay: this.post('isPay'),
-          sum: this.post('sum'),
-          description: this.post('description'),
-          status: this.post('status'),
-          freight: this.post('freight'),
-          contacts: this.post('contacts'),
-          address: this.post('address'),
-          province: this.post('province'),
-          city: this.post('city'),
-          is_confirm: this.post('isConfirm')
-        });
-        this.success(true);
+        if (Number(this.post('sum')) === 0 && Number(this.post('isConfirm')) === 1) {
+          this.fail('确认时购物车不能为空');
+        } else {
+          await this.model('cart').where({id: this.post('cartId')}).update({
+            is_pay: this.post('isPay'),
+            sum: this.post('sum'),
+            description: this.post('description'),
+            status: this.post('status'),
+            freight: this.post('freight'),
+            contacts: this.post('contacts'),
+            address: this.post('address'),
+            province: this.post('province'),
+            city: this.post('city'),
+            is_confirm: this.post('isConfirm')
+          });
+          this.success(true);
+        }
       }
     }
   }
@@ -181,13 +185,13 @@ module.exports = class extends Base {
     const size = this.post('size') || 10;
     const userId = this.getLoginUserId();
     const model = this.model('cart').alias('c');
-    model.field(['c.*', 'g.name group_name', 'g.status group_status']).join({
+    model.field(['c.*', 'date_format(c.insert_date, \'%Y-%m-%d %H:%i:%s\') insert_date_format', 'g.name group_name', 'g.status group_status']).join({
       table: 'group_bill',
       join: 'inner',
       as: 'g',
       on: ['c.group_bill_id', 'g.id']
     });
-    const list = await model.where({'c.user_id': userId}).order(['c.id DESC']).page(page, size).countSelect();
+    const list = await model.where({'c.user_id': userId, 'is_confirm': 1}).order(['c.id DESC']).page(page, size).countSelect();
     this.json(list);
   }
   async listByGroupIdAction() {

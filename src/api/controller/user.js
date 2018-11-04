@@ -200,7 +200,6 @@ module.exports = class extends Base {
   async getAvatarAction() {
     const userId = this.get('userId');
     const key = 'getAvatarAction' + userId;
-    const time = {timeout: 24 * 60 * 60 * 1000 * 7};
     const avatar = await this.cache(key);
     if (avatar) {
       this.type = 'image/jpeg';
@@ -219,7 +218,7 @@ module.exports = class extends Base {
           const req = http.request(options, (resUrl) => {
             resUrl.on('data', (chunk) => {
               const decodeImg = Buffer.from(chunk.toString('base64'), 'base64');
-              this.cache(key, resolve(this.body = decodeImg), time);
+              this.cache(key, resolve(this.body = decodeImg));
               this.type = 'image/jpeg';
               resolve(this.body = decodeImg);
             });
@@ -240,17 +239,16 @@ module.exports = class extends Base {
             _type = itm.split('.')[1];
           }
         });
-
         if (path) {
           const image = fs.readFileSync(path);
           const decodeImg = Buffer.from(image.toString('base64'), 'base64');
           this.type = 'image/' + _type;
-          this.cache(key, decodeImg, time);
+          this.cache(key, decodeImg);
           this.body = decodeImg;
         } else {
           const decodeImg = Buffer.from(this.config('image.defaultUserAvatar'), 'base64');
           this.type = 'image/png';
-          this.cache(key, decodeImg, time);
+          this.cache(key, decodeImg);
           this.body = decodeImg;
         };
       }

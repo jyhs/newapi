@@ -13,7 +13,12 @@ module.exports = class extends think.Logic {
       billId: {int: true, required: true, trim: true}
     };
   }
-
+  getCategoryListAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      billId: {int: true, required: true, trim: true}
+    };
+  }
   getDetailByIdAction() {
     this.allowMethods = 'post';
     this.rules = {

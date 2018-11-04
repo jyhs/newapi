@@ -14,6 +14,7 @@ module.exports = class extends Base {
 
     ];
     this.json(category);
+    return category;
   }
   async categoryAllAction() {
     const categorys = [

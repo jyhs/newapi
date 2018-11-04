@@ -90,4 +90,22 @@ module.exports = class extends Base {
     const list = await this.model('group').countGroupMaterialList(from, to, limit, category);
     this.json(list);
   }
+  async userListByProvinceAction() {
+    const user = this.getLoginUser();
+    if (user.type === 'admin' || user.type === 'yhgly') {
+      const list = await this.model('user').userListByProvince();
+      this.json(list);
+    } else {
+      this.json([]);
+    }
+  }
+  async userCityListByProvinceAction() {
+    const user = this.getLoginUser();
+    if (user.type === 'admin' || user.type === 'yhgly') {
+      const list = await this.model('user').userCityListByProvince(this.post('province'));
+      this.json(list);
+    } else {
+      this.json([]);
+    }
+  }
 };

@@ -13,7 +13,7 @@ module.exports = class extends think.Model {
     if (!think.isEmpty(userId)) {
       whereMap['gb.user_id'] = userId;
     }
-    const list = await model.field(['gb.*', 'gb.bill_id billId', 'b.name bill_name', 'c.name city_name', 'p.name province_name', 'u.name supplier_name'])
+    const list = await model.field(['gb.*', 'date_format(gb.end_date, \'%Y-%m-%d %H:%i:%s\') end_date_format', 'gb.bill_id billId', 'b.name bill_name', 'c.name city_name', 'p.name province_name', 'u.name supplier_name'])
       .join({
         table: 'citys',
         join: 'inner',

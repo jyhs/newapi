@@ -34,6 +34,21 @@ module.exports = class extends Base {
     const bill = await model.where({id: id}).find();
     return this.json(bill);
   }
+  async getCategoryListAction() {
+    const billId = this.post('billId');
+    const model = this.model('bill_detail').alias('d');
+    model.field(['d.*']).join({
+      table: 'material',
+      join: 'inner',
+      as: 'm',
+      on: ['d.material_id', 'm.id']
+    });
+    const categoryList = await model.field('distinct m.category code').where({bill_id: billId}).select();
+    const defineCategoryList = await this.controller('material', 'api').categoryAction();
+    const result = _.intersectionBy(defineCategoryList, categoryList, 'code');
+    result.push({'code': 'other', 'name': '未分类', 'desc': ''});
+    return this.json(result);
+  }
 
   async getDetailByIdAction() {
     const id = this.post('detailId');
@@ -54,11 +69,18 @@ module.exports = class extends Base {
     const model = this.model('bill_detail').alias('d');
     model.field(['d.*']).join({
       table: 'material',
-      join: 'inner',
+      join: 'left',
       as: 'm',
       on: ['d.material_id', 'm.id']
     });
-    const list = await model.where({'m.category': this.post('category'), 'd.bill_id': this.post('billId')}).page(page, size).countSelect();
+    const whereMap = {};
+    whereMap['d.bill_id'] = this.post('billId');
+    if (this.post('category') === 'other') {
+      whereMap['d.material_id'] = ['=', null];
+    } else {
+      whereMap['m.category'] = this.post('category');
+    }
+    const list = await model.where(whereMap).page(page, size).countSelect();
     this.json(list);
   }
   async getDetailByBillIdAndTypeAction() {

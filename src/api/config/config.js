@@ -15,6 +15,7 @@ module.exports = {
     'user/getAvatar',
     'game/list',
     'bill/list',
+    'bill/getCategoryList',
     'bill/get',
     'bill/getDetailByBillId',
     'bill/getDetailByBillIdAndCategory',
