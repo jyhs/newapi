@@ -199,11 +199,16 @@ module.exports = class extends Base {
     const size = this.post('size') || 10;
     const groupId = this.post('groupId');
     const model = this.model('cart').alias('c');
-    model.field(['c.*', 'g.name group_name', 'g.status group_status']).join({
+    model.field(['c.*', 'g.name group_name', 'g.status group_status', 'u.name user_name']).join({
       table: 'group_bill',
       join: 'inner',
       as: 'g',
       on: ['c.group_bill_id', 'g.id']
+    }).join({
+      table: 'user',
+      join: 'inner',
+      as: 'u',
+      on: ['c.user_id', 'u.id']
     });
     const list = await model.where({'c.group_bill_id': groupId, 'c.is_confirm': 1}).order(['c.id DESC']).page(page, size).countSelect();
     this.json(list);
