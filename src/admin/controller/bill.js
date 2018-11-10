@@ -170,10 +170,31 @@ module.exports = class extends Base {
     }
   }
   async deleteAction() {
-    await this.model('bill_detail').where({bill_id: this.post('billId')}).delete();
-    await this.model('bill').where({id: this.post('billId')}).delete();
+    const groupList = await this.model('group_bill').where({bill_id: this.post('billId')}).select();
+    if (think.isEmpty(groupList)) {
+      await this.model('bill_detail').where({bill_id: this.post('billId')}).delete();
+      await this.model('bill').where({id: this.post('billId')}).delete();
+    } else {
+      const group = _.find(groupList, (item) => {
+        return Number(item.status) === 1;
+      });
+      if (think.isEmpty(group)) {
+        await this.model('bill_detail').where({bill_id: this.post('billId')}).delete();
+        await this.model('bill').where({id: this.post('billId')}).delete();
+      } else {
+        this.fail('团购还没有结束不能删除');
+      }
+    }
   }
-
+  async updateAction() {
+    const effortDate = this.post('effortDate') ? this.service('date', 'api').convertWebDateToSubmitDateTime(this.post('effortDate')) : null;
+    await this.model('bill').where({id: this.post('billId')}).update({
+      name: this.post('billName'),
+      effort_date: effortDate,
+      description: this.post('description'),
+      supplier_id: this.post('supplierId')
+    });
+  }
   async detailDeleteAction() {
     await this.model('bill_detail').where({id: this.post('billDetailId')}).delete();
   }

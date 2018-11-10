@@ -16,7 +16,7 @@ module.exports = class extends Base {
       on: ['b.supplier_id', 'u.id']
     });
     const where = name ? {'b.name': ['like', `%${name}%`], 'b.is_one_step': 0} : {'b.is_one_step': 0};
-    const list = await model.where(where).order(['b.effort_date DESC']).page(page, size).countSelect();
+    const list = await model.where(where).order(['b.id DESC', 'b.effort_date DESC']).page(page, size).countSelect();
     _.each(list.data, (item) => {
       const efDate = moment(item['effort_date']);
       if (efDate.isAfter(moment())) {

@@ -16,11 +16,12 @@ module.exports = class extends Base {
     let sessionData = await rp(options);
     sessionData = JSON.parse(sessionData);
     this.json(sessionData);
+    return sessionData;
   }
   async sendMessageAction() {
     const options = {
       method: 'POST',
-      url: 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=' + this.post('accessToken'),
+      url: 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=' + this.getTokenAction()['access_token'],
       body: {
         touser: this.post('openId'),
         template_id: 'KuLyRiWNY-DTCKWdUzXQkkG5LOxTP-rNQ3Xjle-xDgg',

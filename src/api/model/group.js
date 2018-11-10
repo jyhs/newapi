@@ -37,13 +37,14 @@ module.exports = class extends think.Model {
         join: 'inner',
         as: 'u',
         on: ['b.supplier_id', 'u.id']
-      }).where(whereMap).order(['gb.id DESC', 'gb.end_date DESC']).page(page, size).countSelect();
+      }).where(whereMap).order(['gb.status DESC', 'gb.id DESC', 'gb.end_date DESC']).page(page, size).countSelect();
     for (const item of list.data) {
       if (item['status'] !== 0) {
         if (moment(item['end_date']).isAfter(moment())) {
           item['status'] = 1;
         } else {
           item['status'] = 0;
+          await this.model('group_bill').where({'id': item['id']}).update({'status': 0});
         }
       }
       const sum = await this.model('cart').getGroupMoneyById(item['id']);

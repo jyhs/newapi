@@ -35,10 +35,10 @@ module.exports = class extends Base {
   }
   async nextAction() {
     const group = await this.model('group_bill').where({id: this.post('groupId')}).find();
-    if (group.status === 0) {
+    if (Number(group.status) === 1) {
       this.fail('请先结束团购');
     } else {
-      const cart = await this.model('cart').field('count(is_pay) count').where({status: 1, is_pay: 0, sum: ['!=', 0], group_bill_id: this.post('groupId')}).find();
+      const cart = await this.model('cart').field('count(is_pay) count').where({status: 1, is_pay: 0, is_confirm: 1, sum: ['!=', 0], group_bill_id: this.post('groupId')}).find();
       if (cart.count > 0) {
         this.fail('鱼友尚未全部支付');
       } else {
@@ -86,7 +86,7 @@ module.exports = class extends Base {
     const effortDate = this.service('date', 'api').convertWebDateToSubmitDateTime(this.post('endDate'));
     if (this.post('endDate') && !moment(effortDate).isAfter(moment())) {
       this.fail('结束日期必须大于今天');
-    } else if (group.status === 0) {
+    } else if (Number(group.status) === 0) {
       this.fail('已经结束的团购单不能更新');
     } else {
       await this.model('group_bill').where({id: this.post('groupId')}).update({

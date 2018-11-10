@@ -12,7 +12,7 @@ module.exports = {
     mini_appid: 'wx6689f1d6479c5425', // 小程序 appid
     mini_secret: '43f4cbef1445051cbbd4edb6c23b0fa2', // 小程序密钥
     public_appid: 'wx6edb9c7695fb8375', // 公众号 appid
-    public_secret: '3e7b1b2235b7fdeed18afbb299a64683', // 公众号密钥
+    public_secret: '3e7b1b2235b7fdeed18afbb299a64683',
     mch_id: '', // 商户帐号ID
     partner_key: '', // 微信支付密钥
     notify_url: '', // 微信异步通知，例：https://www.nideshop.com/api/pay/notify

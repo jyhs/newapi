@@ -37,7 +37,7 @@ module.exports = class extends think.Logic {
       billDetailId: {int: true, required: true, trim: true},
       billDetailNum: {int: true, required: true, trim: true},
       sum: {int: true, required: true, trim: true},
-      freight: {int: true, required: true, trim: true}
+      freight: {float: true, required: true, trim: true}
     };
   }
   lostAddAction() {
@@ -47,7 +47,7 @@ module.exports = class extends think.Logic {
       billDetailId: {int: true, required: true, trim: true},
       billDetailNum: {int: true, required: true, trim: true},
       sum: {int: true, required: true, trim: true},
-      freight: {int: true, required: true, trim: true}
+      freight: {float: true, required: true, trim: true}
     };
   }
   lostSubAction() {
@@ -57,7 +57,7 @@ module.exports = class extends think.Logic {
       billDetailId: {int: true, required: true, trim: true},
       billDetailNum: {int: true, required: true, trim: true},
       sum: {int: true, required: true, trim: true},
-      freight: {int: true, required: true, trim: true}
+      freight: {float: true, required: true, trim: true}
     };
   }
   damageSubAction() {
@@ -67,7 +67,7 @@ module.exports = class extends think.Logic {
       billDetailId: {int: true, required: true, trim: true},
       billDetailNum: {int: true, required: true, trim: true},
       sum: {int: true, required: true, trim: true},
-      freight: {int: true, required: true, trim: true}
+      freight: {float: true, required: true, trim: true}
     };
   }
   updateAction() {
@@ -84,6 +84,13 @@ module.exports = class extends think.Logic {
       city: {string: true, trim: true},
       contacts: {string: true, trim: true},
       description: {string: true, trim: true}
+    };
+  }
+  updatePayAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cartId: {int: true, required: true, trim: true},
+      isPay: {int: true, required: true, trim: true}
     };
   }
   updateDetailAction() {

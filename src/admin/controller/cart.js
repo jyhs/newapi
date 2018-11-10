@@ -8,11 +8,10 @@ module.exports = class extends Base {
     const billDetailNum = this.post('billDetailNum');
     const sum = this.post('sum');
     const freight = this.post('freight');
-    const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId});
-    const lostNum = cartDetail.lost_num + 1;
-    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum, 'bill_detail_number': billDetailNum});
-    const billDetail = await this.model('bill_detail').where({id: billDetailId});
-    const groupDetail = await this.model('cart').alias('c').field(['g.*']).join({
+    const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).find();
+    const lostNum = cartDetail.lost_num - 1;
+    const billDetail = await this.model('bill_detail').where({id: billDetailId}).find();
+    const groupDetail = await this.model('cart').alias('c').field(['g.*', 'c.*']).join({
       table: 'group_bill',
       join: 'inner',
       as: 'g',
@@ -25,8 +24,10 @@ module.exports = class extends Base {
     } else {
       backFreight = tempFreight > groupDetail.top_freight ? groupDetail.top_freight : tempFreight;
     }
-    let lostBack = billDetail.price + cartDetail.lost_back + backFreight;
-    lostBack = lostBack > cartDetail.sum ? cartDetail.sum : lostBack;
+    let lostBack = groupDetail.lost_back - billDetail.price - backFreight;
+    lostBack = lostBack > groupDetail.sum ? groupDetail.sum : lostBack;
+
+    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum, 'bill_detail_num': billDetailNum, 'lost_back_freight': cartDetail.ost_back_freight - billDetail.price - backFreight});
     await this.model('cart').where({id: cartId}).update({'lost_back': lostBack, 'sum': sum, 'freight': freight});
     this.success(true);
   }
@@ -36,11 +37,11 @@ module.exports = class extends Base {
     const billDetailNum = this.post('billDetailNum');
     const sum = this.post('sum');
     const freight = this.post('freight');
-    const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId});
-    const lostNum = cartDetail.lost_num - 1;
-    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum, 'bill_detail_number': billDetailNum});
-    const billDetail = await this.model('bill_detail').where({id: billDetailId});
-    const groupDetail = await this.model('cart').alias('c').field(['g.*']).join({
+    const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).find();
+    const lostNum = cartDetail.lost_num + 1;
+
+    const billDetail = await this.model('bill_detail').where({id: billDetailId}).find();
+    const groupDetail = await this.model('cart').alias('c').field(['g.*', 'c.*']).join({
       table: 'group_bill',
       join: 'inner',
       as: 'g',
@@ -53,8 +54,10 @@ module.exports = class extends Base {
     } else {
       backFreight = tempFreight > groupDetail.top_freight ? groupDetail.top_freight : tempFreight;
     }
-    let lostBack = billDetail.price - cartDetail.lost_back - backFreight;
+    let lostBack = billDetail.price + groupDetail.lost_back + backFreight;
     lostBack = lostBack < 0 ? 0 : lostBack;
+
+    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum, 'bill_detail_num': billDetailNum, 'lost_back_freight': cartDetail.ost_back_freight + billDetail.price + backFreight});
     await this.model('cart').where({id: cartId}).update({'lost_back': lostBack, 'sum': sum, 'freight': freight});
     this.success(true);
   }
@@ -64,12 +67,15 @@ module.exports = class extends Base {
     const billDetailNum = this.post('billDetailNum');
     const sum = this.post('sum');
     const freight = this.post('freight');
-    const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId});
-    const damageNum = cartDetail.damage_num + 1;
-    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum, 'bill_detail_number': billDetailNum});
-    const billDetail = await this.model('bill_detail').where({id: billDetailId});
-    let damageBack = billDetail.price + cartDetail.damage_back;
-    damageBack = damageBack > cartDetail.sum ? cartDetail.sum : damageBack;
+    const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).find();
+    const damageNum = cartDetail.damage_num - 1;
+    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum, 'bill_detail_num': billDetailNum});
+    const billDetail = await this.model('bill_detail').where({id: billDetailId}).find();
+    const cart = await this.model('cart').where({id: cartId}).find();
+    let damageBack = cart.damage_back - billDetail.price;
+    damageBack = damageBack > cart.sum ? cart.sum : damageBack;
+
+    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum, 'bill_detail_num': billDetailNum, 'damage_back_freight': cartDetail.ost_back_freight - billDetail.price});
     await this.model('cart').where({id: cartId}).update({'damage_back': damageBack, 'sum': sum, 'freight': freight});
     this.success(true);
   }
@@ -79,12 +85,15 @@ module.exports = class extends Base {
     const billDetailNum = this.post('billDetailNum');
     const sum = this.post('sum');
     const freight = this.post('freight');
-    const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId});
-    const damageNum = cartDetail.damage_num - 1;
-    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum, 'bill_detail_number': billDetailNum});
-    const billDetail = await this.model('bill_detail').where({id: billDetailId});
-    let damageBack = billDetail.price - cartDetail.damage_back;
+    const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).find();
+    const damageNum = cartDetail.damage_num + 1;
+
+    const billDetail = await this.model('bill_detail').where({id: billDetailId}).find();
+    const cart = await this.model('cart').where({id: cartId}).find();
+    let damageBack = billDetail.price + cart.damage_back;
     damageBack = damageBack < 0 ? 0 : damageBack;
+
+    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum, 'bill_detail_num': billDetailNum, 'damage_back_freight': cartDetail.ost_back_freight + billDetail.price});
     await this.model('cart').where({id: cartId}).update({'damage_back': damageBack, 'sum': sum, 'freight': freight});
     this.success(true);
   }
@@ -109,7 +118,7 @@ module.exports = class extends Base {
       const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
       if (!moment(group.end_date).isAfter(moment())) {
         this.fail('团购已经结束不能操作购物车');
-      } else if (group.status === 0) {
+      } else if (Number(group.status) === 0) {
         this.fail('团购已经结束不能操作购物车');
       } else {
         await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).delete();
@@ -147,6 +156,21 @@ module.exports = class extends Base {
       });
       const cart = await this.model('cart').where({id: cartId}).find();
       this.json(cart);
+    }
+  }
+  async updatePayAction() {
+    const cart = await this.model('cart').where({id: this.post('cartId')}).find();
+    if (think.isEmpty(cart)) {
+      this.fail('请先创建购物车');
+    } else {
+      if (Number(cart['isConfirm']) === 0) {
+        this.fail('鱼友未确认购物车');
+      } else {
+        await this.model('cart').where({id: this.post('cartId')}).update({
+          is_pay: this.post('isPay')
+        });
+        this.success(true);
+      }
     }
   }
   async updateAction() {
@@ -244,7 +268,7 @@ module.exports = class extends Base {
       const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
       if (!moment(group.end_date).isAfter(moment())) {
         this.fail('团购已经结束不能操作购物车');
-      } else if (group.status === 0) {
+      } else if (Number(group.status) === 0) {
         this.fail('团购已经结束不能操作购物车');
       } else {
         const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).find();
@@ -277,7 +301,7 @@ module.exports = class extends Base {
       const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
       if (!moment(group.end_date).isAfter(moment())) {
         this.fail('团购已经结束不能操作购物车');
-      } else if (group.status === 0) {
+      } else if (Number(group.status) === 0) {
         this.fail('团购已经结束不能操作购物车');
       } else {
         await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).add({

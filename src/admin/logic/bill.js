@@ -11,6 +11,16 @@ module.exports = class extends think.Logic {
       billId: {int: true, required: true, trim: true}
     };
   }
+  updateAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      billName: {string: true, trim: true},
+      effortDate: {date: true, trim: true},
+      description: {string: true, trim: true},
+      supplierId: {int: true, trim: true},
+      billId: {int: true, trim: true}
+    };
+  }
   detailAddAction() {
     this.allowMethods = 'post';
     this.rules = {
