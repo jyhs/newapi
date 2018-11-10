@@ -32,6 +32,9 @@ module.exports = class extends Base {
     const id = this.post('billId');
     const model = this.model('bill');
     const bill = await model.where({id: id}).find();
+    if (bill) {
+      bill['effort_date_format'] = this.service('date', 'api').convertWebDateToSubmitDateTime(bill['effort_date']);
+    }
     return this.json(bill);
   }
   async getCategoryListAction() {
@@ -46,7 +49,10 @@ module.exports = class extends Base {
     const categoryList = await model.field('distinct m.category code').where({bill_id: billId}).select();
     const defineCategoryList = await this.controller('material', 'api').categoryAction();
     const result = _.intersectionBy(defineCategoryList, categoryList, 'code');
-    result.push({'code': 'other', 'name': '未分类', 'desc': ''});
+    const count = await this.model('bill_detail').where({bill_id: billId, material_id: ['=', null]}).count();
+    if (count > 0) {
+      result.push({'code': 'other', 'name': '未分类', 'desc': ''});
+    }
     return this.json(result);
   }
 

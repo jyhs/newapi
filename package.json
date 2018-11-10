@@ -9,6 +9,7 @@
     "lint-fix": "eslint --fix src/"
   },
   "dependencies": {
+    "canvas": "^2.0.1",
     "gm": "^1.23.0",
     "http": "^0.0.0",
     "images": "^3.0.1",

@@ -12,8 +12,8 @@ module.exports = class extends think.Service {
    */
   async getUserInfoByCode(code) {
     const queryDate = {
-      appid: think.config('weixin.appid'),
-      secret: think.config('weixin.secret'),
+      appid: think.config('weixin.mini_appid'),
+      secret: think.config('weixin.mini_secret'),
       code: code,
       grant_type: 'authorization_code'
     };
@@ -77,7 +77,7 @@ module.exports = class extends think.Service {
       return '';
     }
 
-    if (decoded.watermark.appid !== think.config('weixin.appid')) {
+    if (decoded.watermark.appid !== think.config('weixin.mini_appid')) {
       return '';
     }
 
@@ -92,7 +92,7 @@ module.exports = class extends think.Service {
   createUnifiedOrder(payInfo) {
     const WeiXinPay = require('weixinpay');
     const weixinpay = new WeiXinPay({
-      appid: think.config('weixin.appid'), // 微信小程序appid
+      appid: think.config('weixin.mini_appid'), // 微信小程序appid
       openid: payInfo.openid, // 用户openid
       mch_id: think.config('weixin.mch_id'), // 商户帐号ID
       partner_key: think.config('weixin.partner_key') // 秘钥

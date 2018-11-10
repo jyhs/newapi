@@ -65,8 +65,8 @@ module.exports = class extends Base {
       qs: {
         grant_type: 'authorization_code',
         code: code,
-        secret: think.config('weixin.secret'),
-        appid: think.config('weixin.appid')
+        secret: think.config('weixin.mini_secret'),
+        appid: think.config('weixin.mini_appid')
       }
     };
 
