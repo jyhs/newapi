@@ -3,8 +3,88 @@ const md5 = require('md5');
 const qs = require('querystring');
 const https = require('https');
 const _ = require('lodash');
-
+const rp = require('request-promise');
 module.exports = class extends think.Service {
+  async getToken() {
+    const options = {
+      method: 'GET',
+      url: 'https://api.weixin.qq.com/cgi-bin/token',
+      qs: {
+        grant_type: 'client_credential',
+        secret: think.config('weixin.public_secret'),
+        appid: think.config('weixin.public_appid')
+      }
+    };
+
+    let sessionData = await rp(options);
+    sessionData = JSON.parse(sessionData);
+    return sessionData;
+  }
+  async sendSubscribeMessage() {
+    const token = await this.service('weiixn').getToken();
+    const options = {
+      method: 'POST',
+      url: 'https://api.weixin.qq.com/cgi-bin/message/template/subscribe?access_token=' + _.values(token)[0],
+      body: {
+        touser: this.post('openId'),
+        template_id: 'MBKFHUw6G4vVktlxqxu4BGRzH8u9xSBRaMDL0dUBJfU',
+        miniprogram: {
+          'appid': 'wx9f635f06da7360d7',
+          'pagepath': 'pages/index/index?type=group&id=1597'
+        },
+        scene: 1000,
+        title: '测试title',
+        data: {
+          content: {
+            value: '测试value',
+            color: '#ff0000'
+          }
+        }
+      },
+      json: true
+    };
+    rp(options);
+  }
+
+  async sendOpenGroupMessage(user, group) {
+    const token = await this.service('weiixn').getToken();
+    const options = {
+      method: 'POST',
+      url: 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=' + _.values(token)[0],
+      body: {
+        touser: user['open_id'],
+        template_id: 'KuLyRiWNY-DTCKWdUzXQkkG5LOxTP-rNQ3Xjle-xDgg',
+        miniprogram: {
+          'appid': 'wx9f635f06da7360d7',
+          'pagepath': 'pages/index/index?type=group&id=1597'
+        },
+        topcolor: '#FF0000',
+        data: {'first': {'value': '礁岩海水 CEO 开团了', 'color': '#173177'}, 'keyword1': {'value': 'york 姚远 开团了', 'color': '#173177'}, 'keyword2': {'value': '2018-11-08', 'color': '#173177'}, 'remark': {'value': 'tony 太牛逼了', 'color': '#173177'}}
+      },
+      json: true
+    };
+    rp(options);
+  }
+
+  async sendOrderMessage(user, group, cart) {
+    const token = await this.service('weiixn').getToken();
+    const options = {
+      method: 'POST',
+      url: 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=' + _.values(token)[0],
+      body: {
+        touser: user['open_id'],
+        template_id: 'KuLyRiWNY-DTCKWdUzXQkkG5LOxTP-rNQ3Xjle-xDgg',
+        miniprogram: {
+          'appid': 'wx9f635f06da7360d7',
+          'pagepath': 'pages/index/index?type=group&id=1597'
+        },
+        topcolor: '#FF0000',
+        data: {'first': {'value': '礁岩海水 CEO 开团了', 'color': '#173177'}, 'keyword1': {'value': 'york 姚远 开团了', 'color': '#173177'}, 'keyword2': {'value': '2018-11-08', 'color': '#173177'}, 'remark': {'value': 'tony 太牛逼了', 'color': '#173177'}}
+      },
+      json: true
+    };
+    rp(options);
+  }
   /**
    * 根据code获得用户信息
    * @param code
