@@ -26,6 +26,20 @@ module.exports = class extends Base {
   }
   async finishAction() {
     await this.model('group_bill').where({id: this.post('groupId')}).update({status: 0});
+    const group = await this.model('group_bill').where({id: this.post('groupId')}).find();
+    const model = this.model('cart').alias('c');
+    model.field(['u.*']).join({
+      table: 'user',
+      join: 'inner',
+      as: 'u',
+      on: ['c.user_id', 'u.id']
+    });
+    const userList = await model.where({'u.openid': ['!=', null], 'c.group_bill_id': this.post('groupId')}).select();
+    const wexinService = this.service('weixin', 'api');
+    const token = await wexinService.getToken();
+    _.each(userList, (item) => {
+      wexinService.sendFinishGroupMessage(_.values(token)[0], item, group);
+    });
     this.success(true);
   }
   async backAction() {
@@ -58,7 +72,7 @@ module.exports = class extends Base {
     if (!moment(effortDate).isAfter(moment())) {
       this.fail('结束日期必须大于今天');
     } else {
-      const groupId = await this.model('group_bill').add({
+      const group = {
         name: this.post('name'),
         contacts: user.name,
         phone: user.phone,
@@ -75,10 +89,15 @@ module.exports = class extends Base {
         province: this.post('province'),
         private: this.post('private'),
         top_freight: this.post('topFreight')
+      };
+      const groupId = await this.model('group_bill').add(group);
+      group['id'] = groupId;
+      const wexinService = this.service('weixin', 'api');
+      const userList = await this.model('user').where({province: user.province, openid: ['!=', null]}).select();
+      const token = await wexinService.getToken();
+      _.each(userList, (item) => {
+        wexinService.sendOpenGroupMessage(_.values(token)[0], item, group);
       });
-      const qrService = this.service('qr', 'api');
-      this.type = 'image/svg+xml';
-      this.body = qrService.getGroupQrById(groupId, false);
     }
   }
   async updateAction() {

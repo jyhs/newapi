@@ -37,22 +37,4 @@ module.exports = class extends Base {
     fs.writeFileSync('/Users/tony/Documents/2.png', canvas.toBuffer());
     images('/Users/tony/Documents/1.jpg').draw(images('/Users/tony/Documents/2.png'), 10, 50).save('/Users/tony/Documents/3.png');
   }
-  getNewline(str) {
-    let bytesCount = 0;
-    let returnStr = '';
-    for (var i = 0, n = str.length; i < n; i++) {
-      var c = str.charCodeAt(i);
-      if ((c >= 0x0001 && c <= 0x007e) || (c >= 0xff60 && c <= 0xff9f)) {
-        bytesCount += 1;
-      } else {
-        bytesCount += 2;
-      }
-      returnStr += str.charAt(i);
-      if (bytesCount >= 20) {
-        returnStr = returnStr + '\n';
-        bytesCount = 0;
-      }
-    }
-    return returnStr;
-  }
 };

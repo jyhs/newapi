@@ -16,9 +16,8 @@ module.exports = class extends think.Service {
       }
     };
 
-    let sessionData = await rp(options);
-    sessionData = JSON.parse(sessionData);
-    return sessionData;
+    const sessionData = await rp(options);
+    return JSON.parse(sessionData);
   }
   async sendSubscribeMessage() {
     const token = await this.service('weiixn').getToken();
@@ -46,20 +45,79 @@ module.exports = class extends think.Service {
     rp(options);
   }
 
-  async sendOpenGroupMessage(user, group) {
-    const token = await this.service('weiixn').getToken();
+  async sendOpenGroupMessage(token, user, group) {
+    let description = '这个团长很懒什么描述都没有';
+    if (!think.isEmpty(group.description)) {
+      description = group.description.replace(/<[^>]+>/g, '');
+    }
     const options = {
       method: 'POST',
-      url: 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=' + _.values(token)[0],
+      url: 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=' + token,
       body: {
-        touser: user['open_id'],
+        touser: user['openid'],
         template_id: 'KuLyRiWNY-DTCKWdUzXQkkG5LOxTP-rNQ3Xjle-xDgg',
         miniprogram: {
           'appid': 'wx9f635f06da7360d7',
-          'pagepath': 'pages/index/index?type=group&id=1597'
+          'pagepath': 'pages/index/index?type=group&id=' + group.id
         },
-        topcolor: '#FF0000',
-        data: {'first': {'value': '礁岩海水 CEO 开团了', 'color': '#173177'}, 'keyword1': {'value': 'york 姚远 开团了', 'color': '#173177'}, 'keyword2': {'value': '2018-11-08', 'color': '#173177'}, 'remark': {'value': 'tony 太牛逼了', 'color': '#173177'}}
+        data: {
+          'first': {'value': `礁岩海水 团长: ${group.contacts} 开团了.`, 'color': '#17233d'},
+          'keyword1': {'value': group.name, 'color': '#2d8cf0'},
+          'keyword2': {'value': group.end_date, 'color': '#17233d'},
+          'remark': {'value': description, 'color': '#ff9900'}
+        }
+      },
+      json: true
+    };
+    rp(options);
+  }
+  async sendAddBillMessage(token, user, bill) {
+    let description = '礁岩海水最新渔场出货单';
+    if (!think.isEmpty(bill.description)) {
+      description = bill.description.replace(/<[^>]+>/g, '');
+    }
+    const options = {
+      method: 'POST',
+      url: 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=' + token,
+      body: {
+        touser: user['openid'],
+        template_id: 'WD1NaoO9bncFhmVKDq49O_t6qc09mp-iEB1x_eS33aY',
+        miniprogram: {
+          'appid': 'wx9f635f06da7360d7',
+          'pagepath': 'pages/index/index?type=bill-detail&id=' + bill.id
+        },
+        data: {
+          'first': {'value': `礁岩海水 管理员: ${bill.contacts} 上传了最新的单子.`, 'color': '#17233d'},
+          'keyword1': {'value': bill.name, 'color': '#2d8cf0'},
+          'keyword2': {'value': 'CORAL-' + bill.id, 'color': '#17233d'},
+          'remark': {'value': description, 'color': '#ff9900'}
+        }
+      },
+      json: true
+    };
+    rp(options);
+  }
+  async sendFinishGroupMessage(token, user, group) {
+    let description = '这个团长很懒什么描述都没有';
+    if (!think.isEmpty(group.description)) {
+      description = group.description.replace(/<[^>]+>/g, '');
+    }
+    const options = {
+      method: 'POST',
+      url: 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=' + token,
+      body: {
+        touser: user['openid'],
+        template_id: 'KLrD5MRG69-AUKWjf8_L8qo6cDTizo2-2o4j-DQ-QIU',
+        miniprogram: {
+          'appid': 'wx9f635f06da7360d7',
+          'pagepath': 'pages/index/index?type=group&id=' + group.id
+        },
+        data: {
+          'first': {'value': `恭喜您，您参加的团购已结束，团长会尽快发货。`, 'color': '#17233d'},
+          'Pingou_ProductName': {'value': group.name, 'color': '#2d8cf0'},
+          'Weixin_ID': {'value': group.contacts, 'color': '#17233d'},
+          'remark': {'value': description, 'color': '#ff9900'}
+        }
       },
       json: true
     };

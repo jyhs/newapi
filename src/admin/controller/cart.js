@@ -187,7 +187,7 @@ module.exports = class extends Base {
         if (Number(this.post('sum')) === 0 && Number(this.post('isConfirm')) === 1) {
           this.fail('确认时购物车不能为空');
         } else {
-          await this.model('cart').where({id: this.post('cartId')}).update({
+          const updateCart = {
             is_pay: this.post('isPay'),
             sum: this.post('sum'),
             description: this.post('description'),
@@ -198,7 +198,14 @@ module.exports = class extends Base {
             province: this.post('province'),
             city: this.post('city'),
             is_confirm: this.post('isConfirm')
-          });
+          };
+          await this.model('cart').where({id: this.post('cartId')}).update(updateCart);
+          // const user = this.getLoginUser();
+          // if (user.id !== group.user_id && Number(updateCart.is_confirm) === 1) {
+          //   const wexinService = this.service('weixin', 'api');
+          //   const grouper = this.model('user').where({id: group.user_id}).find();
+          //   wexinService.sendOrderMessage(grouper, user, group);
+          // }
           this.success(true);
         }
       }

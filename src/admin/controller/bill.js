@@ -143,7 +143,7 @@ module.exports = class extends Base {
         if (_.size(resault.error) > 0) {
           this.fail(resault.error.join('\n'));
         } else {
-          const billId = await this.model('bill').add({
+          const bill = {
             name: billName,
             user_id: userId,
             contacts: user.name,
@@ -151,7 +151,9 @@ module.exports = class extends Base {
             effort_date: effortDate,
             supplier_id: supplierId,
             description: description
-          });
+          };
+          const billId = await this.model('bill').add(bill);
+          bill['id'] = billId;
           for (let i = 1; i <= length; i++) {
             const detail = resaultlist[i - 1];
             detail['bill_id'] = billId;
@@ -160,6 +162,14 @@ module.exports = class extends Base {
             await this.detailAddAction(detail);
 
             if (i === length) {
+              const wexinService = this.service('weixin', 'api');
+              const userList = await this.model('user').where({type: ['IN', ['cjyy', 'cjtz']]}).select();
+              const token = await wexinService.getToken();
+              _.each(userList, (item) => {
+                if (!think.isEmpty(item['openid'])) {
+                  wexinService.sendAddBillMessage(_.values(token)[0], item, bill);
+                }
+              });
               return this.json({ 'bill_id': billId });
             }
           }
