@@ -91,7 +91,9 @@ module.exports = class extends Base {
         top_freight: this.post('topFreight')
       };
       const groupId = await this.model('group_bill').add(group);
+      const city = await await this.model('citys').where({'mark': this.post('city')}).find();
       group['id'] = groupId;
+      group['city_name'] = city.name;
       const wexinService = this.service('weixin', 'api');
       const userList = await this.model('user').where({province: user.province, openid: ['!=', null]}).select();
       const token = await wexinService.getToken();

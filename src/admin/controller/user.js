@@ -136,6 +136,10 @@ module.exports = class extends Base {
       })
       .where(whereMap).order(['u.id DESC']).page(page, size).countSelect();
     for (const item of list.data) {
+      const cartSummary = await this.model('cart').field(['count(id) count', 'IFNULL(sum(sum),0) sum']).where({'user_id': item.id}).find();
+      item['sum'] = cartSummary.sum;
+      item['count'] = cartSummary.sum ? cartSummary.count : cartSummary.sum;
+
       delete item.password;
     }
     this.json(list);

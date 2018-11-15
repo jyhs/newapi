@@ -61,7 +61,7 @@ module.exports = class extends think.Service {
           'pagepath': 'pages/index/index?type=group&id=' + group.id
         },
         data: {
-          'first': {'value': `礁岩海水 团长: ${group.contacts} 开团了.`, 'color': '#17233d'},
+          'first': {'value': `礁岩海水 团长: ${group.contacts} 在 ${group.city_name} 开团了.`, 'color': '#17233d'},
           'keyword1': {'value': group.name, 'color': '#2d8cf0'},
           'keyword2': {'value': group.end_date, 'color': '#17233d'},
           'remark': {'value': description, 'color': '#ff9900'}
