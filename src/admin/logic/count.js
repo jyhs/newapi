@@ -2,7 +2,9 @@ module.exports = class extends think.Logic {
   grossSalesSummaryAction() {
     this.allowMethods = 'post';
     this.rules = {
-      userId: {int: true, required: true, trim: true}
+      userId: {int: true, required: true, trim: true},
+      from: {date: true, trim: true},
+      to: {date: true, trim: true}
     };
   }
   groupSumByYearAction() {

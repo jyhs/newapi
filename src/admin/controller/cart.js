@@ -1,5 +1,6 @@
 const Base = require('./base.js');
 const moment = require('moment');
+const _ = require('lodash');
 
 module.exports = class extends Base {
   async lostAddAction() {
@@ -27,7 +28,7 @@ module.exports = class extends Base {
     let lostBack = groupDetail.lost_back - billDetail.price - backFreight;
     lostBack = lostBack > groupDetail.sum ? groupDetail.sum : lostBack;
 
-    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum, 'bill_detail_num': billDetailNum, 'lost_back_freight': cartDetail.ost_back_freight - billDetail.price - backFreight});
+    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum, 'bill_detail_num': billDetailNum, 'lost_back_freight': cartDetail.lost_back_freight - billDetail.price - backFreight});
     await this.model('cart').where({id: cartId}).update({'lost_back': lostBack, 'sum': sum, 'freight': freight});
     this.success(true);
   }
@@ -57,7 +58,7 @@ module.exports = class extends Base {
     let lostBack = billDetail.price + groupDetail.lost_back + backFreight;
     lostBack = lostBack < 0 ? 0 : lostBack;
 
-    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum, 'bill_detail_num': billDetailNum, 'lost_back_freight': cartDetail.ost_back_freight + billDetail.price + backFreight});
+    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'lost_num': lostNum, 'bill_detail_num': billDetailNum, 'lost_back_freight': cartDetail.lost_back_freight + billDetail.price + backFreight});
     await this.model('cart').where({id: cartId}).update({'lost_back': lostBack, 'sum': sum, 'freight': freight});
     this.success(true);
   }
@@ -75,7 +76,7 @@ module.exports = class extends Base {
     let damageBack = cart.damage_back - billDetail.price;
     damageBack = damageBack > cart.sum ? cart.sum : damageBack;
 
-    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum, 'bill_detail_num': billDetailNum, 'damage_back_freight': cartDetail.ost_back_freight - billDetail.price});
+    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum, 'bill_detail_num': billDetailNum, 'damage_back_freight': 0});
     await this.model('cart').where({id: cartId}).update({'damage_back': damageBack, 'sum': sum, 'freight': freight});
     this.success(true);
   }
@@ -93,7 +94,7 @@ module.exports = class extends Base {
     let damageBack = billDetail.price + cart.damage_back;
     damageBack = damageBack < 0 ? 0 : damageBack;
 
-    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum, 'bill_detail_num': billDetailNum, 'damage_back_freight': cartDetail.ost_back_freight + billDetail.price});
+    await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({'damage_num': damageNum, 'bill_detail_num': billDetailNum, 'damage_back_freight': 0});
     await this.model('cart').where({id: cartId}).update({'damage_back': damageBack, 'sum': sum, 'freight': freight});
     this.success(true);
   }
@@ -214,23 +215,39 @@ module.exports = class extends Base {
   async listAction() {
     const page = this.post('page') || 1;
     const size = this.post('size') || 10;
-    const userId = this.getLoginUserId();
+    const userId = this.post('userId') ? this.post('userId') : this.getLoginUserId();
     const model = this.model('cart').alias('c');
-    model.field(['c.*', 'date_format(c.insert_date, \'%Y-%m-%d %H:%i\') insert_date_format', 'g.name group_name', 'g.status group_status']).join({
-      table: 'group_bill',
-      join: 'inner',
-      as: 'g',
-      on: ['c.group_bill_id', 'g.id']
-    });
+    model.field(['c.*', 'u.type user_type', 'date_format(c.insert_date, \'%Y-%m-%d %H:%i\') insert_date_format', 'g.name group_name', 'g.status group_status', 'g.contacts group_user_name', 'g.user_id group_user_id'])
+      .join({
+        table: 'group_bill',
+        join: 'inner',
+        as: 'g',
+        on: ['c.group_bill_id', 'g.id']
+      })
+      .join({
+        table: 'user',
+        join: 'inner',
+        as: 'u',
+        on: ['g.user_id', 'u.id']
+      });
     const list = await model.where({'c.user_id': userId, 'is_confirm': 1}).order(['c.id DESC']).page(page, size).countSelect();
+    _.each(list.data, (item) => {
+      item['total'] = Number(item['sum']) + Number(item['freight']);
+      if (item['user_type'] === 'lss' || item['user_type'] === 'lss') {
+        item['is_group'] = false;
+      } else {
+        item['is_group'] = true;
+      }
+    });
     this.json(list);
   }
+
   async listByGroupIdAction() {
     const page = this.post('page') || 1;
     const size = this.post('size') || 10;
     const groupId = this.post('groupId');
     const model = this.model('cart').alias('c');
-    model.field(['c.*', 'g.name group_name', 'g.status group_status', 'u.name user_name']).join({
+    model.field(['c.*', 'g.name group_name', 'g.status group_status', 'u.name user_name', 'u.type user_type']).join({
       table: 'group_bill',
       join: 'inner',
       as: 'g',
@@ -242,6 +259,14 @@ module.exports = class extends Base {
       on: ['c.user_id', 'u.id']
     });
     const list = await model.where({'c.group_bill_id': groupId, 'c.is_confirm': 1}).order(['c.id DESC']).page(page, size).countSelect();
+    _.each(list.data, (item) => {
+      item['total'] = Number(item['sum']) + Number(item['freight']);
+      if (item['user_type'] === 'lss' || item['user_type'] === 'lss') {
+        item['is_group'] = false;
+      } else {
+        item['is_group'] = true;
+      }
+    });
     this.json(list);
   }
   async updateDetailAction() {

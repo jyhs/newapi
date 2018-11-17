@@ -25,7 +25,8 @@ module.exports = class extends Base {
     this.body = qrService.getGroupQrById(groupId, true);
   }
   async finishAction() {
-    await this.model('group_bill').where({id: this.post('groupId')}).update({status: 0});
+    const endDate = this.service('date', 'api').convertWebDateToSubmitDateTime();
+    await this.model('group_bill').where({id: this.post('groupId')}).update({status: 0, 'end_date': endDate});
     const group = await this.model('group_bill').where({id: this.post('groupId')}).find();
     const model = this.model('cart').alias('c');
     model.field(['u.*']).join({
@@ -95,7 +96,7 @@ module.exports = class extends Base {
       group['id'] = groupId;
       group['city_name'] = city.name;
       const wexinService = this.service('weixin', 'api');
-      const userList = await this.model('user').where({province: user.province, openid: ['!=', null]}).select();
+      const userList = await this.model('user').where({province: group.province, openid: ['!=', null]}).select();
       const token = await wexinService.getToken();
       _.each(userList, (item) => {
         wexinService.sendOpenGroupMessage(_.values(token)[0], item, group);

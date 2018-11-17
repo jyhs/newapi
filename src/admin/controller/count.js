@@ -10,21 +10,41 @@ module.exports = class extends Base {
     } else {
       userId = null;
     }
-    const sum = await this.model('cart').where(whereMap).sum('sum') || 0;
-    whereMap['status'] = 0;
+    let from = null;
+    let to = null;
+    if (this.post('from') && this.post('to')) {
+      from = this.service('date', 'api').convertWebDateToSubmitDate(this.post('from'));
+      to = this.service('date', 'api').convertWebDateToSubmitDate(this.post('to'));
+    }
+
+    if (from && to) {
+      whereMap['end_date'] = ['BETWEEN', from, `DATE_ADD('${to}',INTERVAL 1 DAY)`];
+    } else {
+      whereMap['end_date'] = ['<', 'DATE_ADD(now(),INTERVAL 1 DAY)'];
+    }
+
+    const model = this.model('cart').alias('c');
+    model.field(['sum(c.sum+c.freight) sum']).join({
+      table: 'group_bill',
+      join: 'inner',
+      as: 'g',
+      on: ['g.id', 'c.group_bill_id']
+    });
+    const groupSum = await model.where({'g.user_id': userId, 'c.is_pay': 1}).find() || 0;
     const groupId = await this.model('group_bill').where(whereMap).max('id');
-    const lastSum = await this.model('cart').where({group_bill_id: groupId}).sum('sum') || 0;
+    const lastSum = await this.model('cart').field(['sum(sum+freight) sum']).where({'group_bill_id': groupId, 'is_pay': 1}).find() || 0;
+
     const sumThisWeekGroup = await this.model('group').sumThisWeekGroup(userId);
     const sumLastWeekGroup = await this.model('group').sumLastWeekGroup(userId);
     const sumThisMonthGroup = await this.model('group').sumThisMonthGroup(userId);
     const sumLastMonthGroup = await this.model('group').sumLastMonthGroup(userId);
     this.json({
-      sum: sum,
-      lastSum: lastSum,
-      week: Math.round(Math.abs(sumThisWeekGroup[0].sum - sumLastWeekGroup[0].sum) / (sumLastWeekGroup[0].sum + 1)) * 100,
+      sum: groupSum.sum || 0,
+      lastSum: lastSum.sum || 0,
+      week: Math.round(Math.abs(sumThisWeekGroup[0].sum - sumLastWeekGroup[0].sum) / (sumLastWeekGroup[0].sum + 1)) / 100,
       weekUp: sumThisWeekGroup[0].sum - sumLastWeekGroup[0].sum >= 0,
-      month: Math.round(Math.abs(sumThisMonthGroup[0].sum - sumLastMonthGroup[0].sum) / (sumLastMonthGroup[0].sum + 1)) * 100,
-      monthUp: sumLastMonthGroup[0].sum - sumThisMonthGroup[0].sum >= 0
+      month: Math.round(Math.abs(sumThisMonthGroup[0].sum - sumLastMonthGroup[0].sum) / (sumLastMonthGroup[0].sum + 1)) / 100,
+      monthUp: sumThisMonthGroup[0].sum - sumLastMonthGroup[0].sum >= 0
     });
   }
   async groupSumByYearAction() {
@@ -38,7 +58,7 @@ module.exports = class extends Base {
     const list = await this.model('group').sumGroup(from, to, userId);
     const obj = {};
     _.each(list, (item) => {
-      obj[item.date] = item.sum;
+      obj[item.date] = Number(item.sum);
     });
     this.json(obj);
   }

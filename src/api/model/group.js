@@ -54,7 +54,7 @@ module.exports = class extends think.Model {
   }
   async getGroup(id) {
     const model = this.model('group_bill').alias('gb');
-    const group = await model.field(['gb.*', 'c.name city', 'p.name province', 'u.name supplier_name'])
+    const group = await model.field(['gb.*', 'c.name city', 'p.name province'])
       .join({
         table: 'citys',
         join: 'inner',
@@ -66,18 +66,6 @@ module.exports = class extends think.Model {
         join: 'inner',
         as: 'p',
         on: ['gb.province', 'p.code']
-      })
-      .join({
-        table: 'bill',
-        join: 'inner',
-        as: 'b',
-        on: ['gb.bill_id', 'b.id']
-      })
-      .join({
-        table: 'user',
-        join: 'inner',
-        as: 'u',
-        on: ['b.supplier_id', 'u.id']
       }).where({'gb.id': id}).order(['gb.id DESC', 'gb.end_date DESC']).find();
 
     if (group['status'] !== 0) {
@@ -85,10 +73,27 @@ module.exports = class extends think.Model {
         group['status'] = 1;
       } else {
         group['status'] = 0;
+        await this.model('group_bill_id').where({'id': id}).update({'status': 0});
       }
     }
 
-    const sum = await this.model('cart').getGroupMoneyById(group['id']);
+    const billModel = this.model('bill').alias('b');
+    const supplierNameObj = await billModel.field(['u.name supplierName'])
+      .join({
+        table: 'group_bill',
+        join: 'inner',
+        as: 'g',
+        on: ['g.bill_id', 'b.id']
+      })
+      .join({
+        table: 'user',
+        join: 'inner',
+        as: 'u',
+        on: ['b.supplier_id', 'u.id']
+      }).where({'g.id': id}).find();
+    group['supplierName'] = supplierNameObj ? supplierNameObj.supplierName : '';
+
+    const sum = await this.model('cart').getGroupMoneyById(id);
     group['sum'] = sum;
     return group;
   }
