@@ -4,7 +4,7 @@ module.exports = class extends think.Model {
    * @returns {Promise.<*>}
    */
   async getGroupMoneyById(id) {
-    const sumObj = await this.model('cart').field(['sum(sum+freight) sum']).where({group_bill_id: id}).find();
+    const sumObj = await this.model('cart').field(['sum(sum+freight) sum']).where({'group_bill_id': id, 'is_confirm': 1}).find();
     return sumObj.sum || 0;
   }
 };

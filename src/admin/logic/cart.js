@@ -35,9 +35,7 @@ module.exports = class extends think.Logic {
     this.rules = {
       cartId: {int: true, required: true, trim: true},
       billDetailId: {int: true, required: true, trim: true},
-      billDetailNum: {int: true, required: true, trim: true},
-      sum: {int: true, required: true, trim: true},
-      freight: {float: true, required: true, trim: true}
+      billDetailNum: {int: true, required: true, trim: true}
     };
   }
   lostAddAction() {
@@ -45,9 +43,7 @@ module.exports = class extends think.Logic {
     this.rules = {
       cartId: {int: true, required: true, trim: true},
       billDetailId: {int: true, required: true, trim: true},
-      billDetailNum: {int: true, required: true, trim: true},
-      sum: {int: true, required: true, trim: true},
-      freight: {float: true, required: true, trim: true}
+      billDetailNum: {int: true, required: true, trim: true}
     };
   }
   lostSubAction() {
@@ -55,9 +51,7 @@ module.exports = class extends think.Logic {
     this.rules = {
       cartId: {int: true, required: true, trim: true},
       billDetailId: {int: true, required: true, trim: true},
-      billDetailNum: {int: true, required: true, trim: true},
-      sum: {int: true, required: true, trim: true},
-      freight: {float: true, required: true, trim: true}
+      billDetailNum: {int: true, required: true, trim: true}
     };
   }
   damageSubAction() {
@@ -65,9 +59,7 @@ module.exports = class extends think.Logic {
     this.rules = {
       cartId: {int: true, required: true, trim: true},
       billDetailId: {int: true, required: true, trim: true},
-      billDetailNum: {int: true, required: true, trim: true},
-      sum: {int: true, required: true, trim: true},
-      freight: {float: true, required: true, trim: true}
+      billDetailNum: {int: true, required: true, trim: true}
     };
   }
   updateAction() {
@@ -149,6 +141,12 @@ module.exports = class extends think.Logic {
       cartId: {int: true, required: true, trim: true},
       page: {int: true, required: true, trim: true},
       size: {int: true, required: true, trim: true}
+    };
+  }
+  createOrderAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cartId: {int: true, required: true, trim: true}
     };
   }
 };

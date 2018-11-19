@@ -61,8 +61,8 @@ module.exports = class extends think.Service {
           'pagepath': 'pages/index/index?type=group&id=' + group.id
         },
         data: {
-          'first': {'value': `礁岩海水 团长: ${group.contacts} 在 ${group.city_name} 开团了.`, 'color': '#17233d'},
-          'keyword1': {'value': group.name, 'color': '#2d8cf0'},
+          'first': {'value': `礁岩海水 团长: ${group.contacts} 在 ${group.city_name} 开团了.`, 'color': '#2d8cf0'},
+          'keyword1': {'value': group.name, 'color': '#17233d'},
           'keyword2': {'value': group.end_date, 'color': '#17233d'},
           'remark': {'value': description, 'color': '#ff9900'}
         }
@@ -222,12 +222,128 @@ module.exports = class extends think.Service {
     return decoded;
   }
 
-  /**
-   * 统一下单
-   * @param payInfo
-   * @returns {Promise}
-   */
-  createUnifiedOrder(payInfo) {
+  async createUnifiedOrder(payInfo) {
+    const orderNo = payInfo.orderNo;
+    const appId = think.config('weixin.public_appid');
+    const attach = '礁岩海水团购网';
+    const mchId = think.config('weixin.mch_id');
+    const nonceStr = Math.random().toString(36).substr(2, 15);
+    const totalFee = payInfo.totalFee;
+    const notifyUrl = 'https://api2.huanjiaohu.com/notice/handleWxNotify';
+    const openid = payInfo.openid;
+    const ip = payInfo.ip;
+    const body = payInfo.body;
+    const timeStamp = parseInt(new Date().getTime() / 1000) + '';
+    const url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
+    let formData = '<xml>';
+    formData += '<appid>' + appId + '</appid>'; // appid
+    formData += '<attach>' + attach + '</attach>'; // 附加数据
+    formData += '<body>' + body + '</body>';
+    formData += '<mch_id>' + mchId + '</mch_id>'; // 商户号
+    formData += '<nonce_str>' + nonceStr + '</nonce_str>'; // 随机字符串，不长于32位。
+    formData += '<notify_url>' + notifyUrl + '</notify_url>';
+    formData += '<openid>' + openid + '</openid>';
+    formData += '<out_trade_no>' + orderNo + '</out_trade_no>';
+    formData += '<spbill_create_ip>' + ip + '</spbill_create_ip>';
+    formData += '<total_fee>' + totalFee + '</total_fee>';
+    formData += '<trade_type>JSAPI</trade_type>';
+    formData += '<sign>' + this.paysignjsapi(appId, attach, body, mchId, nonceStr, notifyUrl, openid, orderNo, ip, totalFee, 'JSAPI') + '</sign>';
+    formData += '</xml>';
+    const options = {
+      method: 'POST',
+      url: url,
+      body: formData,
+      json: true
+    };
+    const orderResult = await rp(options);
+    console.log(orderResult);
+    const _prepayId = this.getXMLNodeValue('prepay_id', orderResult);
+    if (_prepayId) {
+      const tmp = _prepayId.split('[');
+      const tmp1 = tmp[2].split(']');
+      const prepayId = 'prepay_id=' + tmp1[0];
+      const paySignjs = this.paysignjs(appId, nonceStr, prepayId, 'MD5', timeStamp);
+
+      return {
+        'appId': appId, // 公众号名称，由商户传入
+        'timeStamp': timeStamp, // 时间戳，自1970年以来的秒数
+        'nonceStr': nonceStr, // 随机串
+        'package': prepayId,
+        'signType': 'MD5', // 微信签名方式：
+        'paySign': paySignjs // 微信签名
+      };
+    } else {
+      let errorDes = this.getXMLNodeValue('err_code_des', orderResult);
+      if (!errorDes) {
+        errorDes = this.getXMLNodeValue('return_msg', orderResult);
+      }
+      const tmp = errorDes.split('[');
+      const tmp1 = tmp[2].split(']');
+      const error = tmp1[0];
+      return {
+        error
+      };
+    }
+  }
+
+  paysignjs(appid, nonceStr, prepayId, signType, timeStamp) {
+    var ret = {
+      appId: appid,
+      nonceStr: nonceStr,
+      package: prepayId,
+      signType: signType,
+      timeStamp: timeStamp
+    };
+    var string = this.raw(ret);
+    var key = think.config('weixin.partner_key');
+    string = string + '&key=' + key;
+    var crypto = require('crypto');
+    return crypto.createHash('md5').update(string, 'utf8').digest('hex');
+  };
+
+  getXMLNodeValue(nodeName, xml) {
+    var tmp = xml.split('<' + nodeName + '>');
+    var _tmp = tmp[1].split('</' + nodeName + '>');
+    return _tmp[0];
+  }
+
+  paysignjsapi(appId, attach, body, mchId, nonceStr, notifyUrl, openid, orderNo, ip, totalFee, tradeType) {
+    var ret = {
+      appid: appId,
+      attach: attach,
+      body: body,
+      mch_id: mchId,
+      nonce_str: nonceStr,
+      notify_url: notifyUrl,
+      openid: openid,
+      out_trade_no: orderNo,
+      spbill_create_ip: ip,
+      total_fee: totalFee,
+      trade_type: tradeType
+    };
+    var string = this.raw(ret);
+    var key = think.config('weixin.partner_key');
+    string = string + '&key=' + key;
+    var crypto = require('crypto');
+    return crypto.createHash('md5').update(string, 'utf8').digest('hex');
+  };
+
+  raw(args) {
+    var keys = Object.keys(args);
+    keys = keys.sort();
+    var newArgs = {};
+    keys.forEach(function(key) {
+      newArgs[key] = args[key];
+    });
+    var string = '';
+    for (var k in newArgs) {
+      string += '&' + k + '=' + newArgs[k];
+    }
+    string = string.substr(1);
+    return string;
+  };
+
+  createUnifiedOrderForMinProgram(payInfo) {
     const WeiXinPay = require('weixinpay');
     const weixinpay = new WeiXinPay({
       appid: think.config('weixin.mini_appid'), // 微信小程序appid

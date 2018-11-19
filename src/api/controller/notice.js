@@ -10,6 +10,14 @@ module.exports = class extends Base {
     await this.model('focus').add(notice);
   }
 
+  async handleWxNotifyAction() {
+    // console.log(this.ctx.req);
+    console.log('============');
+    console.log(this.ctx.body);
+    this.type = 'text/plain; charset=utf-8';
+    this.body = '<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
+  }
+
   async checkAction() {
     const notice = await this.model('focus').where({'user_id': this.getLoginUserId(), 'notice_id': this.post('noticeId')}).find();
     if (think.isEmpty(notice)) {

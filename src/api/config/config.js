@@ -23,6 +23,7 @@ module.exports = {
     'group/get',
     'ad/getNumber',
     'notice/get',
+    'notice/handleWxNotify',
     'notice/check',
     'location/getChina',
     'location/getProvinces',

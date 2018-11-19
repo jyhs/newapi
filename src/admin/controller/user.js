@@ -1,7 +1,7 @@
 const Base = require('./base.js');
 const fs = require('fs');
 const md5 = require('md5');
-// const images = require('images');
+const images = require('images');
 module.exports = class extends Base {
   async updateAction() {
     const userId = this.post('userId');
@@ -65,9 +65,9 @@ module.exports = class extends Base {
     const tempPath = this.config('image.user') + '/temp/' + name;
     fs.renameSync(avatar.path, tempPath);
     await this.cache('getAvatarAction' + id, null);
-    // images(tempPath + '').size(150).save(this.config('image.user') + '/' + name, {
-    //   quality: 75
-    // });
+    images(tempPath + '').size(150).save(this.config('image.user') + '/' + name, {
+      quality: 75
+    });
   }
 
   async getByTypeAction() {
@@ -136,7 +136,7 @@ module.exports = class extends Base {
       })
       .where(whereMap).order(['u.id DESC']).page(page, size).countSelect();
     for (const item of list.data) {
-      const cartSummary = await this.model('cart').field(['count(id) count', 'IFNULL(sum(sum),0) sum']).where({'user_id': item.id, 'is_pay': 1, 'is_confirm': 1}).find();
+      const cartSummary = await this.model('cart').field(['count(id) count', 'IFNULL(sum(sum+freight),0) sum']).where({'user_id': item.id, 'is_pay': 1, 'is_confirm': 1}).find();
       item['sum'] = cartSummary.sum;
       item['count'] = cartSummary.sum ? cartSummary.count : cartSummary.sum;
 
