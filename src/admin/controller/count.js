@@ -5,10 +5,10 @@ module.exports = class extends Base {
     let userId = this.post('userId');
     const user = this.getLoginUser();
     const whereMap = {};
-    if (user.type !== 'admin' || user.type !== 'tggly') {
-      whereMap['user_id'] = userId;
-    } else {
+    if (user.type === 'admin' || user.type === 'tggly') {
       userId = null;
+    } else {
+      whereMap['g.user_id'] = userId;
     }
     let from = null;
     let to = null;
@@ -18,9 +18,9 @@ module.exports = class extends Base {
     }
 
     if (from && to) {
-      whereMap['end_date'] = ['BETWEEN', from, `DATE_ADD('${to}',INTERVAL 1 DAY)`];
+      whereMap['g.end_date'] = ['BETWEEN', from, to];
     } else {
-      whereMap['end_date'] = ['<', 'DATE_ADD(now(),INTERVAL 1 DAY)'];
+      whereMap['g.end_date'] = ['<', 'now()'];
     }
 
     const model = this.model('cart').alias('c');
@@ -30,10 +30,13 @@ module.exports = class extends Base {
       as: 'g',
       on: ['g.id', 'c.group_bill_id']
     });
-    const groupSum = await model.where({'g.user_id': userId, 'c.is_pay': 1}).find() || 0;
-    const groupId = await this.model('group_bill').where(whereMap).max('id');
-    const lastSum = await this.model('cart').field(['sum(sum+freight) sum']).where({'group_bill_id': groupId, 'is_pay': 1}).find() || 0;
+    console.log(whereMap);
 
+    const groupSum = await model.where(whereMap).find() || 0;
+    console.log(groupSum);
+
+    const groupId = await this.model('group_bill').alias('g').where(whereMap).max('id');
+    const lastSum = await this.model('cart').field(['sum(sum) sum']).where({'group_bill_id': groupId}).find() || 0;
     const sumThisWeekGroup = await this.model('group').sumThisWeekGroup(userId);
     const sumLastWeekGroup = await this.model('group').sumLastWeekGroup(userId);
     const sumThisMonthGroup = await this.model('group').sumThisMonthGroup(userId);
