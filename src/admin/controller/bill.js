@@ -133,7 +133,16 @@ module.exports = class extends Base {
                 break;
             }
           }
-          list.push(item);
+          const fish = _.find(list, (_item) => {
+            if (_item['name'] === item['name'] && _item['size'] === item['size'] && _item['price'] === item['price']) {
+              return _item;
+            }
+          });
+          if (think.isEmpty(fish)) {
+            list.push(item);
+          } else {
+            errorList.push('名称是' + fish['name'] + '的生物尺寸价格重复');
+          }
         }
       }
       const resault = {'flag': flag, 'list': list, 'error': errorList};
