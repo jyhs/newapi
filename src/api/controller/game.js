@@ -20,9 +20,9 @@ module.exports = class extends Base {
     }
   }
   async listAction() {
-    const totle = await this.model('game').totleRanking();
+    const day = await this.model('game').dayRanking();
     const week = await this.model('game').weekRanking();
     const month = await this.model('game').monthRanking();
-    this.json({ totle: totle, week: week, month: month });
+    this.json({ day: day, week: week, month: month });
   }
 };
