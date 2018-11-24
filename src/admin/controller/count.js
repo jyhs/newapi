@@ -6,7 +6,7 @@ module.exports = class extends Base {
     const user = this.getLoginUser();
     const whereMap = {};
     if (user.type === 'admin' || user.type === 'tggly') {
-      const loginUserId = this.getLoginUserId;
+      const loginUserId = this.getLoginUserId();
       if (Number(loginUserId) !== Number(userId)) {
         whereMap['g.user_id'] = userId;
       } else {
@@ -35,6 +35,7 @@ module.exports = class extends Base {
       as: 'g',
       on: ['g.id', 'c.group_bill_id']
     });
+
     const groupSum = await model.where(whereMap).find() || 0;
     const groupId = await this.model('group_bill').alias('g').where(whereMap).max('id');
     const lastSum = await this.model('cart').field(['sum(sum) sum']).where({'group_bill_id': groupId}).find() || 0;
@@ -62,7 +63,7 @@ module.exports = class extends Base {
     let userId = this.post('userId');
     const user = this.getLoginUser();
     if (user.type === 'admin' || user.type === 'tggly') {
-      const loginUserId = this.getLoginUserId;
+      const loginUserId = this.getLoginUserId();
       if (Number(loginUserId) === Number(userId)) {
         userId = null;
       }
@@ -81,7 +82,7 @@ module.exports = class extends Base {
     let userId = this.post('userId');
     const user = this.getLoginUser();
     if (user.type === 'admin' || user.type === 'tggly') {
-      const loginUserId = this.getLoginUserId;
+      const loginUserId = this.getLoginUserId();
       if (Number(loginUserId) === Number(userId)) {
         userId = null;
       }
@@ -104,7 +105,7 @@ module.exports = class extends Base {
     let userId = this.post('userId');
     const user = this.getLoginUser();
     if (user.type === 'admin' || user.type === 'tggly') {
-      const loginUserId = this.getLoginUserId;
+      const loginUserId = this.getLoginUserId();
       if (Number(loginUserId) === Number(userId)) {
         userId = null;
       }
@@ -122,7 +123,7 @@ module.exports = class extends Base {
     let userId = this.post('userId');
     const user = this.getLoginUser();
     if (user.type === 'admin' || user.type === 'tggly') {
-      const loginUserId = this.getLoginUserId;
+      const loginUserId = this.getLoginUserId();
       if (Number(loginUserId) === Number(userId)) {
         userId = null;
       }
