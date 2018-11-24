@@ -3,6 +3,10 @@ module.exports = class extends think.Model {
     const totle = 'select level,title,time,u.name,u.headimgurl from game g,user u where g.user_id=u.id  order by level desc,time asc limit 50';
     return this.execute(totle);
   }
+  dayRanking() {
+    const week = 'select level,title,time,u.name,u.headimgurl from game g,user u where g.user_id=u.id and to_days(g.insert_date) = to_days(now())  order by level desc,time asc limit 50';
+    return this.execute(week);
+  }
   weekRanking() {
     const week = 'select level,title,time,u.name,u.headimgurl from game g,user u where g.user_id=u.id and YEARWEEK(date_format(g.insert_date,\'%Y-%m-%d\') - INTERVAL 1 DAY) = YEARWEEK(now() - INTERVAL 1 DAY)  order by level desc,time asc limit 50';
     return this.execute(week);
