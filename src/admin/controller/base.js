@@ -15,22 +15,19 @@ module.exports = class extends think.Controller {
       } else if (userId && Number(userId) !== Number(this.ctx.state.user.id)) {
         if (this.ctx.state.user.type === 'yy') {
           return this.fail(401, '无权访问');
-        }
-        if (this.ctx.state.user.type !== 'admin') {
-          if (this.ctx.controller === 'ad') {
+        } else if (this.ctx.state.user.type !== 'admin') {
+          if (this.ctx.controller === 'ad' && this.ctx.state.user.type !== 'xtgly') {
             return this.fail(401, '无权访问');
           }
-        }
-        if (this.ctx.state.user.type !== 'admin' && this.ctx.state.user.type !== 'tggly') {
-          if (this.ctx.controller === 'group' || this.ctx.controller === 'cart' || this.ctx.controller === 'bill') {
+          if ((this.ctx.controller === 'group' || this.ctx.controller === 'cart' || this.ctx.controller === 'bill') && this.ctx.state.user.type !== 'tggly') {
             return this.fail(401, '无权访问');
           }
-        }
-        if (this.ctx.controller === 'user' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'yhgly')) {
-          return this.fail(401, '无权访问');
-        }
-        if (this.ctx.controller === 'material' && !(this.ctx.state.user.type === 'admin' || this.ctx.state.user.type === 'bkgly')) {
-          return this.fail(401, '无权访问');
+          if (this.ctx.controller === 'user' && this.ctx.state.user.type !== 'yhgly') {
+            return this.fail(401, '无权访问');
+          }
+          if (this.ctx.controller === 'material' && this.ctx.state.user.type !== 'bkgly') {
+            return this.fail(401, '无权访问');
+          }
         }
       }
     }

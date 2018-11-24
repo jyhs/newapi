@@ -5,10 +5,15 @@ module.exports = class extends Base {
     let userId = this.post('userId');
     const user = this.getLoginUser();
     const whereMap = {};
-    if (user.type !== 'admin' || user.type !== 'tggly') {
-      whereMap['user_id'] = userId;
+    if (user.type === 'admin' || user.type === 'tggly') {
+      const loginUserId = this.getLoginUserId;
+      if (Number(loginUserId) !== Number(userId)) {
+        whereMap['g.user_id'] = userId;
+      } else {
+        userId = null;
+      }
     } else {
-      userId = null;
+      whereMap['g.user_id'] = userId;
     }
     let from = null;
     let to = null;
@@ -18,9 +23,9 @@ module.exports = class extends Base {
     }
 
     if (from && to) {
-      whereMap['end_date'] = ['BETWEEN', from, `DATE_ADD('${to}',INTERVAL 1 DAY)`];
+      whereMap['g.end_date'] = ['BETWEEN', from, to];
     } else {
-      whereMap['end_date'] = ['<', 'DATE_ADD(now(),INTERVAL 1 DAY)'];
+      whereMap['g.end_date'] = ['<', 'now()'];
     }
 
     const model = this.model('cart').alias('c');
@@ -30,17 +35,21 @@ module.exports = class extends Base {
       as: 'g',
       on: ['g.id', 'c.group_bill_id']
     });
-    const groupSum = await model.where({'g.user_id': userId, 'c.is_pay': 1}).find() || 0;
-    const groupId = await this.model('group_bill').where(whereMap).max('id');
-    const lastSum = await this.model('cart').field(['sum(sum+freight) sum']).where({'group_bill_id': groupId, 'is_pay': 1}).find() || 0;
-
+    const groupSum = await model.where(whereMap).find() || 0;
+    const groupId = await this.model('group_bill').alias('g').where(whereMap).max('id');
+    const lastSum = await this.model('cart').field(['sum(sum) sum']).where({'group_bill_id': groupId}).find() || 0;
     const sumThisWeekGroup = await this.model('group').sumThisWeekGroup(userId);
     const sumLastWeekGroup = await this.model('group').sumLastWeekGroup(userId);
     const sumThisMonthGroup = await this.model('group').sumThisMonthGroup(userId);
     const sumLastMonthGroup = await this.model('group').sumLastMonthGroup(userId);
     this.json({
-      sum: groupSum.sum || 0,
+      sum: parseInt(groupSum.sum) || 0,
+      roundSum: Math.round(groupSum.sum / 10000) || 0,
       lastSum: lastSum.sum || 0,
+      sumThisWeekGroup: parseInt(sumThisWeekGroup[0].sum),
+      sumThisMonthGroup: parseInt(sumThisMonthGroup[0].sum),
+      sumLastWeekGroup: parseInt(sumLastWeekGroup[0].sum),
+      sumLastMonthGroup: parseInt(sumLastMonthGroup[0].sum),
       week: Math.round(Math.abs(sumThisWeekGroup[0].sum - sumLastWeekGroup[0].sum) / (sumLastWeekGroup[0].sum + 1)) / 100,
       weekUp: sumThisWeekGroup[0].sum - sumLastWeekGroup[0].sum >= 0,
       month: Math.round(Math.abs(sumThisMonthGroup[0].sum - sumLastMonthGroup[0].sum) / (sumLastMonthGroup[0].sum + 1)) / 100,
@@ -53,7 +62,10 @@ module.exports = class extends Base {
     let userId = this.post('userId');
     const user = this.getLoginUser();
     if (user.type === 'admin' || user.type === 'tggly') {
-      userId = null;
+      const loginUserId = this.getLoginUserId;
+      if (Number(loginUserId) === Number(userId)) {
+        userId = null;
+      }
     }
     const list = await this.model('group').sumGroup(from, to, userId);
     const obj = {};
@@ -69,7 +81,10 @@ module.exports = class extends Base {
     let userId = this.post('userId');
     const user = this.getLoginUser();
     if (user.type === 'admin' || user.type === 'tggly') {
-      userId = null;
+      const loginUserId = this.getLoginUserId;
+      if (Number(loginUserId) === Number(userId)) {
+        userId = null;
+      }
     }
     const list = await this.model('group').countGroup(from, to, userId);
     const returnListKey = [];
@@ -89,9 +104,15 @@ module.exports = class extends Base {
     let userId = this.post('userId');
     const user = this.getLoginUser();
     if (user.type === 'admin' || user.type === 'tggly') {
-      userId = null;
+      const loginUserId = this.getLoginUserId;
+      if (Number(loginUserId) === Number(userId)) {
+        userId = null;
+      }
     }
     const list = await this.model('group').countGroupUserList(from, to, userId, limit);
+    _.each(list, (item) => {
+      item['sum'] = Math.round(item['sum']);
+    });
     this.json(list);
   }
   async groupSupplierListAction() {
@@ -101,7 +122,10 @@ module.exports = class extends Base {
     let userId = this.post('userId');
     const user = this.getLoginUser();
     if (user.type === 'admin' || user.type === 'tggly') {
-      userId = null;
+      const loginUserId = this.getLoginUserId;
+      if (Number(loginUserId) === Number(userId)) {
+        userId = null;
+      }
     }
     const list = await this.model('group').countGroupSupplierList(from, to, userId, limit);
     this.json(list);

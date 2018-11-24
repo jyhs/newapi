@@ -18,7 +18,26 @@ module.exports = class extends think.Logic {
   getByIdAction() {
     this.allowMethods = 'post';
     this.rules = {
-      userId: { required: true, int: true }
+      userId: { required: true, int: true, trim: true }
+    };
+  }
+  getCartListAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      userId: { required: true, int: true, trim: true }
+    };
+  }
+  deleteCartAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      cartId: { required: true, int: true, trim: true }
+    };
+  }
+
+  getLikeMaterialAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      userId: { required: true, int: true, trim: true }
     };
   }
 
