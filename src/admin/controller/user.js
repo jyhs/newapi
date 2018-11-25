@@ -1,7 +1,7 @@
 const Base = require('./base.js');
 const fs = require('fs');
 const md5 = require('md5');
-const images = require('images');
+// const images = require('images');
 module.exports = class extends Base {
   async updateAction() {
     const userId = this.post('userId');
@@ -44,6 +44,10 @@ module.exports = class extends Base {
       {'code': 'tggly', 'name': '团购管理员', 'desc': '可以管理团购列表'},
       {'code': 'admin', 'name': '超级管理员', 'desc': '可以管理团购列表'}
     ];
+    const user = this.getLoginUser();
+    if (user['type'] !== 'admin') {
+      list.pop();
+    }
     return this.json(list);
   }
 
@@ -65,9 +69,22 @@ module.exports = class extends Base {
     const tempPath = this.config('image.user') + '/temp/' + name;
     fs.renameSync(avatar.path, tempPath);
     await this.cache('getAvatarAction' + id, null);
-    images(tempPath + '').size(150).save(this.config('image.user') + '/' + name, {
-      quality: 75
-    });
+    // images(tempPath + '').size(150).save(this.config('image.user') + '/' + name, {
+    //   quality: 75
+    // });
+  }
+
+  async getLikeMaterialAction() {
+    const list = await this.model('user').getUserLikeMaterial(this.post('userId'));
+    this.json(list);
+  }
+  async getCartListAction() {
+    const list = await this.controller('cart', 'admin').listAction(this.post('userId'));
+    this.json(list);
+  }
+
+  async deleteCartAction() {
+    await this.controller('cart', 'admin').deleteAction(this.post('cartId'));
   }
 
   async getByTypeAction() {

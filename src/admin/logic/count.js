@@ -2,7 +2,7 @@ module.exports = class extends think.Logic {
   grossSalesSummaryAction() {
     this.allowMethods = 'post';
     this.rules = {
-      userId: {int: true, required: true, trim: true},
+      userId: {int: {min: 0}, required: true, trim: true},
       from: {date: true, trim: true},
       to: {date: true, trim: true}
     };
@@ -12,7 +12,7 @@ module.exports = class extends think.Logic {
     this.rules = {
       from: {date: true, required: true, trim: true},
       to: {date: true, required: true, trim: true},
-      userId: {int: true, required: true, trim: true}
+      userId: {int: {min: 0}, required: true, trim: true}
     };
   }
   groupCountByYearAction() {
@@ -20,7 +20,7 @@ module.exports = class extends think.Logic {
     this.rules = {
       from: {date: true, required: true, trim: true},
       to: {date: true, required: true, trim: true},
-      userId: {int: true, required: true, trim: true}
+      userId: {int: {min: 0}, required: true, trim: true}
     };
   }
   groupUserListAction() {
@@ -28,7 +28,7 @@ module.exports = class extends think.Logic {
     this.rules = {
       from: {date: true, required: true, trim: true},
       to: {date: true, required: true, trim: true},
-      userId: {int: true, required: true, trim: true},
+      userId: {int: {min: 0}, required: true, trim: true},
       limit: {int: true, trim: true}
     };
   }
@@ -37,7 +37,7 @@ module.exports = class extends think.Logic {
     this.rules = {
       from: {date: true, required: true, trim: true},
       to: {date: true, required: true, trim: true},
-      userId: {int: true, required: true, trim: true},
+      userId: {int: {min: 0}, required: true, trim: true},
       limit: {int: true, trim: true}
     };
   }
