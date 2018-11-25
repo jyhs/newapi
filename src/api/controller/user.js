@@ -68,8 +68,8 @@ module.exports = class extends Base {
       qs: {
         grant_type: 'authorization_code',
         code: code,
-        secret: appid,
-        appid: secret
+        secret: secret,
+        appid: appid
       }
     };
 
