@@ -58,6 +58,9 @@ module.exports = class extends Base {
   }
   async loginByCodeAction() {
     const code = this.post('code');
+    const from = this.post('from');
+    const appid = from ? think.config('weixin.mini_appid') : think.config('weixin.public_appid');
+    const secret = from ? think.config('weixin.mini_secret') : think.config('weixin.public_secret');
     // 获取unionid
     const options = {
       method: 'GET',
@@ -65,8 +68,8 @@ module.exports = class extends Base {
       qs: {
         grant_type: 'authorization_code',
         code: code,
-        secret: think.config('weixin.mini_secret'),
-        appid: think.config('weixin.mini_appid')
+        secret: appid,
+        appid: secret
       }
     };
 
