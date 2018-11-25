@@ -256,7 +256,7 @@ module.exports = class extends think.Service {
       json: true
     };
     const orderResult = await rp(options);
-    console.log(orderResult);
+    // console.log(orderResult);
     const _prepayId = this.getXMLNodeValue('prepay_id', orderResult);
     if (_prepayId) {
       const tmp = _prepayId.split('[');
