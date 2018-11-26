@@ -6,7 +6,6 @@ const http = require('http');
 const url = require('url');
 const fs = require('fs');
 const _ = require('lodash');
-// const images = require('images');
 
 module.exports = class extends Base {
   async login() {

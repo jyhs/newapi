@@ -14,6 +14,7 @@ module.exports = {
     'user/register',
     'user/getAvatar',
     'game/list',
+    'game/over',
     'bill/list',
     'bill/getCategoryList',
     'bill/get',
@@ -33,6 +34,7 @@ module.exports = {
     'material/get',
     'material/getImage',
     'material/getImageSmall',
-    'material/randomList'
+    'material/randomList',
+    'material/randomImageList'
   ]
 };

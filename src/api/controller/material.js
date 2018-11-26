@@ -304,9 +304,8 @@ module.exports = class extends Base {
     }
   }
   async randomImageListAction() {
-    const path = await this.cache('material-hy-path');
-    if (think.isEmpty(path)) {
-      const pathList = [];
+    const pathList = await this.cache('material-hy-path');
+    if (think.isEmpty(pathList)) {
       const path = this.config('image.material') + `/small/hy/`;
       const files = fs.readdirSync(path);
       files.forEach((filename) => {
@@ -316,11 +315,29 @@ module.exports = class extends Base {
         pathList.push(obj);
       });
       await this.cache('material-hy-path', pathList);
-      const page = this.post('page');
-      const size = this.post('size');
-      const list = await this.model('material').where({'category': 'hy', 'price': ['>', 0], 'type': ['IN', ['dd', 'dxsx', 'dy', 'hyqt', 'xxsx', 'zhy', 'lty']]}).order('rand()').page(page, size).countSelect();
-      this.json(list);
     }
+    const limit = this.post('limit') || 30;
+    const list = await this.model('material').where({'category': 'hy', 'price': ['>', 0], 'type': ['IN', ['dd', 'dxsx', 'dy', 'hyqt', 'xxsx', 'zhy', 'lty']]}).order('rand()').limit(limit).select();
+    const returnList = [];
+    _.each(list, (mapre) => {
+      const returnObj = {};
+      const names = mapre.tag ? mapre.tag.split(',') : [];
+      names.push(mapre.name);
+      const ranName = Math.floor(Math.random() * (names.length));
+      const name = names[ranName];
+      const path = _.find(pathList, (_path) => _path.code === mapre.code);
+      if (path) {
+        returnObj.key = mapre.id;
+        returnObj.name = name;
+        returnObj.pic = path.pic;
+      } else {
+        returnObj.key = 330;
+        returnObj.name = '夏威夷红圣诞龙';
+        returnObj.pic = '/small/hy/1513179762-XWYHSDL.png';
+      }
+      returnList.push(returnObj);
+    });
+    this.json(returnList);
   }
   async randomListAction() {
     const page = this.post('page') || 1;

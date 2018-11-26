@@ -35,7 +35,7 @@ module.exports = class extends Base {
       as: 'u',
       on: ['c.user_id', 'u.id']
     });
-    const userList = await model.where({'u.openid': ['!=', null], 'c.group_bill_id': this.post('groupId')}).select();
+    const userList = await model.where({'u.openid': ['!=', null], 'c.sum': ['!=', 0], 'c.group_bill_id': this.post('groupId')}).select();
     const wexinService = this.service('weixin', 'api');
     const token = await wexinService.getToken();
     _.each(userList, (item) => {

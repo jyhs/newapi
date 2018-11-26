@@ -52,8 +52,7 @@ module.exports = class extends think.Logic {
   randomImageListAction() {
     this.allowMethods = 'post';
     this.rules = {
-      page: {int: true, required: true, trim: true, default: 1},
-      size: {int: true, required: true, trim: true, default: 30},
+      limit: {int: true, default: 0},
       classification: {int: true, default: 0}
     };
   }

@@ -7,16 +7,19 @@ module.exports = class extends Base {
       title: this.post('title'),
       time: this.post('time')
     };
-    const game = await this.model('game').where({ 'user_id': this.getLoginUserId() }).find();
+    const game = await this.model('game').getScore(5157);
     if (think.isEmpty(game)) {
       await this.model('game').add(userObj);
+      this.success('ok');
     } else {
-      if (game.level < userObj.level) {
-        await this.model('game').where({ 'user_id': this.getLoginUserId() }).update(userObj);
+      userObj['insert_date'] = new Date();
+      if (Number(game[0].level) < Number(userObj.level)) {
+        await this.model('game').where({ 'id': game[0].id }).update(userObj);
       }
-      if (Number(game.level) === Number(userObj.level) && game.time > userObj.time) {
-        await this.model('game').where({ 'user_id': this.getLoginUserId() }).update(userObj);
+      if (Number(game[0].level) === Number(userObj.level) && Number(game[0].time) > Number(userObj.time)) {
+        await this.model('game').where({ 'id': game[0].id }).update(userObj);
       }
+      this.success('update');
     }
   }
   async listAction() {
