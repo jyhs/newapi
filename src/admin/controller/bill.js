@@ -11,6 +11,7 @@ module.exports = class extends Base {
     const billName = urlObj.query.name;
     const _effortDate = urlObj.query.effortDate;
     const supplierId = urlObj.query.supplierId;
+    const isOneStep = urlObj.query.isOneStep || 0;
     const description = urlObj.query.description;
     const effortDate = this.service('date', 'api').convertWebDateToSubmitDateTime(_effortDate);
     const user = this.getLoginUser();
@@ -150,7 +151,8 @@ module.exports = class extends Base {
             phone: user.phone,
             effort_date: effortDate,
             supplier_id: supplierId,
-            description: description
+            description: description,
+            is_one_step: isOneStep
           };
           const billId = await this.model('bill').add(bill);
           bill['id'] = billId;
