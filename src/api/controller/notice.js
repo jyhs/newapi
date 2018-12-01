@@ -11,9 +11,29 @@ module.exports = class extends Base {
   }
 
   async handleWxNotifyAction() {
-    // console.log(this.ctx.req);
-    this.type = 'text/plain; charset=utf-8';
-    this.body = '<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
+    const payInfo = this.post('xml');
+    try {
+      if (payInfo) {
+        const attach = payInfo.attach[0].split('-');
+        const cartId = attach[1];
+        const userId = attach[0];
+        payInfo['cart_id'] = Number(cartId);
+        payInfo['user_id'] = Number(userId);
+        const nonceStr = payInfo.nonce_str[0];
+        console.log(cartId);
+        console.log(nonceStr);
+        const cart = await this.model('cart').where({'id': cartId, 'nonceStr': nonceStr}).find();
+        if (!think.isEmpty(cart)) {
+          await this.model('pay').add(payInfo);
+          cart['is_pay'] = 1;
+          await this.model('cart').where({'id': cartId}).update(cart);
+        }
+        this.type = 'text/plain; charset=utf-8';
+        this.body = '<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
+      }
+    } catch (error) {
+
+    }
   }
 
   async checkAction() {

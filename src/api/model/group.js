@@ -47,8 +47,8 @@ module.exports = class extends think.Model {
           await this.model('group_bill').where({'id': item['id']}).update({'status': 0});
         }
       }
-      const sum = await this.model('cart').getGroupMoneyById(item['id']);
-      item['sum'] = sum;
+      const sumObj = await this.model('cart').field(['sum(sum) sum']).where({'group_bill_id': item['id'], 'is_confirm': 1}).find();
+      item['sum'] = sumObj.sum || 0;
     }
     return list;
   }
@@ -93,8 +93,8 @@ module.exports = class extends think.Model {
       }).where({'g.id': id}).find();
     group['supplierName'] = supplierNameObj ? supplierNameObj.supplierName : '';
 
-    const sum = await this.model('cart').getGroupMoneyById(id);
-    group['sum'] = sum;
+    const sumObj = await this.model('cart').field(['sum(sum) sum']).where({'group_bill_id': id, 'is_confirm': 1}).find();
+    group['sum'] = sumObj.sum || 0;
     return group;
   }
 };

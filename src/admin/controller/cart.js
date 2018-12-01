@@ -359,11 +359,15 @@ module.exports = class extends Base {
     payInfo.totalFee = 1;
     payInfo.openid = 'ohGtg1o1F-fgzmbXElW1fbFNvdDg';
     payInfo.ip = '111.231.136.250';
-    payInfo.body = '礁岩海水支付测试';
+    payInfo.body = '礁岩海水支付';
+    payInfo.cartId = cartId;
+    // payInfo.userId = user.id;
+    payInfo.userId = 5157;
     const payRequest = await wexinService.createUnifiedOrder(payInfo);
     if (payRequest.error) {
       this.fail(payRequest.error);
     } else {
+      await this.model('cart').where({id: cartId}).update({ 'nonceStr': payRequest.nonceStr });
       this.json(payRequest);
     }
     // }

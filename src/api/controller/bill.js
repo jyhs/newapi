@@ -49,7 +49,7 @@ module.exports = class extends Base {
     const categoryList = await model.field('distinct m.category code').where({bill_id: billId}).select();
     const defineCategoryList = await this.controller('material', 'api').categoryAction();
     const result = _.intersectionBy(defineCategoryList, categoryList, 'code');
-    const count = await this.model('bill_detail').where({bill_id: billId, material_id: ['=', null]}).count();
+    const count = await this.model('bill_detail').where({bill_id: billId, material_id: 0}).count();
     if (count > 0) {
       result.push({'code': 'other', 'name': '未分类', 'desc': ''});
     }
@@ -82,7 +82,7 @@ module.exports = class extends Base {
     const whereMap = {};
     whereMap['d.bill_id'] = this.post('billId');
     if (this.post('category') === 'other') {
-      whereMap['d.material_id'] = ['=', null];
+      whereMap['d.material_id'] = 0;
     } else {
       whereMap['m.category'] = this.post('category');
     }
@@ -136,7 +136,7 @@ module.exports = class extends Base {
     const page = this.post('page') || 1;
     const size = this.post('size') || 10;
     const model = this.model('bill_detail');
-    const list = await model.where({'material_id': ['=', null], 'bill_id': this.post('billId')}).page(page, size).countSelect();
+    const list = await model.where({'material_id': 0, 'bill_id': this.post('billId')}).page(page, size).countSelect();
     this.json(list);
   }
 };

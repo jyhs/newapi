@@ -134,7 +134,14 @@ module.exports = class extends Base {
                 break;
             }
           }
-          list.push(item);
+          const fish = _.find(list, (f) => {
+            return f.name === item.name && f.size === item.size && Number(f.price) === Number(item.price);
+          });
+          if (!fish) {
+            list.push(item);
+          } else {
+            errorList.push(`有多个名字是${fish.name}尺寸是${fish.size}价格是${fish.price}的生物`);
+          }
         }
       }
       const resault = {'flag': flag, 'list': list, 'error': errorList};
@@ -142,7 +149,7 @@ module.exports = class extends Base {
       const length = _.size(resaultlist);
       if (resault.flag) {
         if (_.size(resault.error) > 0) {
-          this.fail(resault.error.join('\n'));
+          this.fail(resault.error.join('<br>'));
         } else {
           const bill = {
             name: billName,
@@ -232,36 +239,31 @@ module.exports = class extends Base {
       bill_id: this.post('billId'),
       recommend: this.post('recommend')
     };
-    const detail = await this.model('bill_detail').where({name: detailObj.name, size: detailObj.size, bill_id: detailObj.bill_id}).find();
-    if (!think.isEmpty(detail)) {
-      this.fail('名字和大小一样的鱼已经存在');
-    } else {
-      const fishName = detailObj['name'].match(/[\u4e00-\u9fa5]/g);
-      let name = fishName ? fishName.join('') : detailObj['name'];
-      name = _.trim(name);
-      const material = await this.model('material').where({ name: name }).find();
-      if (think.isEmpty(material)) {
-        const likeMaterial = await this.model('material').where({ tag: ['like', `%${name}%`] }).select();
-        if (think.isEmpty(likeMaterial)) {
-          await this.model('bill_detail').add(detailObj);
-        } else {
-          let matchId = likeMaterial[0].id;
-          _.each(likeMaterial, (re) => {
-            const id = re['id'];
-            const tags = re['tag'];
-            _.each(tags.split(','), (tag) => {
-              if (name === tag) {
-                matchId = id;
-              }
-            });
-          });
-          detailObj['material_id'] = matchId;
-          await this.model('bill_detail').add(detailObj);
-        }
+    const fishName = detailObj['name'].match(/[\u4e00-\u9fa5]/g);
+    let name = fishName ? fishName.join('') : detailObj['name'];
+    name = _.trim(name);
+    const material = await this.model('material').where({ name: name }).find();
+    if (think.isEmpty(material)) {
+      const likeMaterial = await this.model('material').where({ tag: ['like', `%${name}%`] }).select();
+      if (think.isEmpty(likeMaterial)) {
+        await this.model('bill_detail').add(detailObj);
       } else {
-        detailObj['material_id'] = material.id;
+        let matchId = likeMaterial[0].id;
+        _.each(likeMaterial, (re) => {
+          const id = re['id'];
+          const tags = re['tag'];
+          _.each(tags.split(','), (tag) => {
+            if (name === tag) {
+              matchId = id;
+            }
+          });
+        });
+        detailObj['material_id'] = matchId;
         await this.model('bill_detail').add(detailObj);
       }
+    } else {
+      detailObj['material_id'] = material.id;
+      await this.model('bill_detail').add(detailObj);
     }
   }
 };

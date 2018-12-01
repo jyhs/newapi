@@ -78,10 +78,23 @@ module.exports = class extends Base {
       return this.fail('登录失败');
     }
     // 根据unionid查找用户是否已经注册
-    let user = await this.model('user').where({ unionid: sessionData.unionid }).find();
+    let user = sessionData.unionid ? await this.model('user').where({ unionid: sessionData.unionid }).find() : null;
     if (think.isEmpty(user)) {
-      let city = await this.model('citys').where({ name: sessionData.city }).find('mark', true);
-      let province = await this.model('provinces').where({ name: sessionData.province }).find('code', true);
+      const options = {
+        method: 'GET',
+        url: 'https://api.weixin.qq.com/sns/userinfo',
+        qs: {
+          access_token: sessionData.access_token,
+          openid: sessionData.openid
+        }
+      };
+
+      const userInfoJson = await rp(options);
+      const userInfo = JSON.parse(userInfoJson);
+      console.log('userInfo', userInfo);
+      let city = userInfo.city ? await this.model('citys').field('mark').where({ name: userInfo.city }).find() : 'shc';
+      let province = userInfo.province ? await this.model('provinces').field('code').where({ name: userInfo.province }).find() : 'sh';
+
       if (think.isEmpty(province)) {
         province = 'sh';
         city = 'shc';
@@ -89,27 +102,30 @@ module.exports = class extends Base {
         city = 'shc';
       } else if (province === 'bj') {
         city = 'bjc';
+      } else if (province === 'tj') {
+        city = 'tjc';
+      } else if (province === 'cq') {
+        city = 'cqc';
       }
       // 注册
       user = {
-        name: sessionData.nickName,
-        nickname: sessionData.nickName,
+        name: userInfo.nickname,
+        nickname: userInfo.nickname,
         password: '0ff8ecf84a686258caeb350dbc8040d6',
         city: city,
         phone: '18888888888',
         type: 'yy',
         province: province,
-        country: sessionData.country,
-        openid: sessionData.openid,
-        headimgurl: sessionData.headimgurl || '',
-        sex: sessionData.sex || 1, // 性别 0：未知、1：男、2：女
-        province_name: sessionData.province,
-        city_name: sessionData.city,
-        unionid: sessionData.unionid
+        country: userInfo.country,
+        openid: userInfo.openid,
+        headimgurl: userInfo.headimgurl || '',
+        sex: userInfo.sex || 1, // 性别 0：未知、1：男、2：女
+        province_name: userInfo.province,
+        city_name: userInfo.city,
+        unionid: userInfo.unionid
       };
       user.id = await this.model('user').add(user);
     }
-
     // 更新登录信息
     await this.model('user').where({ id: user.id }).update({
       insert_date: moment().format('YYYYMMDD'),

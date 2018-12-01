@@ -120,8 +120,8 @@ module.exports = class extends think.Model {
         group['status'] = 0;
       }
     }
-    const sum = await this.model('cart').getGroupMoneyById(group['id']);
-    group['sum'] = sum;
+    const sumObj = await this.model('cart').field(['sum(sum+freight-lost_back-damage_back) sum']).where({'group_bill_id': group['id'], 'is_confirm': 1}).find();
+    group['sum'] = sumObj.sum || 0;
     return group;
   }
 };

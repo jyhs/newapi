@@ -20,7 +20,7 @@ module.exports = class extends think.Service {
     return JSON.parse(sessionData);
   }
   async sendSubscribeMessage() {
-    const token = await this.service('weiixn').getToken();
+    const token = await this.service('weixin').getToken();
     const options = {
       method: 'POST',
       url: 'https://api.weixin.qq.com/cgi-bin/message/template/subscribe?access_token=' + _.values(token)[0],
@@ -125,7 +125,7 @@ module.exports = class extends think.Service {
   }
 
   async sendOrderMessage(user, group, cart) {
-    const token = await this.service('weiixn').getToken();
+    const token = await this.service('weixin').getToken();
     const options = {
       method: 'POST',
       url: 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=' + _.values(token)[0],
@@ -225,7 +225,7 @@ module.exports = class extends think.Service {
   async createUnifiedOrder(payInfo) {
     const orderNo = payInfo.orderNo;
     const appId = think.config('weixin.public_appid');
-    const attach = '礁岩海水团购网';
+    const attach = `${payInfo.userId}-${payInfo.cartId}`;
     const mchId = think.config('weixin.mch_id');
     const nonceStr = Math.random().toString(36).substr(2, 15);
     const totalFee = payInfo.totalFee;
@@ -234,6 +234,7 @@ module.exports = class extends think.Service {
     const ip = payInfo.ip;
     const body = payInfo.body;
     const timeStamp = parseInt(new Date().getTime() / 1000) + '';
+    const sign = this.paysignjsapi(appId, attach, body, mchId, nonceStr, notifyUrl, openid, orderNo, ip, totalFee, 'JSAPI');
     const url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
     let formData = '<xml>';
     formData += '<appid>' + appId + '</appid>'; // appid
@@ -247,7 +248,7 @@ module.exports = class extends think.Service {
     formData += '<spbill_create_ip>' + ip + '</spbill_create_ip>';
     formData += '<total_fee>' + totalFee + '</total_fee>';
     formData += '<trade_type>JSAPI</trade_type>';
-    formData += '<sign>' + this.paysignjsapi(appId, attach, body, mchId, nonceStr, notifyUrl, openid, orderNo, ip, totalFee, 'JSAPI') + '</sign>';
+    formData += '<sign>' + sign + '</sign>';
     formData += '</xml>';
     const options = {
       method: 'POST',
@@ -256,33 +257,29 @@ module.exports = class extends think.Service {
       json: true
     };
     const orderResult = await rp(options);
-    // console.log(orderResult);
-    const _prepayId = this.getXMLNodeValue('prepay_id', orderResult);
-    if (_prepayId) {
-      const tmp = _prepayId.split('[');
+    const _error = this.getXMLNodeValue('err_code_des', orderResult);
+    if (_error) {
+      const tmp = _error.split('[');
       const tmp1 = tmp[2].split(']');
-      const prepayId = 'prepay_id=' + tmp1[0];
-      const paySignjs = this.paysignjs(appId, nonceStr, prepayId, 'MD5', timeStamp);
-
-      return {
-        'appId': appId, // 公众号名称，由商户传入
-        'timeStamp': timeStamp, // 时间戳，自1970年以来的秒数
-        'nonceStr': nonceStr, // 随机串
-        'package': prepayId,
-        'signType': 'MD5', // 微信签名方式：
-        'paySign': paySignjs // 微信签名
-      };
+      return {error: tmp1[0]};
     } else {
-      let errorDes = this.getXMLNodeValue('err_code_des', orderResult);
-      if (!errorDes) {
-        errorDes = this.getXMLNodeValue('return_msg', orderResult);
+      const _prepayId = this.getXMLNodeValue('prepay_id', orderResult);
+      if (_prepayId) {
+        const tmp = _prepayId.split('[');
+        const tmp1 = tmp[2].split(']');
+        const prepayId = 'prepay_id=' + tmp1[0];
+        const paySignjs = this.paysignjs(appId, nonceStr, prepayId, 'MD5', timeStamp);
+        return {
+          'appId': appId, // 公众号名称，由商户传入
+          'timeStamp': timeStamp, // 时间戳，自1970年以来的秒数
+          'nonceStr': nonceStr, // 随机串
+          'package': prepayId,
+          'signType': 'MD5', // 微信签名方式：
+          'paySign': paySignjs // 微信签名
+        };
+      } else {
+        return {error: orderResult};
       }
-      const tmp = errorDes.split('[');
-      const tmp1 = tmp[2].split(']');
-      const error = tmp1[0];
-      return {
-        error
-      };
     }
   }
 
@@ -303,7 +300,7 @@ module.exports = class extends think.Service {
 
   getXMLNodeValue(nodeName, xml) {
     var tmp = xml.split('<' + nodeName + '>');
-    var _tmp = tmp[1].split('</' + nodeName + '>');
+    var _tmp = tmp[1] ? tmp[1].split('</' + nodeName + '>') : [];
     return _tmp[0];
   }
 
