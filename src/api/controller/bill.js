@@ -66,7 +66,12 @@ module.exports = class extends Base {
     const size = this.post('size') || 10;
     const id = this.post('billId');
     const model = this.model('bill_detail');
-    const list = await model.where({bill_id: id}).page(page, size).countSelect();
+    const whereMap = {};
+    whereMap['bill_id'] = id;
+    if (!think.isEmpty(this.post('name'))) {
+      whereMap['name'] = ['like', `%${this.post('name')}%`];
+    }
+    const list = await model.where(whereMap).page(page, size).countSelect();
     return this.json(list);
   }
   async getDetailByBillIdAndCategoryAction() {
@@ -83,10 +88,18 @@ module.exports = class extends Base {
     whereMap['d.bill_id'] = this.post('billId');
     if (this.post('category') === 'other') {
       whereMap['d.material_id'] = 0;
+    } else if (!think.isEmpty(this.post('name'))) {
+      whereMap['d.name'] = ['like', `%${this.post('name')}%`];
     } else {
       whereMap['m.category'] = this.post('category');
     }
-    const list = await model.where(whereMap).page(page, size).countSelect();
+    const order = this.post('priceOrder');
+    let list = null;
+    if (think.isEmpty(order)) {
+      list = await model.where(whereMap).page(page, size).countSelect();
+    } else {
+      list = await model.where(whereMap).order('price ' + order).page(page, size).countSelect();
+    }
     this.json(list);
   }
   async getDetailByBillIdAndTypeAction() {

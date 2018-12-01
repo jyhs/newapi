@@ -21,7 +21,9 @@ module.exports = class extends think.Logic {
     this.allowMethods = 'post';
     this.rules = {
       cartId: {int: true, required: true, trim: true},
-      billDetailId: {int: true, required: true, trim: true}
+      billDetailId: {int: true, required: true, trim: true},
+      sum: {float: true, required: true, trim: true},
+      freight: {float: true, required: true, trim: true}
     };
   }
   deleteAction() {
@@ -70,7 +72,7 @@ module.exports = class extends think.Logic {
       sum: {int: true, trim: true},
       isConfirm: {int: true, trim: true},
       freight: {float: true, trim: true},
-      phone: {string: true, trim: true},
+      phone: {mobile: 'zh-CN', trim: true},
       address: {string: true, trim: true},
       province: {string: true, trim: true},
       city: {string: true, trim: true},
@@ -90,7 +92,9 @@ module.exports = class extends think.Logic {
     this.rules = {
       cartId: {int: true, required: true, trim: true},
       billDetailId: {int: true, required: true, trim: true},
-      billDetailNum: {int: true, required: true, trim: true}
+      billDetailNum: {int: true, required: true, trim: true},
+      sum: {float: true, required: true, trim: true},
+      freight: {float: true, required: true, trim: true}
     };
   }
   addDetailAction() {

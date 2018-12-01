@@ -30,7 +30,8 @@ module.exports = class extends think.Logic {
     this.rules = {
       page: {int: true, trim: true},
       size: {int: true, trim: true},
-      billId: {int: true, required: true, trim: true}
+      billId: {int: true, required: true, trim: true},
+      name: {string: true, trim: true}
     };
   }
   getDetailByBillIdAndCategoryAction() {
@@ -39,7 +40,8 @@ module.exports = class extends think.Logic {
       page: {int: true, trim: true},
       size: {int: true, trim: true},
       billId: {int: true, required: true, trim: true},
-      category: {string: true, required: true, trim: true}
+      category: {string: true, required: true, trim: true},
+      priceOrder: {string: true, trim: true}
     };
   }
   getDetailByBillIdAndRecommendAction() {

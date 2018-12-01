@@ -114,6 +114,10 @@ module.exports = class extends Base {
         this.fail('团购已经结束不能操作购物车');
       } else {
         await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).delete();
+        await this.model('cart').where({id: cartId}).update({
+          sum: this.post('sum'),
+          freight: this.post('freight')
+        });
         this.success(true);
       }
     }
@@ -166,9 +170,12 @@ module.exports = class extends Base {
     }
   }
   async updateAction() {
+    const phone = this.post('phone');
     const cart = await this.model('cart').where({id: this.post('cartId')}).find();
     if (think.isEmpty(cart)) {
       this.fail('请先创建购物车');
+    } else if (phone && phone === '18888888888') {
+      this.fail('请输入正确的手机号');
     } else {
       const group = await this.model('group_bill').where({id: cart.group_bill_id}).find();
       if (!moment(group.end_date).isAfter(moment())) {
@@ -192,12 +199,11 @@ module.exports = class extends Base {
             is_confirm: this.post('isConfirm')
           };
           await this.model('cart').where({id: this.post('cartId')}).update(updateCart);
-          // const user = this.getLoginUser();
-          // if (user.id !== group.user_id && Number(updateCart.is_confirm) === 1) {
-          //   const wexinService = this.service('weixin', 'api');
-          //   const grouper = this.model('user').where({id: group.user_id}).find();
-          //   wexinService.sendOrderMessage(grouper, user, group);
-          // }
+          const cityObj = await this.controller('tools', 'api').getCityByPhoneAction(phone);
+          if (cityObj) {
+            const userId = this.getLoginUserId();
+            this.model('user').where({ 'id': userId }).update({city: cityObj.mark, province: cityObj.area, city_name: cityObj.city, province_name: cityObj.province});
+          }
           this.success(true);
         }
       }
@@ -221,7 +227,7 @@ module.exports = class extends Base {
         as: 'u',
         on: ['g.user_id', 'u.id']
       });
-    const list = await model.where({'c.user_id': userId, 'is_confirm': 1}).order(['c.id DESC']).page(page, size).countSelect();
+    const list = await model.where({'c.user_id': userId, 'is_confirm': 1, 'sum': ['!=', 0]}).order(['c.id DESC']).page(page, size).countSelect();
     _.each(list.data, (item) => {
       item['total'] = Number(item['sum']) + Number(item['freight']) - Number(item['lost_back']) - Number(item['damage_back']);
       if (item['group_user_type'] === 'lss') {
@@ -250,7 +256,7 @@ module.exports = class extends Base {
       as: 'u',
       on: ['c.user_id', 'u.id']
     });
-    const list = await model.where({'c.group_bill_id': groupId, 'c.is_confirm': 1}).order(['c.id DESC']).page(page, size).countSelect();
+    const list = await model.where({'c.group_bill_id': groupId, 'c.is_confirm': 1, 'c.sum': ['!=', 0]}).order(['c.id DESC']).page(page, size).countSelect();
     _.each(list.data, (item) => {
       item['total'] = Number(item['sum']) + Number(item['freight']) - Number(item['lost_back']) - Number(item['damage_back']);
       if (item['user_type'] === 'lss' || item['user_type'] === 'lss') {
@@ -277,6 +283,10 @@ module.exports = class extends Base {
       } else {
         await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({
           bill_detail_num: billDetailNum
+        });
+        await this.model('cart').where({id: cartId}).update({
+          sum: this.post('sum'),
+          freight: this.post('freight')
         });
       }
     }

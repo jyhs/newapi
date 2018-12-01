@@ -9,17 +9,11 @@ module.exports = class extends think.Service {
     return this.getQrByUrl(url);
   }
   buildGroupUrl(id, isPrivate) {
-    const code = id + '';
-    let c = String.fromCharCode(code.charCodeAt(0) + code.length);
-    for (let i = 1; i < code.length; i++) {
-      c += String.fromCharCode(code.charCodeAt(i) + code.charCodeAt(i - 1));
-    }
-    c = escape(c.split('').join(' '));
     let url = null;
     if (isPrivate) {
-      url = `https://group.huanjiaohu.com/?#/buy/${c}/page`;
+      url = `https://group.huanjiaohu.com/#/groupShop/${id}`;
     } else {
-      url = `https://group.huanjiaohu.com/?#/buy/${c}/page?private=${id}`;
+      url = `https://group.huanjiaohu.com/#/groupShop/${id}?private=${id}`;
     }
     return url;
   }

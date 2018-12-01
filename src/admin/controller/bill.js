@@ -54,10 +54,16 @@ module.exports = class extends Base {
         flag = false;
       }
 
+      let isBreakRow = 0;
       if (flag) {
         for (let row = 2; ; row++) {
           if (sheet['A' + row] == null) {
-            break;
+            if (isBreakRow >= 10) {
+              break;
+            } else {
+              isBreakRow++;
+              continue;
+            }
           }
           const item = {};
           for (let col = 65; col <= 71; col++) {

@@ -1,7 +1,7 @@
 const Base = require('./base.js');
 const fs = require('fs');
 const _ = require('lodash');
-// const images = require('images');
+const images = require('images');
 
 module.exports = class extends Base {
   async deleteImageAction() {
@@ -64,13 +64,13 @@ module.exports = class extends Base {
     timestamp = timestamp / 1000;
     const name = timestamp + '-' + code + '.' + tempName[1];
     const path = this.config('image.material') + '/' + category + '/' + name;
-    // const smallPath = this.config('image.material') + '/small/' + category + '/' + name;
+    const smallPath = this.config('image.material') + '/small/' + category + '/' + name;
     return new Promise((resolve, reject) => {
       fs.createWriteStream(path);
       const returnPath = `/${category}/${name}`;
-      // images(path).size(150).save(smallPath, {
-      //   quality: 75
-      // });
+      images(path).size(150).save(smallPath, {
+        quality: 75
+      });
       resolve(this.json({'imgPath': returnPath}));
     });
   }

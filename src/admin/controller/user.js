@@ -112,7 +112,7 @@ module.exports = class extends Base {
   }
 
   async changPasswordAction() {
-    await this.model('user').where({ id: this.getLoginUserId() }).update({
+    await this.model('user').where({ id: this.post('userId') }).update({
       password: md5(this.post('password'))
     });
   }
@@ -173,5 +173,38 @@ module.exports = class extends Base {
       }
     }
     this.json({'status': 'OK'});
+  }
+
+  async registerAction() {
+    const password1 = this.post('password1');
+    const password2 = this.post('password2');
+    const name = this.post('name');
+    const phone = this.post('phone');
+    if (password1 !== password2) {
+      this.fail('两次输入的密码不匹配');
+    } else {
+      const user = await this.model('user').where({name: name}).find();
+      if (!think.isEmpty(user)) {
+        this.fail('用户名已经存在');
+      } else {
+        const user = {
+          name: name,
+          nickname: name,
+          password: md5(password1),
+          phone: phone,
+          type: 'yy'
+        };
+        user.id = await this.model('user').add(user);
+        if (user.id > 0) {
+          const cityObj = await this.controller('tools', 'api').getCityByPhoneAction(phone);
+          if (cityObj) {
+            this.model('user').where({ 'id': user.id }).update({city: cityObj.mark, province: cityObj.area, city_name: cityObj.city, province_name: cityObj.province});
+          }
+          this.success('注册成功');
+        } else {
+          this.fail('注册失败');
+        }
+      }
+    }
   }
 };
