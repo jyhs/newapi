@@ -5,7 +5,7 @@ module.exports = class extends think.Model {
     this.execute(`delete from cart_detail where cart_id in (select id from (select c.id from cart c where c.group_bill_id=${id}) cartid)`);
   }
   summaryGroup(id) {
-    return this.query(`select bd.name,bd.size,bd.price,sum(bill_detail_num) bill_detail_num,sum((bd.price*cd.bill_detail_num)) sum,sum(c.freight) sum_freight,sum(c.lost_back) sum_lost_back,sum(c.damage_back) sum_damage_back from cart c,cart_detail cd,bill_detail bd where c.is_confirm=1 and c.sum!=0 and c.id=cd.cart_id  and cd.bill_detail_id=bd.id and c.group_bill_id=${id} group by name,size,price`);
+    return this.query(`select bd.name,bd.size,bd.price,sum(bill_detail_num) bill_detail_num,sum((bd.price*cd.bill_detail_num)) sum,sum(cd.freight) sum_freight,sum(cd.lost_back_freight) sum_lost_back_freight,sum((bd.price*cd.lost_num)) sum_lost_back,sum((bd.price*cd.damage_num)) sum_damage_back from cart c,cart_detail cd,bill_detail bd where c.is_confirm=1 and c.sum!=0 and c.id=cd.cart_id  and cd.bill_detail_id=bd.id and c.group_bill_id=${id} group by name,size,price`);
   }
   countGroupMaterialList(from, to, limit = 10, category = 'hy') {
     return this.query(`select m.id,count(m.id) count,m.name,m.tag from bill b,group_bill g,bill_detail bd,material m where g.bill_id=b.id and bd.bill_id=b.id and bd.material_id=m.id and m.category='${category}' and   g.end_date < now() and g.end_date BETWEEN '${from}' AND DATE_ADD('${to}',INTERVAL 1 DAY) group by m.id order by count desc limit ${limit}`);
@@ -35,7 +35,7 @@ module.exports = class extends think.Model {
     return this.query(`select IFNULL(sum(c.sum+c.freight-c.lost_back-c.damage_back),0) sum from cart c,group_bill g where  g.id=c.group_bill_id  and  g.end_date < now() and  ${userId ? 'g.user_id=' + userId : '1=1'} and DATE_FORMAT( c.insert_date, '%Y%m' ) = DATE_FORMAT( DATE_SUB(now(), INTERVAL 1 YEAR), '%Y%m' )`);
   }
   detailGroup(id) {
-    const detailGroup = `select IFNULL(u.nickname,u.name) userName,u.phone,u.contacts,(select name from citys where mark=u.province) province,(select name from citys where mark=u.city) city,if(u.address='null','',u.address) address,if(c.description='null','',c.description) description,bd.name,bd.size,bd.price,cd.bill_detail_num,(bd.price*cd.bill_detail_num) sum,c.freight,cd.lost_back_freight,cd.lost_num,cd.damage_num from cart c,cart_detail cd,bill_detail bd,user u where c.is_confirm=1 and c.sum!=0 and c.id=cd.cart_id and c.user_id=u.id and cd.bill_detail_id=bd.id and c.group_bill_id=${id} order by c.id asc`;
+    const detailGroup = `select IFNULL(u.nickname,u.name) userName,u.phone,u.contacts,(select name from citys where mark=u.province) province,(select name from citys where mark=u.city) city,if(u.address='null','',u.address) address,if(c.description='null','',c.description) description,bd.name,bd.size,bd.price,cd.bill_detail_num,(bd.price*cd.bill_detail_num) sum,cd.freight,cd.lost_back_freight,cd.lost_num,cd.damage_num from cart c,cart_detail cd,bill_detail bd,user u where c.is_confirm=1 and c.sum!=0 and c.id=cd.cart_id and c.user_id=u.id and cd.bill_detail_id=bd.id and c.group_bill_id=${id} order by c.id asc`;
     return this.query(detailGroup);
   }
   async getUserGroupList({name, page, size, userId}) {

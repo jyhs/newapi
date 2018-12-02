@@ -92,7 +92,7 @@ module.exports = class extends Base {
         top_freight: this.post('topFreight')
       };
       const groupId = await this.model('group_bill').add(group);
-      const city = await await this.model('citys').where({'mark': this.post('city')}).find();
+      const city = await this.model('citys').where({'mark': this.post('city')}).find();
       group['id'] = groupId;
       group['city_name'] = city.name;
       const wexinService = this.service('weixin', 'api');
@@ -128,10 +128,10 @@ module.exports = class extends Base {
   }
   async downloadAction() {
     const group = await this.model('group_bill').where({'id': this.post('groupId')}).find();
-    const returnData = [['序号', '昵称', '联系电话', '联系人', '联系地址', '合计', '备注', '品名', '规格', '单价', '数量', '共计（不含运费)']];
+    const returnData = [['序号', '昵称', '联系电话', '备注', '合计', '品名', '规格', '单价', '数量', '共计（不含运费)']];
     const totleReturnData = [['品名', '规格', '单价', '数量', '共计（不含运费)']];
     const totleReturnDataWithfreight = [['品名', '规格', '单价', '数量', '生物总价', '生物运费', '缺货退费', '报损退费', '共计（含运费)']];
-    const returnDataWithfreight = [['序号', '昵称', '联系电话', '联系人', '联系地址', '备注', '品名', '规格', '单价', '实际数量', '缺货数量', '报损数量', '缺货退款（含运费)', '报损退款', '应退款（含运费)', '应收款（含运费)']];
+    const returnDataWithfreight = [['序号', '昵称', '联系电话', '备注', '合计', '品名', '规格', '单价', '实际数量', '缺货数量', '报损数量', '缺货退款（含运费)', '报损退款', '应退款（含运费)', '应收款（含运费)']];
     const detailGroups = await this.model('group').detailGroup(this.post('groupId'));
     const summaryGroups = await this.model('group').summaryGroup(this.post('groupId'));
     let totleSum = 0;
@@ -149,10 +149,10 @@ module.exports = class extends Base {
       _itemListWithfreight.push(summaryGroup.bill_detail_num);
       _itemList.push(summaryGroup.sum);
       _itemListWithfreight.push(summaryGroup.sum);
-      _itemListWithfreight.push(summaryGroup.sum_freight);
-      _itemListWithfreight.push('-' + summaryGroup.sum_lost_back);
+      _itemListWithfreight.push(Number(summaryGroup.sum_freight) - Number(summaryGroup.sum_lost_back_freight));
+      _itemListWithfreight.push('-' + (summaryGroup.sum_lost_back + Number(summaryGroup.sum_lost_back_freight)));
       _itemListWithfreight.push('-' + summaryGroup.sum_damage_back);
-      const sum = Number(summaryGroup.sum) + Number(summaryGroup.sum_freight) - Number(summaryGroup.sum_lost_back) - Number(summaryGroup.sum_damage_back);
+      const sum = Number(summaryGroup.sum) + Number(summaryGroup.sum_freight) - Number(summaryGroup.sum_lost_back_freight);
       _itemListWithfreight.push(sum);
       totleSum += summaryGroup.sum;
       totleSumWithfreight += sum;
@@ -196,25 +196,21 @@ module.exports = class extends Base {
       _.each(itemList, (item, index) => {
         const _itemList = [];
         const _itemListWithfreight = [];
-
+        const lostBack = Number(item.lost_num) * Number(item.price) + Number(item.lost_back_freight);
+        const damageBack = Number(item.damage_num) * Number(item.price);
         if (index === 0) {
           _itemList.push(secquence);
           _itemList.push(item.userName);
           _itemList.push(item.phone);
-          _itemList.push(item.contacts);
-          _itemList.push(item.province + (item.city ? item.city : '') + (item.address ? item.address : ''));
-          _itemList.push(_count);
           _itemList.push(item.description);
+          _itemList.push(_count);
           _itemListWithfreight.push(secquence);
           _itemListWithfreight.push(item.userName);
           _itemListWithfreight.push(item.phone);
-          _itemListWithfreight.push(item.contacts);
-          _itemListWithfreight.push(item.province + (item.city ? item.city : '') + (item.address ? item.address : ''));
           _itemListWithfreight.push(item.description);
+          _itemListWithfreight.push(Number(_count) + Number(item.freight) - Number(item.lost_back_freight));
           secquence++;
         } else {
-          _itemList.push('');
-          _itemList.push('');
           _itemList.push('');
           _itemList.push('');
           _itemList.push('');
@@ -238,12 +234,13 @@ module.exports = class extends Base {
         _itemListWithfreight.push(item.bill_detail_num);
         _itemListWithfreight.push(item.lost_num);
         _itemListWithfreight.push(item.damage_num);
-        const lostBack = Number(item.lost_num) * Number(item.price) + Number(item.lost_back_freight);
-        const damageBack = Number(item.damage_num) * Number(item.price);
-        _itemListWithfreight.push('-' + lostBack);
-        _itemListWithfreight.push('-' + damageBack);
-        _itemListWithfreight.push('-' + (lostBack + damageBack));
-        _itemListWithfreight.push(Number(_count) + Number(item.freight));
+        const lostBackItem = Number(item.lost_num) * Number(item.price) + Number(item.lost_back_freight);
+        const damageBackItem = Number(item.damage_num) * Number(item.price);
+        _itemListWithfreight.push('-' + lostBackItem);
+        _itemListWithfreight.push('-' + damageBackItem);
+        _itemListWithfreight.push('-' + (lostBackItem + damageBackItem));
+        const itemCount = Number(item.bill_detail_num) * Number(item.price) + Number(item.freight) - Number(item.lost_back_freight);
+        _itemListWithfreight.push(itemCount);
 
         returnData.push(_itemList);
         returnDataWithfreight.push(_itemListWithfreight);
@@ -254,8 +251,8 @@ module.exports = class extends Base {
     const name = 'coral123-' + group.id + '.xlsx';
     const path = this.config('image.bill') + '/' + name;
 
-    // var buffer = xlsx.build([{name: "总单(不含运费)", data: totleReturnData},{name: "明细(不含运费)", data: returnData},{name: "总单(含运费)", data: totleReturnDataWithfreight},{name: "明细(含运费)", data: returnDataWithfreight}]);
-    const buffer = xlsx.build([{name: '总单', data: totleReturnData}, {name: '明细', data: returnData}], {'!merges': rangeList});
+    var buffer = xlsx.build([{name: '总单(不含运费)', data: totleReturnData}, {name: '明细(不含运费)', data: returnData}, {name: '总单(含运费)', data: totleReturnDataWithfreight}, {name: '明细(含运费)', data: returnDataWithfreight}]);
+    // const buffer = xlsx.build([{name: '总单', data: totleReturnData}, {name: '明细', data: returnData}], {'!merges': rangeList});
     const ws = fs.createWriteStream(path);
     await ws.write(buffer, 'utf8');
     this.json({'name': name});

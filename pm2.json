@@ -4,7 +4,7 @@
     "script": "production.js",
     "cwd": "/root/newapi",
     "exec_mode": "fork",
-    "max_memory_restart": "1G",
+    "max_memory_restart": "2G",
     "autorestart": true,
     "node_args": [],
     "args": [],

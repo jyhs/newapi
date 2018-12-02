@@ -91,31 +91,31 @@ module.exports = class extends Base {
 
       const userInfoJson = await rp(options);
       const userInfo = JSON.parse(userInfoJson);
-      console.log('userInfo', userInfo);
-      let city = userInfo.city ? await this.model('citys').field('mark').where({ name: userInfo.city }).find() : 'shc';
-      let province = userInfo.province ? await this.model('provinces').field('code').where({ name: userInfo.province }).find() : 'sh';
+      // console.log('userInfo', userInfo);
+      // let city = userInfo.city ? await this.model('citys').field('mark').where({ name: userInfo.city }).find() : 'shc';
+      // let province = userInfo.province ? await this.model('provinces').field('code').where({ name: userInfo.province }).find() : 'sh';
 
-      if (think.isEmpty(province)) {
-        province = 'sh';
-        city = 'shc';
-      } else if (province === 'sh') {
-        city = 'shc';
-      } else if (province === 'bj') {
-        city = 'bjc';
-      } else if (province === 'tj') {
-        city = 'tjc';
-      } else if (province === 'cq') {
-        city = 'cqc';
-      }
+      // if (think.isEmpty(province)) {
+      //   province = 'sh';
+      //   city = 'shc';
+      // } else if (province === 'sh') {
+      //   city = 'shc';
+      // } else if (province === 'bj') {
+      //   city = 'bjc';
+      // } else if (province === 'tj') {
+      //   city = 'tjc';
+      // } else if (province === 'cq') {
+      //   city = 'cqc';
+      // }
       // 注册
       user = {
         name: userInfo.nickname,
         nickname: userInfo.nickname,
         password: '0ff8ecf84a686258caeb350dbc8040d6',
-        city: city,
+        city: 'shc',
         phone: '18888888888',
         type: 'yy',
-        province: province,
+        province: 'sh',
         country: userInfo.country,
         openid: userInfo.openid,
         headimgurl: userInfo.headimgurl || '',

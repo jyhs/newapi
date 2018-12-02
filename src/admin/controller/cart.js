@@ -281,8 +281,21 @@ module.exports = class extends Base {
       } else if (Number(group.status) === 0) {
         this.fail('团购已经结束不能操作购物车');
       } else {
+        const model = this.model('cart_detail').alias('c');
+        model.field(['c.*', 'b.price']).join({
+          table: 'bill_detail',
+          join: 'inner',
+          as: 'b',
+          on: ['c.bill_detail_id', 'b.id']
+        });
+        const cartDetail = await model.where({'c.bill_detail_id': billDetailId, 'c.cart_id': cartId}).find();
+        let freight = Number(cartDetail.price) * billDetailNum * Number(group.freight);
+        if (Number(group.top_freight) !== 0) {
+          freight = freight > group.top_freight ? group.top_freight : freight;
+        }
         await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({
-          bill_detail_num: billDetailNum
+          bill_detail_num: billDetailNum,
+          freight: freight
         });
         await this.model('cart').where({id: cartId}).update({
           sum: this.post('sum'),
@@ -305,16 +318,29 @@ module.exports = class extends Base {
       } else if (Number(group.status) === 0) {
         this.fail('团购已经结束不能操作购物车');
       } else {
-        const cartDetail = await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).find();
+        const model = this.model('cart_detail').alias('c');
+        model.field(['c.*', 'b.price']).join({
+          table: 'bill_detail',
+          join: 'inner',
+          as: 'b',
+          on: ['c.bill_detail_id', 'b.id']
+        });
+        const cartDetail = await model.where({'c.bill_detail_id': billDetailId, 'c.cart_id': cartId}).find();
+        let freight = Number(cartDetail.price) * billDetailNum * Number(group.freight);
+        if (Number(group.top_freight) !== 0) {
+          freight = freight > group.top_freight ? group.top_freight : freight;
+        }
         if (think.isEmpty(cartDetail)) {
           await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).add({
             cart_id: cartId,
             bill_detail_id: billDetailId,
-            bill_detail_num: billDetailNum
+            bill_detail_num: billDetailNum,
+            freight: freight
           });
         } else {
           await this.model('cart_detail').where({bill_detail_id: billDetailId, cart_id: cartId}).update({
-            bill_detail_num: billDetailNum
+            bill_detail_num: billDetailNum,
+            freight: freight
           });
         }
         await this.model('cart').where({id: cartId}).update({
@@ -378,6 +404,13 @@ module.exports = class extends Base {
       this.fail(payRequest.error);
     } else {
       await this.model('cart').where({id: cartId}).update({ 'nonceStr': payRequest.nonceStr });
+      console.log(payRequest);
+      // { appId: 'wx6edb9c7695fb8375',
+      // 0|jyhs  |   timeStamp: '1543716865',
+      // 0|jyhs  |   nonceStr: '8bzfjte12k3',
+      // 0|jyhs  |   package: 'prepay_id=wx02101425667089d5ea6d5b8f0036848458',
+      // 0|jyhs  |   signType: 'MD5',
+      // 0|jyhs  |   paySign: '92eaf9529af1168bd1909297c66b110f' }
       this.json(payRequest);
     }
     // }

@@ -17,14 +17,30 @@ module.exports = class extends Base {
         const attach = payInfo.attach[0].split('-');
         const cartId = attach[1];
         const userId = attach[0];
-        payInfo['cart_id'] = Number(cartId);
-        payInfo['user_id'] = Number(userId);
         const nonceStr = payInfo.nonce_str[0];
-        console.log(cartId);
-        console.log(nonceStr);
         const cart = await this.model('cart').where({'id': cartId, 'nonceStr': nonceStr}).find();
         if (!think.isEmpty(cart)) {
-          await this.model('pay').add(payInfo);
+          const payInfoObj = {
+            cart_id: cartId,
+            user_id: userId,
+            appid: payInfo.appid[0],
+            attach: payInfo.attach[0],
+            bank_type: payInfo.bank_type[0],
+            cash_fee: payInfo.cash_fee[0],
+            fee_type: payInfo.fee_type[0],
+            is_subscribe: payInfo.is_subscribe[0],
+            mch_id: payInfo.mch_id[0],
+            nonce_str: payInfo.nonce_str[0],
+            openid: payInfo.openid[0],
+            out_trade_no: payInfo.out_trade_no[0],
+            result_code: payInfo.result_code[0],
+            sign: payInfo.sign[0],
+            time_end: payInfo.time_end[0],
+            total_fee: payInfo.total_fee[0],
+            trade_type: payInfo.trade_type[0],
+            transaction_id: payInfo.transaction_id[0]
+          };
+          await this.model('pay').add(payInfoObj);
           cart['is_pay'] = 1;
           await this.model('cart').where({'id': cartId}).update(cart);
         }
