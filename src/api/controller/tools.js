@@ -5,7 +5,7 @@ const rp = require('request-promise');
 module.exports = class extends Base {
   async sendVerificationAction() {
     const accessKeyId = think.config('weixin.accessKeyId');
-    const secretAccessKey = think.config('weixin.mini_secretAccessKey');
+    const secretAccessKey = think.config('weixin.secretAccessKey');
     const qcloudsms = QcloudSms(accessKeyId, secretAccessKey);
     const code = parseInt(Math.random() * 9000 + 1000) + '';
     const ssender = qcloudsms.SmsSingleSender();
