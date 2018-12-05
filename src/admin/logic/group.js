@@ -34,6 +34,12 @@ module.exports = class extends think.Logic {
       groupId: {int: true, required: true, trim: true}
     };
   }
+  addGroupQrAction() {
+    this.allowMethods = 'post';
+    this.rules = {
+      billId: {int: true, required: true, trim: true}
+    };
+  }
   deleteAction() {
     this.allowMethods = 'post';
     this.rules = {

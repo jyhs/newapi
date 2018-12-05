@@ -24,6 +24,13 @@ module.exports = class extends Base {
     this.type = 'image/svg+xml';
     this.body = qrService.getGroupQrById(groupId, true);
   }
+  async addGroupQrAction() {
+    const billId = this.post('billId');
+    const url = `https://group.huanjiaohu.com/#/group/add/${billId}`;
+    const qrService = this.service('qr', 'api');
+    this.type = 'image/svg+xml';
+    this.body = qrService.getQrByUrl(url);
+  }
   async finishAction() {
     const endDate = this.service('date', 'api').convertWebDateToSubmitDateTime();
     await this.model('group_bill').where({id: this.post('groupId')}).update({status: 0, 'end_date': endDate});
@@ -180,7 +187,7 @@ module.exports = class extends Base {
     totleReturnDataWithfreight.push(_itemListWithfreight);
 
     const tempMap = new Map();
-    const rangeList = [];
+    // const rangeList = [];
     _.each(detailGroups, (detailGroup) => {
       const itemList = tempMap.get(detailGroup.userName);
       if (itemList) {
@@ -196,8 +203,8 @@ module.exports = class extends Base {
       _.each(itemList, (item, index) => {
         const _itemList = [];
         const _itemListWithfreight = [];
-        const lostBack = Number(item.lost_num) * Number(item.price) + Number(item.lost_back_freight);
-        const damageBack = Number(item.damage_num) * Number(item.price);
+        // const lostBack = Number(item.lost_num) * Number(item.price) + Number(item.lost_back_freight);
+        // const damageBack = Number(item.damage_num) * Number(item.price);
         if (index === 0) {
           _itemList.push(secquence);
           _itemList.push(item.userName);
