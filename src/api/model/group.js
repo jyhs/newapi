@@ -4,7 +4,7 @@ module.exports = class extends think.Model {
   async getGroupList({name, page, size, province, userId}) {
     const model = this.model('group_bill').alias('gb');
     const whereMap = {};
-    whereMap['gb.private'] = ['!=', 1];
+    whereMap['gb.private'] = 0;
     if (!think.isEmpty(province)) {
       whereMap['gb.province'] = province;
     }
