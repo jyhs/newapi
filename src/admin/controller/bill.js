@@ -250,56 +250,51 @@ module.exports = class extends Base {
     const fishName = detailObj['name'].match(/[\u4e00-\u9fa5]/g);
     let name = fishName ? fishName.join('') : detailObj['name'];
     // name = _.trim(name.split(/\s+/)[0]);
-    name = _.trim(name);
+    // name = _.trim(name);
+    const arrMg = ['美国', '越南', '沙巴'];
+    _.each(arrMg, (item) => {
+      const r = new RegExp(item, 'ig');
+      name = name.replace(r, '');
+    });
     const material = await this.model('material').where({ name: name }).find();
     if (think.isEmpty(material)) {
       const likeMaterial = await this.model('material').where({ tag: ['like', `%${name}%`] }).select();
       if (think.isEmpty(likeMaterial)) {
-        const options = {
-          method: 'GET',
-          url: 'http://api.pullword.com/get.php',
-          qs: {
-            source: name,
-            param1: 0,
-            param2: 0
-          }
-        };
-        const wordList = await rp(options);
-        if (String(_.trim(wordList)) === 'error') {
-          await this.model('bill_detail').add(detailObj);
-        } else {
-          let flag = true;
-          for (const item of wordList) {
-            const material = await this.model('material').where({ name: item }).find();
-            if (think.isEmpty(material)) {
-              const likeMaterial = await this.model('material').where({ tag: ['like', `%${item}%`] }).select();
-              if (!think.isEmpty(likeMaterial)) {
-                let matchId = likeMaterial[0].id;
-                _.each(likeMaterial, (re) => {
-                  const id = re['id'];
-                  const tags = re['tag'];
-                  _.each(tags.split(','), (tag) => {
-                    if (item === tag) {
-                      matchId = id;
-                    }
-                  });
-                });
-                detailObj['material_id'] = matchId;
-                await this.model('bill_detail').add(detailObj);
-                flag = false;
-                break;
-              }
-            } else {
-              detailObj['material_id'] = material.id;
-              await this.model('bill_detail').add(detailObj);
-              flag = false;
-              break;
-            }
-          }
-          if (flag) {
-            await this.model('bill_detail').add(detailObj);
-          }
-        }
+        await this.model('bill_detail').add(detailObj);
+
+        // const options = {
+        //   method: 'GET',
+        //   url: 'http://api.pullword.com/get.php',
+        //   qs: {
+        //     source: name,
+        //     param1: 0,
+        //     param2: 0
+        //   }
+        // };
+        // const wordList = await rp(options);
+        // if (String(_.trim(wordList)) === 'error') {
+        //   await this.model('bill_detail').add(detailObj);
+        // } else {
+        //   let flag = true;
+        //   for (const item of wordList.split(/\s+/)) {
+        //     if (_.trim(item).length > 0) {
+        //       console.log('========1=======', item);
+        //       const material = await this.model('material').where({ name: item }).find();
+        //       if (!think.isEmpty(material)) {
+        //         console.log('======2=========', material.id);
+        //         detailObj['material_id'] = material.id;
+        //         await this.model('bill_detail').add(detailObj);
+        //         flag = false;
+        //         break;
+        //       }
+        //     }
+        //   }
+        //   if (flag) {
+        //     console.log('=======3=======', detailObj);
+
+        //     await this.model('bill_detail').add(detailObj);
+        //   }
+        // }
       } else {
         let matchId = likeMaterial[0].id;
         _.each(likeMaterial, (re) => {
