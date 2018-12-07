@@ -3,6 +3,8 @@ const XLSX = require('xlsx');
 const moment = require('moment');
 const _ = require('lodash');
 const parse = require('url-parse');
+const rp = require('request-promise');
+
 module.exports = class extends Base {
   async addAction() {
     const file = think.extend({}, this.file('bill'));
@@ -247,12 +249,57 @@ module.exports = class extends Base {
     };
     const fishName = detailObj['name'].match(/[\u4e00-\u9fa5]/g);
     let name = fishName ? fishName.join('') : detailObj['name'];
+    // name = _.trim(name.split(/\s+/)[0]);
     name = _.trim(name);
     const material = await this.model('material').where({ name: name }).find();
     if (think.isEmpty(material)) {
       const likeMaterial = await this.model('material').where({ tag: ['like', `%${name}%`] }).select();
       if (think.isEmpty(likeMaterial)) {
-        await this.model('bill_detail').add(detailObj);
+        const options = {
+          method: 'GET',
+          url: 'http://api.pullword.com/get.php',
+          qs: {
+            source: name,
+            param1: 0,
+            param2: 0
+          }
+        };
+        const wordList = await rp(options);
+        if (String(_.trim(wordList)) === 'error') {
+          await this.model('bill_detail').add(detailObj);
+        } else {
+          let flag = true;
+          for (const item of wordList) {
+            const material = await this.model('material').where({ name: item }).find();
+            if (think.isEmpty(material)) {
+              const likeMaterial = await this.model('material').where({ tag: ['like', `%${item}%`] }).select();
+              if (!think.isEmpty(likeMaterial)) {
+                let matchId = likeMaterial[0].id;
+                _.each(likeMaterial, (re) => {
+                  const id = re['id'];
+                  const tags = re['tag'];
+                  _.each(tags.split(','), (tag) => {
+                    if (item === tag) {
+                      matchId = id;
+                    }
+                  });
+                });
+                detailObj['material_id'] = matchId;
+                await this.model('bill_detail').add(detailObj);
+                flag = false;
+                break;
+              }
+            } else {
+              detailObj['material_id'] = material.id;
+              await this.model('bill_detail').add(detailObj);
+              flag = false;
+              break;
+            }
+          }
+          if (flag) {
+            await this.model('bill_detail').add(detailObj);
+          }
+        }
       } else {
         let matchId = likeMaterial[0].id;
         _.each(likeMaterial, (re) => {
